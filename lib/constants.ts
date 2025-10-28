@@ -1,4 +1,4 @@
-import { NavItem } from "@/types"
+import { NavItem, Currency } from "@/types"
 import {
   LayoutDashboard,
   Package,
@@ -7,6 +7,7 @@ import {
   TrendingUp,
   Users,
   Settings,
+  MapPin,
 } from "lucide-react"
 
 export const navItems: NavItem[] = [
@@ -15,6 +16,12 @@ export const navItems: NavItem[] = [
     href: "/dashboard",
     icon: LayoutDashboard,
     roles: ["HQ_Admin", "Branch_Manager"],
+  },
+  {
+    title: "Locations",
+    href: "/locations",
+    icon: MapPin,
+    roles: ["HQ_Admin"],
   },
   {
     title: "Suppliers",
@@ -53,3 +60,39 @@ export const navItems: NavItem[] = [
     roles: ["HQ_Admin"],
   },
 ]
+
+// Product unit options
+export const PRODUCT_UNITS = [
+  { value: 'EA', label: 'EA (Each)' },
+  { value: 'BOX', label: 'BOX' },
+  { value: 'PACK', label: 'PACK' },
+] as const
+
+// Product category options
+export const PRODUCT_CATEGORIES = [
+  { value: 'skincare', label: 'Skincare' },
+  { value: 'makeup', label: 'Makeup' },
+  { value: 'haircare', label: 'Haircare' },
+  { value: 'bodycare', label: 'Bodycare' },
+  { value: 'fragrance', label: 'Fragrance' },
+] as const
+
+// Currency symbols
+export const CURRENCY_SYMBOLS: Record<Currency, string> = {
+  KRW: '₩',
+  VND: '₫',
+  CNY: '¥',
+}
+
+// Location type options
+export const LOCATION_TYPES = [
+  { value: 'HQ', label: 'Headquarters' },
+  { value: 'Branch', label: 'Branch' },
+] as const
+
+// Currency options
+export const CURRENCIES = [
+  { value: 'KRW', label: 'KRW (₩)' },
+  { value: 'VND', label: 'VND (₫)' },
+  { value: 'CNY', label: 'CNY (¥)' },
+] as const
