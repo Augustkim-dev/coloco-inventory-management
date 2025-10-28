@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS public.users (
   email TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
   role TEXT NOT NULL CHECK (role IN ('HQ_Admin', 'Branch_Manager')),
-  location_id UUID REFERENCES public.locations(id),
+  location_id UUID,  -- Foreign key will be added in Phase 02 after locations table is created
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
