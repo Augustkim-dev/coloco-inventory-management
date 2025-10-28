@@ -1,0 +1,2856 @@
+# 아르노 코스메틱 판매·재고 관리 시스템 PRD
+## Product Requirements Document
+
+**문서 버전:** 1.0  
+**작성일:** 2025년 10월 28일  
+**프로젝트명:** 아르노 코스메틱 글로벌 재고·판매 관리 시스템  
+**회사:** 아르노 코스메틱 (Arno Cosmetics)  
+
+---
+
+## 1. 프로젝트 개요
+
+### 1.1 배경 및 목적
+
+아르노 코스메틱은 한국에서 화장품을 매입하여 베트남과 중국 지사를 통해 현지 판매하는 화장품 유통 기업입니다. 사업 확장에 따라 다음과 같은 요구사항이 발생했습니다:
+
+- 품목별 매입단가부터 최종 판매가격까지의 원가 구조 투명화
+- 본사-지사 간 실시간 재고 가시성 확보
+- 국가별 환율, 운송비, 관세, 마케팅 비용을 반영한 정확한 가격 계산
+- 일별 판매 데이터 집계를 통한 신속한 의사결정
+- 화장품 산업 특화 기능(유통기한, 인증, 프로모션, 성분 관리)
+
+### 1.2 핵심 비즈니스 플로우
+
+```
+생산공장 → 한국 본사 → 베트남/중국 지사 → 현지 소비자
+
+1. 공장: 제품 생산 (OEM/ODM 방식)
+2. 본사: 제품 등록 및 공급처(공장) 관리
+3. 본사: 발주서(PO) 생성 및 공장으로 발송
+4. 공장: 생산 완료 및 출고
+5. 본사: 입고 처리 및 품질 검수 (본사 창고)
+6. 본사: 매입가 확정 및 재고 등록
+7. 본사: 국가별 인증 관리 및 가격 계산
+8. 본사: 지사로 출고 지시 (운송비, 관세 등 비용 포함)
+9. 지사: 입고 및 품질 검사 (현지 창고)
+10. 지사: 일별 판매 입력 (채널별 구분)
+11. 본사: 실시간 매출·재고·손익 모니터링
+12. 본사: 가격 조정 및 프로모션 전략 수립
+13. 본사: 수요 예측 기반 공장 발주 계획
+```
+
+### 1.3 주요 목표
+
+- **정확한 원가 계산**: 매입가부터 판매가까지 모든 비용 요소 추적
+- **실시간 가시성**: 본사-지사 간 재고·매출 실시간 동기화
+- **규제 준수**: 국가별 화장품 인증 및 성분 규제 자동 체크
+- **수익성 최적화**: 품목별·채널별·지사별 마진 분석
+- **운영 효율화**: 유통기한 관리, 프로모션 자동화, 반품 처리 간소화
+
+---
+
+## 2. MVP 기능 범위
+
+### 2.1 필수 기능 (Phase 1 - MVP)
+
+#### 2.1.1 공급처 및 발주 관리 (신규 추가)
+- ✅ 공급처(생산공장) 등록 및 관리
+  - OEM/ODM 구분
+  - 생산 능력, 리드 타임, 품질 평가
+  - 결제 조건, 은행 정보
+- ✅ 발주서(PO) 생성 및 관리
+  - 제품별 수량, 단가, 납기일
+  - 승인 프로세스
+  - 발주 상태 추적 (Draft → Submitted → Confirmed → In_Production → Shipped)
+- ✅ 본사 입고 처리
+  - 입고 수량 확인
+  - 품질 검사 체크리스트
+  - 합격/불합격 판정
+  - 로트/배치 정보 등록
+  - 본사 창고 재고 자동 증가
+- ✅ 공급처 성과 평가
+  - 품질 합격률
+  - 납기 준수율
+  - 거래 이력
+
+#### 2.1.2 제품 관리
+#### 2.1.2 제품 관리
+- ✅ 제품 마스터 데이터 (SKU, 이름, 규격, 카테고리)
+- ✅ 배치번호/제조번호 추적
+- ✅ 제조일, 유통기한, 개봉 후 사용기한 관리
+- ✅ 국가별 인증 정보 (식약처, NMPA, MOH 등)
+- ✅ 성분 정보 및 국가별 규제 체크
+- ✅ 제품 이미지 관리 (다각도, 성분표, 인증서)
+
+#### 2.1.3 매입 및 원가 관리
+#### 2.1.3 매입 및 원가 관리
+- ✅ 공급처별 매입 단가 등록 (로트별, 유효기간별)
+- ✅ 본사 입고 시 실제 매입가 확정
+- ✅ 원가 구성 요소 상세 입력
+  - 매입가 (본사 입고 확정가), 국내 운송비, 수출 비용
+  - 국제 운송비, 보험료, 관세
+  - 현지 운송비, 라벨링 비용, 인증 비용
+  - 마케팅 배부비, 간접비 배부, 샘플 비용
+- ✅ 환율 자동 업데이트 및 수동 조정
+- ✅ 가격 계산 엔진 및 시뮬레이터
+
+#### 2.1.4 재고 관리
+#### 2.1.4 재고 관리
+- ✅ 본사 재고 (공장 입고 후)
+- ✅ 본사 → 지사 출고 관리 (송장, 운송비, 추적번호)
+- ✅ 지사 입고 처리 (로트별, 품질 검사 기록)
+- ✅ 로트별 재고 추적 (FIFO 기반)
+- ✅ 안전재고 설정 및 알림
+- ✅ 유통기한 3단계 알림 (6개월/3개월/1개월)
+- ✅ 샘플/테스터 재고 별도 관리
+
+#### 2.1.5 판매 관리
+#### 2.1.5 판매 관리
+- ✅ 지사별 일별 판매 입력 (수동 입력 + 엑셀 업로드)
+- ✅ 채널별 판매 구분 (온라인/오프라인/라이브커머스)
+- ✅ 프로모션 적용 (할인율, 번들, 사은품)
+- ✅ 번들/세트 상품 판매 시 자동 재고 차감
+- ✅ 반품/교환 처리 (재고 복귀/폐기)
+- ✅ 판매가격 현지 통화 표시
+
+#### 2.1.6 리포트 및 대시보드
+- ✅ 실시간 대시보드 (재고, 매출, 알림)
+- ✅ 발주 진행 현황 (공장별)
+- ✅ 본사 입고 이력 및 품질 리포트
+- ✅ 일/월별 판매 현황 (지사별, 채널별, 품목별)
+- ✅ 품목별 재고 현황 (로트별, 유통기한 포함)
+- ✅ 지사별 손익 계산서 (P&L)
+- ✅ 마진 분석 (표준원가 vs 실제원가)
+- ✅ 재고 회전율 및 안전재고 경보
+- ✅ 프로모션 효과 분석
+- ✅ 공급처 성과 리포트 (품질, 납기)
+
+#### 2.1.7 권한 및 보안
+#### 2.1.7 권한 및 보안
+- ✅ 역할 기반 접근 제어 (RBAC)
+  - 본사 Admin: 전체 권한
+  - 본사 조회: 읽기 전용
+  - 지사 Manager: 지사 데이터 전체
+  - 지사 Clerk: 입출고/판매 입력만
+- ✅ 감사 로그 (모든 중요 작업 기록)
+- ✅ 2단계 인증 (관리자)
+
+#### 2.1.8 다국어 및 통화
+- ✅ 다국어 지원 (한국어, 베트남어, 중국어 간체)
+- ✅ 다중 통화 (KRW, VND, CNY)
+- ✅ 환율 자동 업데이트 및 알림
+
+### 2.2 초기 확장 기능 (Phase 2)
+
+- 🔄 바코드/QR 스캔 입출고
+- 🔄 모바일 앱 (React Native) - 지사 실무자용
+- 🔄 POS 시스템 연동
+- 🔄 회계 시스템 연동 (전표 자동 생성)
+- 🔄 오프라인 입력 후 동기화
+- 🔄 고급 프로모션 엔진 (교차 구매, 포인트 적립)
+- 🔄 채널 자동 정산 (쇼핑몰 API 연동)
+
+### 2.3 장기 로드맵 (Phase 3+)
+
+- 📅 AI 기반 수요 예측
+- 📅 고급 원가 분석 (ABC costing)
+- 📅 다중 창고 관리 (지사 내 여러 창고)
+- 📅 고객 관계 관리 (CRM) 통합
+- 📅 라이브커머스 플랫폼 직접 연동
+- 📅 블록체인 기반 정품 인증
+
+---
+
+## 3. 데이터 모델 설계
+
+### 3.1 핵심 엔티티 관계도 (ERD)
+
+```
+companies (회사)
+    ↓
+locations (본사/지사/창고) ← suppliers (공급처/공장)
+    ↓                          ↓
+users (사용자)          purchase_orders (발주서) → purchase_receipts (본사 입고)
+    ↓                          ↓
+products (제품) ← product_categories (카테고리)
+    ↓
+├─ product_certifications (인증)
+├─ product_ingredients (성분)
+├─ product_images (이미지)
+├─ purchase_prices (매입가)
+├─ cost_components (원가 구성)
+├─ pricing_rules (가격 규칙)
+    ↓
+stock_batches (재고 로트) ← purchase_receipts (본사 입고)
+    ↓
+├─ transfers (본사→지사 출고/입고)
+├─ sales (판매)
+├─ returns (반품)
+├─ sample_distribution (샘플 배포)
+    ↓
+promotions (프로모션) → product_bundles (번들 상품)
+    ↓
+audit_logs (감사로그)
+```
+
+**플로우 설명**:
+1. **공장 발주**: suppliers → purchase_orders (본사가 공장에 발주)
+2. **본사 입고**: purchase_orders → purchase_receipts → stock_batches (본사 창고 재고 증가)
+3. **지사 출고**: stock_batches → transfers (본사→지사)
+4. **지사 입고**: transfers → stock_batches (지사 창고 재고 증가)
+5. **판매**: stock_batches → sales (지사 재고 차감)
+
+### 3.2 상세 테이블 정의
+
+#### 3.2.1 회사 및 조직
+
+**companies (회사)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+name                VARCHAR(255) NOT NULL
+country_code        CHAR(2)
+currency            CHAR(3)
+tax_id              VARCHAR(100)
+address             TEXT
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+```
+
+**locations (사업장)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+company_id          BIGINT REFERENCES companies(id)
+name                VARCHAR(255) NOT NULL
+location_type       VARCHAR(20) -- 'HQ', 'Branch', 'Warehouse'
+country_code        CHAR(2)
+address             TEXT
+timezone            VARCHAR(50)
+is_active           BOOLEAN DEFAULT TRUE
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_locations_company_id ON locations(company_id)
+INDEX idx_locations_type ON locations(location_type)
+```
+
+**users (사용자)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+company_id          BIGINT REFERENCES companies(id)
+location_id         BIGINT REFERENCES locations(id)
+email               VARCHAR(255) UNIQUE NOT NULL
+password_hash       VARCHAR(255) NOT NULL
+name                VARCHAR(255) NOT NULL
+role                VARCHAR(50) -- 'HQ_Admin', 'HQ_Viewer', 'Branch_Manager', 'Branch_Clerk'
+locale              VARCHAR(10) DEFAULT 'ko'
+is_active           BOOLEAN DEFAULT TRUE
+last_login_at       TIMESTAMP
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_users_email ON users(email)
+INDEX idx_users_location ON users(location_id)
+```
+
+#### 3.2.2 제품 관리
+
+**product_categories (제품 카테고리)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+parent_id           BIGINT REFERENCES product_categories(id)
+name_ko             VARCHAR(255) NOT NULL
+name_local          VARCHAR(255)
+sort_order          INTEGER
+is_active           BOOLEAN DEFAULT TRUE
+```
+
+**products (제품 마스터)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+sku                 VARCHAR(100) UNIQUE NOT NULL
+category_id         BIGINT REFERENCES product_categories(id)
+name_ko             VARCHAR(255) NOT NULL
+name_vn             VARCHAR(255)
+name_cn             VARCHAR(255)
+description_ko      TEXT
+description_vn      TEXT
+description_cn      TEXT
+unit                VARCHAR(20) -- 'EA', 'SET', 'BOX'
+net_weight          DECIMAL(10,2)
+weight_unit         VARCHAR(10) -- 'g', 'ml'
+hs_code             VARCHAR(20) -- 관세 코드
+shelf_life_days     INTEGER -- 유통기한 (일)
+opened_shelf_life_days INTEGER -- 개봉 후 사용기한
+storage_condition   TEXT -- 보관 조건
+is_temperature_sensitive BOOLEAN DEFAULT FALSE
+is_active           BOOLEAN DEFAULT TRUE
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_products_sku ON products(sku)
+INDEX idx_products_category ON products(category_id)
+```
+
+**product_certifications (제품 인증)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+product_id          BIGINT REFERENCES products(id)
+country_code        CHAR(2)
+certification_type  VARCHAR(100) -- '식약처', 'NMPA', 'MOH'
+certification_number VARCHAR(255) NOT NULL
+issued_date         DATE
+expiry_date         DATE
+status              VARCHAR(50) -- 'Active', 'Pending', 'Expired'
+document_url        TEXT
+notes               TEXT
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_certifications_product ON product_certifications(product_id)
+INDEX idx_certifications_country ON product_certifications(country_code)
+INDEX idx_certifications_expiry ON product_certifications(expiry_date)
+```
+
+**ingredients (성분 마스터)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+name_ko             VARCHAR(255) NOT NULL
+name_en             VARCHAR(255)
+cas_number          VARCHAR(50) -- CAS 등록번호
+inci_name           VARCHAR(255) -- INCI 명칭
+restricted_countries JSONB -- ['CN', 'VN'] 제한 국가 목록
+max_concentration   DECIMAL(5,2) -- 최대 허용 농도 (%)
+notes               TEXT
+```
+
+**product_ingredients (제품-성분 관계)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+product_id          BIGINT REFERENCES products(id)
+ingredient_id       BIGINT REFERENCES ingredients(id)
+concentration       DECIMAL(5,2) -- 농도 (%)
+purpose             VARCHAR(100) -- 용도
+sort_order          INTEGER
+created_at          TIMESTAMP
+
+INDEX idx_product_ingredients_product ON product_ingredients(product_id)
+UNIQUE (product_id, ingredient_id)
+```
+
+**product_images (제품 이미지)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+product_id          BIGINT REFERENCES products(id)
+image_type          VARCHAR(50) -- 'Main', 'Detail', 'Ingredient', 'Certificate'
+image_url           TEXT NOT NULL
+sort_order          INTEGER
+created_at          TIMESTAMP
+
+INDEX idx_product_images_product ON product_images(product_id)
+```
+
+#### 3.2.3 원가 및 가격 관리
+
+**suppliers (공급처/생산공장)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+supplier_code       VARCHAR(50) UNIQUE NOT NULL
+name                VARCHAR(255) NOT NULL
+supplier_type       VARCHAR(50) -- 'OEM', 'ODM', 'Raw_Material', 'Packaging'
+country_code        CHAR(2)
+address             TEXT
+contact_person      VARCHAR(255)
+email               VARCHAR(255)
+phone               VARCHAR(50)
+fax                 VARCHAR(50)
+tax_id              VARCHAR(100)
+business_license    VARCHAR(100)
+payment_terms       VARCHAR(100) -- 'Net 30', 'Net 60', 'Prepaid 50%'
+currency            CHAR(3) -- 주 거래 통화
+bank_account        TEXT -- 암호화 필요
+production_capacity INTEGER -- 월 생산 가능량
+lead_time_days      INTEGER -- 평균 리드 타임 (일)
+quality_rating      DECIMAL(3,2) -- 품질 평가 (0-5)
+min_order_qty       INTEGER -- 최소 주문 수량
+certifications      JSONB -- ['ISO 9001', 'GMP', ...]
+notes               TEXT
+is_active           BOOLEAN DEFAULT TRUE
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_suppliers_type ON suppliers(supplier_type)
+INDEX idx_suppliers_country ON suppliers(country_code)
+INDEX idx_suppliers_active ON suppliers(is_active)
+```
+
+**purchase_prices (매입 단가)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+product_id          BIGINT REFERENCES products(id)
+supplier_id         BIGINT REFERENCES suppliers(id)
+currency            CHAR(3)
+unit_price          DECIMAL(15,2) NOT NULL
+moq                 INTEGER -- Minimum Order Quantity
+effective_from      DATE NOT NULL
+effective_to        DATE
+notes               TEXT
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_purchase_prices_product ON purchase_prices(product_id)
+INDEX idx_purchase_prices_dates ON purchase_prices(effective_from, effective_to)
+```
+
+**cost_components (원가 구성 요소)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+product_id          BIGINT REFERENCES products(id)
+location_id         BIGINT REFERENCES locations(id) -- NULL이면 본사 기준
+component_type      VARCHAR(100) NOT NULL
+    -- 'purchase', 'domestic_transport', 'export_handling',
+    -- 'international_freight', 'insurance', 'import_duty',
+    -- 'local_transport', 'labeling', 'compliance',
+    -- 'marketing_alloc', 'overhead_alloc', 'sampling'
+amount_per_unit     DECIMAL(15,4) NOT NULL
+currency            CHAR(3)
+calculation_method  VARCHAR(50) -- 'Fixed', 'Percentage', 'Volume-based'
+notes               TEXT
+effective_from      DATE NOT NULL
+effective_to        DATE
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_cost_components_product ON cost_components(product_id)
+INDEX idx_cost_components_location ON cost_components(location_id)
+INDEX idx_cost_components_type ON cost_components(component_type)
+```
+
+**exchange_rates (환율)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+from_currency       CHAR(3) NOT NULL
+to_currency         CHAR(3) NOT NULL
+rate                DECIMAL(15,6) NOT NULL
+source              VARCHAR(100) -- 'OpenExchangeRates', 'Manual'
+timestamp           TIMESTAMP NOT NULL
+is_manual_override  BOOLEAN DEFAULT FALSE
+created_at          TIMESTAMP
+
+INDEX idx_exchange_rates_pair ON exchange_rates(from_currency, to_currency, timestamp DESC)
+UNIQUE (from_currency, to_currency, timestamp)
+```
+
+**pricing_rules (가격 규칙)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+location_id         BIGINT REFERENCES locations(id)
+product_id          BIGINT REFERENCES products(id) -- NULL이면 전체 적용
+hq_margin_percent   DECIMAL(5,2) -- 본사 마진율
+branch_margin_percent DECIMAL(5,2) -- 지사 마진율
+min_price           DECIMAL(15,2)
+max_price           DECIMAL(15,2)
+rounding_rule       VARCHAR(50) -- '100원 단위', '1000원 단위'
+effective_from      DATE NOT NULL
+effective_to        DATE
+is_active           BOOLEAN DEFAULT TRUE
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_pricing_rules_location ON pricing_rules(location_id)
+INDEX idx_pricing_rules_product ON pricing_rules(product_id)
+INDEX idx_pricing_rules_dates ON pricing_rules(effective_from, effective_to)
+```
+
+#### 3.2.4 재고 관리
+
+**stock_batches (재고 로트)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+product_id          BIGINT REFERENCES products(id)
+location_id         BIGINT REFERENCES locations(id)
+batch_no            VARCHAR(100) NOT NULL
+manufacturing_no    VARCHAR(100)
+qty_on_hand         INTEGER NOT NULL DEFAULT 0
+qty_reserved        INTEGER DEFAULT 0 -- 예약 재고
+qty_available       INTEGER GENERATED ALWAYS AS (qty_on_hand - qty_reserved) STORED
+manufactured_date   DATE
+expiry_date         DATE NOT NULL
+cost_per_unit       DECIMAL(15,4) NOT NULL
+currency            CHAR(3)
+quality_status      VARCHAR(50) DEFAULT 'OK' -- 'OK', 'Damaged', 'Quarantine'
+notes               TEXT
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_stock_location_product ON stock_batches(location_id, product_id)
+INDEX idx_stock_expiry ON stock_batches(expiry_date)
+INDEX idx_stock_batch_no ON stock_batches(batch_no)
+UNIQUE (product_id, location_id, batch_no)
+```
+
+**transfers (본사-지사 이동)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+transfer_no         VARCHAR(100) UNIQUE NOT NULL
+from_location_id    BIGINT REFERENCES locations(id)
+to_location_id      BIGINT REFERENCES locations(id)
+product_id          BIGINT REFERENCES products(id)
+batch_no            VARCHAR(100)
+qty                 INTEGER NOT NULL
+unit_cost           DECIMAL(15,4)
+shipping_cost       DECIMAL(15,2)
+insurance_cost      DECIMAL(15,2)
+customs_duty        DECIMAL(15,2)
+total_cost          DECIMAL(15,2)
+currency            CHAR(3)
+status              VARCHAR(50) DEFAULT 'Draft'
+    -- 'Draft', 'Approved', 'Shipped', 'In-Transit', 'Received', 'Cancelled'
+tracking_no         VARCHAR(255)
+shipped_at          TIMESTAMP
+estimated_arrival   DATE
+received_at         TIMESTAMP
+received_by         BIGINT REFERENCES users(id)
+quality_check_notes TEXT
+created_by          BIGINT REFERENCES users(id)
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_transfers_from ON transfers(from_location_id)
+INDEX idx_transfers_to ON transfers(to_location_id)
+INDEX idx_transfers_status ON transfers(status)
+INDEX idx_transfers_dates ON transfers(shipped_at, received_at)
+```
+
+**purchase_orders (발주서)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+po_no               VARCHAR(100) UNIQUE NOT NULL
+supplier_id         BIGINT REFERENCES suppliers(id)
+order_date          DATE NOT NULL
+requested_delivery_date DATE
+confirmed_delivery_date DATE
+status              VARCHAR(50) DEFAULT 'Draft'
+    -- 'Draft', 'Submitted', 'Confirmed', 'In_Production', 
+    -- 'Quality_Check', 'Shipped', 'Partial_Received', 'Completed', 'Cancelled'
+currency            CHAR(3)
+total_amount        DECIMAL(15,2)
+deposit_amount      DECIMAL(15,2) -- 선급금
+deposit_paid_at     TIMESTAMP
+payment_status      VARCHAR(50) -- 'Unpaid', 'Partial', 'Paid'
+payment_due_date    DATE
+shipping_method     VARCHAR(100) -- 'Sea', 'Air', 'Land'
+incoterm            VARCHAR(20) -- 'EXW', 'FOB', 'CIF', 'DDP'
+estimated_shipping_cost DECIMAL(15,2)
+notes               TEXT
+attachments         JSONB -- [{filename, url}, ...]
+created_by          BIGINT REFERENCES users(id)
+approved_by         BIGINT REFERENCES users(id)
+approved_at         TIMESTAMP
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_po_supplier ON purchase_orders(supplier_id)
+INDEX idx_po_status ON purchase_orders(status)
+INDEX idx_po_order_date ON purchase_orders(order_date)
+```
+
+**purchase_order_items (발주서 상세)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+po_id               BIGINT REFERENCES purchase_orders(id) ON DELETE CASCADE
+product_id          BIGINT REFERENCES products(id)
+qty                 INTEGER NOT NULL
+unit_price          DECIMAL(15,2) NOT NULL
+currency            CHAR(3)
+line_total          DECIMAL(15,2)
+requested_specs     TEXT -- 특별 요구사항
+notes               TEXT
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_po_items_po ON purchase_order_items(po_id)
+INDEX idx_po_items_product ON purchase_order_items(product_id)
+```
+
+**purchase_receipts (본사 입고 처리)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+receipt_no          VARCHAR(100) UNIQUE NOT NULL
+po_id               BIGINT REFERENCES purchase_orders(id)
+supplier_id         BIGINT REFERENCES suppliers(id)
+location_id         BIGINT REFERENCES locations(id) -- 본사 창고
+receipt_date        DATE NOT NULL
+receipt_time        TIME
+status              VARCHAR(50) DEFAULT 'Pending'
+    -- 'Pending', 'Inspecting', 'Approved', 'Partial_Reject', 'Rejected'
+notes               TEXT
+created_by          BIGINT REFERENCES users(id)
+approved_by         BIGINT REFERENCES users(id)
+approved_at         TIMESTAMP
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_receipts_po ON purchase_receipts(po_id)
+INDEX idx_receipts_location ON purchase_receipts(location_id)
+INDEX idx_receipts_date ON purchase_receipts(receipt_date)
+```
+
+**purchase_receipt_items (본사 입고 상세)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+receipt_id          BIGINT REFERENCES purchase_receipts(id) ON DELETE CASCADE
+po_item_id          BIGINT REFERENCES purchase_order_items(id)
+product_id          BIGINT REFERENCES products(id)
+batch_no            VARCHAR(100) NOT NULL
+manufacturing_no    VARCHAR(100)
+manufactured_date   DATE
+expiry_date         DATE NOT NULL
+ordered_qty         INTEGER -- 발주 수량
+received_qty        INTEGER NOT NULL -- 실제 입고 수량
+approved_qty        INTEGER -- 승인 수량
+rejected_qty        INTEGER DEFAULT 0 -- 반려 수량
+rejection_reason    VARCHAR(255)
+unit_cost           DECIMAL(15,4) -- 실제 매입 단가
+currency            CHAR(3)
+quality_status      VARCHAR(50) DEFAULT 'Pending'
+    -- 'Pending', 'Pass', 'Conditional_Pass', 'Fail'
+quality_notes       TEXT
+inspection_photos   JSONB -- [url, ...]
+inspector_id        BIGINT REFERENCES users(id)
+inspected_at        TIMESTAMP
+storage_location    VARCHAR(100) -- 창고 내 위치
+notes               TEXT
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_receipt_items_receipt ON purchase_receipt_items(receipt_id)
+INDEX idx_receipt_items_product ON purchase_receipt_items(product_id)
+INDEX idx_receipt_items_batch ON purchase_receipt_items(batch_no)
+```
+
+#### 3.2.5 판매 및 프로모션
+
+**sales (판매 기록)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+sale_no             VARCHAR(100)
+location_id         BIGINT REFERENCES locations(id)
+product_id          BIGINT REFERENCES products(id)
+batch_id            BIGINT REFERENCES stock_batches(id)
+qty                 INTEGER NOT NULL
+unit_price          DECIMAL(15,2) NOT NULL
+discount_amount     DECIMAL(15,2) DEFAULT 0
+total_amount        DECIMAL(15,2) NOT NULL
+currency            CHAR(3)
+sale_date           DATE NOT NULL
+sale_time           TIME
+channel             VARCHAR(50) -- 'Online', 'Offline', 'Live'
+promotion_id        BIGINT REFERENCES promotions(id)
+is_bundle_sale      BOOLEAN DEFAULT FALSE
+bundle_id           BIGINT REFERENCES product_bundles(id)
+customer_id         VARCHAR(100) -- Optional: 고객 식별자
+payment_method      VARCHAR(50)
+notes               TEXT
+created_by          BIGINT REFERENCES users(id)
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_sales_location ON sales(location_id)
+INDEX idx_sales_product ON sales(product_id)
+INDEX idx_sales_date ON sales(sale_date)
+INDEX idx_sales_channel ON sales(channel)
+```
+
+**returns (반품/교환)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+return_no           VARCHAR(100) UNIQUE NOT NULL
+sale_id             BIGINT REFERENCES sales(id)
+product_id          BIGINT REFERENCES products(id)
+qty                 INTEGER NOT NULL
+return_type         VARCHAR(50) -- 'Refund', 'Exchange', 'Discard'
+reason              VARCHAR(100)
+status              VARCHAR(50) DEFAULT 'Pending'
+    -- 'Pending', 'Approved', 'Restocked', 'Discarded', 'Rejected'
+refund_amount       DECIMAL(15,2)
+restocked_batch_id  BIGINT REFERENCES stock_batches(id)
+processed_at        TIMESTAMP
+processed_by        BIGINT REFERENCES users(id)
+notes               TEXT
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_returns_sale ON returns(sale_id)
+INDEX idx_returns_status ON returns(status)
+```
+
+**promotions (프로모션)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+code                VARCHAR(100) UNIQUE NOT NULL
+name_ko             VARCHAR(255) NOT NULL
+name_local          VARCHAR(255)
+description         TEXT
+promotion_type      VARCHAR(50) -- 'Discount', 'Bundle', 'Gift', 'BOGO'
+discount_type       VARCHAR(50) -- 'Percentage', 'Fixed', 'FreeShipping'
+discount_value      DECIMAL(15,2)
+min_purchase_amount DECIMAL(15,2)
+max_discount_amount DECIMAL(15,2)
+applicable_products JSONB -- [product_id, ...]
+applicable_locations JSONB -- [location_id, ...]
+applicable_channels JSONB -- ['Online', 'Offline']
+start_date          DATE NOT NULL
+end_date            DATE NOT NULL
+max_usage_per_customer INTEGER
+total_usage_limit   INTEGER
+current_usage_count INTEGER DEFAULT 0
+is_active           BOOLEAN DEFAULT TRUE
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_promotions_dates ON promotions(start_date, end_date)
+INDEX idx_promotions_active ON promotions(is_active)
+```
+
+**product_bundles (번들/세트 상품)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+bundle_sku          VARCHAR(100) UNIQUE NOT NULL
+name_ko             VARCHAR(255) NOT NULL
+name_local          VARCHAR(255)
+bundle_components   JSONB NOT NULL
+    -- [{"product_id": 123, "qty": 2}, {"product_id": 456, "qty": 1}]
+bundle_price        DECIMAL(15,2) NOT NULL
+currency            CHAR(3)
+discount_rate       DECIMAL(5,2) -- 개별 구매 대비 할인율
+effective_from      DATE NOT NULL
+effective_to        DATE
+is_active           BOOLEAN DEFAULT TRUE
+created_at          TIMESTAMP
+updated_at          TIMESTAMP
+
+INDEX idx_bundles_dates ON product_bundles(effective_from, effective_to)
+```
+
+**sample_distribution (샘플/테스터 배포)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+product_id          BIGINT REFERENCES products(id)
+location_id         BIGINT REFERENCES locations(id)
+qty                 INTEGER NOT NULL
+distribution_date   DATE NOT NULL
+distribution_type   VARCHAR(50) -- 'InStore', 'Event', 'Influencer', 'CustomerRequest'
+cost_per_unit       DECIMAL(15,2)
+total_cost          DECIMAL(15,2)
+purpose             TEXT
+notes               TEXT
+created_by          BIGINT REFERENCES users(id)
+created_at          TIMESTAMP
+
+INDEX idx_samples_product ON sample_distribution(product_id)
+INDEX idx_samples_location ON sample_distribution(location_id)
+INDEX idx_samples_date ON sample_distribution(distribution_date)
+```
+
+#### 3.2.6 감사 및 로그
+
+**audit_logs (감사 로그)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+user_id             BIGINT REFERENCES users(id)
+action              VARCHAR(100) NOT NULL -- 'CREATE', 'UPDATE', 'DELETE', 'LOGIN'
+table_name          VARCHAR(100)
+record_id           BIGINT
+before_data         JSONB
+after_data          JSONB
+ip_address          VARCHAR(50)
+user_agent          TEXT
+timestamp           TIMESTAMP DEFAULT NOW()
+
+INDEX idx_audit_user ON audit_logs(user_id)
+INDEX idx_audit_timestamp ON audit_logs(timestamp DESC)
+INDEX idx_audit_table ON audit_logs(table_name, record_id)
+```
+
+**system_settings (시스템 설정)**
+```sql
+id                  BIGSERIAL PRIMARY KEY
+setting_key         VARCHAR(100) UNIQUE NOT NULL
+setting_value       TEXT
+data_type           VARCHAR(50) -- 'String', 'Number', 'Boolean', 'JSON'
+description         TEXT
+updated_by          BIGINT REFERENCES users(id)
+updated_at          TIMESTAMP
+```
+
+---
+
+## 4. 가격 계산 로직 (정형화된 공식)
+
+### 4.1 원가 계산 프로세스
+
+#### Step 1: 본사 기준 Landed Cost (KRW)
+
+```
+Purchase_Cost_KRW = 매입 단가 (원)
+
+Domestic_Costs = 
+    + 국내 운송비 (제품당)
+    + 포장비 (제품당)
+    + 가공/검수비 (제품당)
+
+Export_Costs = 
+    + 수출 통관비 (제품당)
+    + 포워딩 수수료 (제품당)
+    + 수출 포장비 (제품당)
+
+International_Logistics = 
+    + 국제 운송비 (FOB/CIF 기준, 제품당)
+    + 해상/항공 보험료 (제품당)
+
+Local_Import_Costs = 
+    + 현지 관세 (제품당, 현지 통화 → 원화 환산)
+    + 현지 통관비 (제품당, 현지 통화 → 원화 환산)
+    + 항구→지사 물류비 (제품당, 현지 통화 → 원화 환산)
+
+Compliance_Costs = 
+    + 라벨링 비용 (제품당, 현지어 표기)
+    + 인증 비용 배부 (총 인증비용 / 예상 판매량)
+    + 성분표 인쇄비
+
+Landed_Cost_KRW = 
+    Purchase_Cost_KRW 
+    + Domestic_Costs 
+    + Export_Costs 
+    + International_Logistics 
+    + Local_Import_Costs 
+    + Compliance_Costs
+```
+
+#### Step 2: 현지 통화 환산 및 추가 비용
+
+```
+Landed_Cost_Local = Landed_Cost_KRW / Exchange_Rate_KRW_to_Local
+
+Marketing_Allocation = 
+    (총 마케팅 예산 × 제품 배부율) / 예상 판매량
+
+Overhead_Allocation = 
+    (SG&A 비용 × 제품 배부율) / 예상 판매량
+
+Sample_Allocation = 
+    (샘플 제작 및 배포 비용) / 예상 판매량
+
+Local_Operating_Costs = 
+    + 점포 운영비 배부
+    + 인건비 배부
+    + 기타 현지 비용
+
+Total_Cost_Per_Unit_Local = 
+    Landed_Cost_Local 
+    + Marketing_Allocation 
+    + Overhead_Allocation 
+    + Sample_Allocation 
+    + Local_Operating_Costs
+```
+
+#### Step 3: 마진 적용 및 최종 판매가
+
+```
+Target_Margin_HQ = 본사 목표 마진율 (예: 10%)
+Target_Margin_Branch = 지사 목표 마진율 (예: 30%)
+Total_Target_Margin = Target_Margin_HQ + Target_Margin_Branch
+
+Base_Price_Before_Tax = 
+    Total_Cost_Per_Unit_Local / (1 - Total_Target_Margin)
+
+VAT_Rate = 현지 부가가치세율 (예: VN 10%, CN 13%)
+
+Price_Before_Promotion = 
+    Base_Price_Before_Tax × (1 + VAT_Rate)
+
+Promotional_Discount = 
+    프로모션 할인액 (정액 또는 할인율 적용)
+
+Final_Sale_Price = 
+    Price_Before_Promotion - Promotional_Discount
+
+Rounded_Sale_Price = 
+    ROUND(Final_Sale_Price, 가격 정책에 따른 반올림)
+    -- 예: 100원 단위, 1000원 단위, 끝자리 90으로
+```
+
+### 4.2 마진 분배 로직
+
+```
+Gross_Revenue = Final_Sale_Price × Quantity_Sold
+
+VAT_Amount = Gross_Revenue × (VAT_Rate / (1 + VAT_Rate))
+
+Net_Revenue = Gross_Revenue - VAT_Amount
+
+Total_COGS = Total_Cost_Per_Unit_Local × Quantity_Sold
+
+Gross_Profit = Net_Revenue - Total_COGS
+
+HQ_Profit_Share = 
+    Gross_Profit × (Target_Margin_HQ / Total_Target_Margin)
+
+Branch_Profit_Share = 
+    Gross_Profit × (Target_Margin_Branch / Total_Target_Margin)
+```
+
+### 4.3 환율 변동 대응 규칙
+
+```
+IF (현재_환율 - 기준_환율) / 기준_환율 > ±5% THEN
+    → 가격 재검토 알림 발송
+    → 가격 시뮬레이터로 영향도 분석
+    → 필요시 가격 조정 승인 프로세스
+
+환율 헤지 고려:
+- 선물환 계약 시 계약 환율 적용
+- 옵션 계약 시 행사가 기준 적용
+```
+
+### 4.4 가격 시뮬레이터 입력 파라미터
+
+사용자가 실시간으로 조정 가능한 변수:
+
+1. **환율**: KRW/VND, KRW/CNY
+2. **운송비**: 국제 운송비, 현지 물류비
+3. **관세율**: 국가별 HS 코드 기준
+4. **마진율**: 본사/지사 마진 비율
+5. **마케팅 배부**: 제품별 마케팅 비용
+6. **프로모션**: 할인율 또는 정액 할인
+7. **환율 시나리오**: 낙관(+5%), 기본, 비관(-5%)
+
+**출력 결과:**
+- 제품별 권장 판매가
+- 예상 마진액 및 마진율
+- 손익분기점 판매량
+- 시나리오별 수익성 비교 차트
+
+---
+
+## 5. 업무 흐름 (User Journey)
+
+### 5.1 본사 관리자 흐름
+
+#### 5.1.0 공장 발주 및 입고 (신규 추가)
+```
+1. 수요 예측 및 발주 계획
+   - 지사별 판매 데이터 분석
+   - 재고 현황 확인
+   - 안전재고 기준 검토
+   - 발주 필요 품목 선정
+   
+2. 공급처(공장) 관리
+   - 공장 등록 (OEM/ODM 구분)
+   - 생산 능력, 리드 타임 정보 관리
+   - 품질 평가 이력 관리
+   - 계약 조건 및 결제 조건 설정
+   
+3. 발주서(PO) 생성
+   - 제품 및 수량 선택
+   - 공장 선택
+   - 단가 협상 및 확정
+   - 납기일 설정
+   - 결제 조건 확인 (선급금, Net 30 등)
+   - 첨부 파일 (사양서, 계약서)
+   - 승인 및 공장 발송
+   
+4. 발주 진행 상태 추적
+   - 공장 확인 (Confirmed)
+   - 생산 중 (In_Production)
+   - 품질 검사 (Quality_Check)
+   - 출하 (Shipped)
+   - 운송 추적
+   
+5. 본사 입고 처리
+   - 입고 예정 확인
+   - 물품 도착
+   - 수량 확인 (발주 수량 vs 실제 입고)
+   - 품질 검사 실시
+     * 외관 검사 (포장 상태, 라벨)
+     * 제품 검사 (색상, 향, 질감)
+     * 서류 검사 (COA, 성적서)
+     * 샘플 테스트 (필요시)
+   - 검사 결과 입력
+     * 합격 (Pass): 전량 입고
+     * 조건부 합격 (Conditional_Pass): 일부 입고
+     * 불합격 (Fail): 반품 또는 폐기
+   - 로트/배치 정보 등록
+     * 제조번호, 제조일, 유통기한
+   - 본사 창고 재고 증가
+   
+6. 매입가 확정 및 회계 처리
+   - 실제 매입 단가 확정
+   - 세금계산서 확인
+   - 대금 결제 처리
+   - 회계 전표 생성
+```
+
+#### 5.1.1 신제품 등록
+```
+1. 제품 기본 정보 입력
+   - SKU, 이름, 카테고리, 규격, 단위
+   - 제조일, 유통기한
+   
+2. 성분 정보 입력
+   - 성분 검색 및 추가
+   - 농도 입력
+   - 자동 규제 체크 (국가별 금지 성분)
+   
+3. 인증 관리
+   - 국가별 인증 정보 입력
+   - 인증서 파일 업로드
+   - 갱신 알림 설정
+   
+4. 이미지 업로드
+   - 제품 이미지 (다각도)
+   - 성분표 이미지
+   - 인증서 스캔
+   
+5. 매입 정보 입력
+   - 공급처 선택
+   - 매입 단가 및 유효기간
+   - MOQ 정보
+```
+
+#### 5.1.2 가격 설정
+```
+1. 원가 구성 입력
+   - 매입 단가 (본사 입고 시 확정된 실제 단가)
+   - 각 비용 항목별 단가 입력
+   - 환율 확인 및 조정
+   
+2. 가격 시뮬레이터 실행
+   - 국가별 시나리오 시뮬레이션
+   - 환율 변동 시나리오 (±5%, ±10%)
+   - 마진율 조정 실험
+   
+3. 가격 규칙 설정
+   - 국가별 목표 마진율
+   - 최소/최대 가격 제약
+   - 반올림 규칙
+   
+4. 승인 및 적용
+   - 가격 정책 저장
+   - 지사에 통보
+   - 유효 기간 설정
+```
+
+#### 5.1.3 출고 관리 (본사 → 지사)
+```
+1. 출고 계획 수립
+   - 지사별 수요 확인
+   - 안전재고 기준 검토
+   
+2. 출고 지시 생성
+   - 제품 및 수량 선택
+   - 로트/배치 지정
+   - 운송 방법 선택
+   
+3. 운송 정보 입력
+   - 운송사 및 추적번호
+   - 운송비, 보험료
+   - 예상 도착일
+   
+4. 출고 처리
+   - 본사 재고 차감
+   - 송장 생성 및 전송
+   - 상태 업데이트 (Shipped)
+```
+
+#### 5.1.4 모니터링 및 분석
+```
+1. 대시보드 확인
+   - 본사 재고 현황 (공장 입고 후)
+   - 지사 재고 현황
+   - 일별 판매 요약
+   - 발주 진행 상황
+   - 알림 확인 (안전재고, 유통기한)
+   
+2. 리포트 조회
+   - 공장별 납품 성과 (품질, 납기 준수율)
+   - 본사 입고 이력
+   - 지사별 P&L
+   - 품목별 회전율
+   - 채널별 매출 분석
+   
+3. 가격 재검토
+   - 실제 마진율 vs 목표 마진율
+   - 환율 변동 영향도
+   - 가격 조정 의사결정
+   
+4. 재주문 관리
+   - 판매 데이터 기반 수요 예측
+   - 안전재고 미달 품목 확인
+   - 발주 제안 검토
+   - PO 생성 및 발송
+```
+
+### 5.2 지사 관리자 흐름
+
+#### 5.2.1 입고 처리
+```
+1. 입고 예정 확인
+   - Transfer 목록 조회
+   - 예상 도착일 확인
+   
+2. 물품 도착
+   - 수량 확인
+   - 육안 검사 (파손, 변색, 누수)
+   - 온도 이력 확인 (온도 민감 제품)
+   
+3. 품질 검사 기록
+   - 검사 결과 입력 (OK/Damaged/Quarantine)
+   - 사진 업로드 (이상 발견 시)
+   - 특이사항 메모
+   
+4. 입고 완료
+   - 로트별 재고 증가
+   - 샘플 분리 (테스터용)
+   - 본사에 입고 확인 통보
+```
+
+#### 5.2.2 판매 관리
+```
+1. 일별 판매 입력
+   - 날짜 선택
+   - 제품별 판매 수량 입력
+   - 채널별 구분 (Online/Offline/Live)
+   
+2. 프로모션 적용
+   - 활성 프로모션 목록 확인
+   - 해당 제품에 할인 자동 적용
+   - 번들 판매 시 구성 제품 자동 차감
+   
+3. 대량 입력 (엑셀 업로드)
+   - 템플릿 다운로드
+   - 데이터 입력 및 업로드
+   - 검증 결과 확인 및 수정
+   
+4. 재고 확인
+   - 판매 후 재고 잔량 확인
+   - 안전재고 미달 시 재주문 요청
+```
+
+#### 5.2.3 재고 관리
+```
+1. 재고 현황 조회
+   - 품목별 재고 수량
+   - 로트별 유통기한
+   - 테스터/샘플 재고
+   
+2. 유통기한 관리
+   - 3단계 알림 (6개월/3개월/1개월)
+   - 임박 제품 우선 판매 지시
+   - 폐기 예정 제품 본사 보고
+   
+3. 재고 실사
+   - 정기 실사 (월 1회 권장)
+   - 실사 수량 입력
+   - 차이 조정 및 사유 기록
+   
+4. 반품 처리
+   - 반품 접수
+   - 제품 상태 확인
+   - 재고 복귀 또는 폐기 처리
+```
+
+### 5.3 지사 실무자 흐름 (모바일 앱)
+
+```
+1. 입고 스캔
+   - 바코드/QR 스캔
+   - 수량 입력
+   - 로트 정보 자동 기록
+   
+2. 간편 판매 입력
+   - 제품 스캔 또는 검색
+   - 수량 입력
+   - 채널 선택
+   - 저장
+   
+3. 재고 조회
+   - 제품 검색
+   - 현재 재고 수량 확인
+   - 유통기한 확인
+   
+4. 알림 확인
+   - 안전재고 미달
+   - 유통기한 임박
+   - 입고 예정
+```
+
+---
+
+## 6. API 설계
+
+### 6.1 인증 및 권한
+
+**Base URL:** `https://api.arnocosmetics.com/v1`
+
+**인증 방식:** JWT (JSON Web Token)
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+Content-Type: application/json
+Accept-Language: ko|vi|zh
+```
+
+**권한 레벨:**
+- `HQ_Admin`: 모든 권한
+- `HQ_Viewer`: 읽기 전용 (본사 데이터)
+- `Branch_Manager`: 해당 지사 전체 권한
+- `Branch_Clerk`: 해당 지사 입출고/판매 입력만
+
+### 6.2 핵심 엔드포인트
+
+#### 6.2.1 인증
+
+```http
+POST /auth/login
+Request:
+{
+  "email": "string",
+  "password": "string"
+}
+Response:
+{
+  "access_token": "string",
+  "refresh_token": "string",
+  "user": {
+    "id": "number",
+    "name": "string",
+    "role": "string",
+    "location_id": "number"
+  }
+}
+
+POST /auth/refresh
+Request:
+{
+  "refresh_token": "string"
+}
+
+POST /auth/logout
+```
+
+#### 6.2.2 제품 관리
+
+```http
+GET /products
+Query params:
+  - category_id: number
+  - search: string
+  - is_active: boolean
+  - page: number
+  - limit: number
+Response:
+{
+  "data": [Product[]],
+  "total": number,
+  "page": number,
+  "limit": number
+}
+
+GET /products/{id}
+Response: Product
+
+POST /products
+Request: Product
+Response: Product
+
+PUT /products/{id}
+Request: Partial<Product>
+Response: Product
+
+DELETE /products/{id}
+
+GET /products/{id}/certifications
+POST /products/{id}/certifications
+PUT /products/{id}/certifications/{cert_id}
+
+GET /products/{id}/ingredients
+POST /products/{id}/ingredients
+
+GET /products/{id}/images
+POST /products/{id}/images
+```
+
+#### 6.2.3 공급처 및 발주 관리 (신규 추가)
+
+```http
+GET /suppliers
+Query params:
+  - supplier_type: 'OEM'|'ODM'
+  - country_code: string
+  - is_active: boolean
+Response: Supplier[]
+
+GET /suppliers/{id}
+Response: Supplier
+
+POST /suppliers
+Request: Supplier
+Response: Supplier
+
+PUT /suppliers/{id}
+Request: Partial<Supplier>
+
+DELETE /suppliers/{id}
+
+GET /purchase-orders
+Query params:
+  - supplier_id: number
+  - status: string
+  - date_from: date
+  - date_to: date
+Response: PurchaseOrder[]
+
+GET /purchase-orders/{id}
+Response: PurchaseOrder with items
+
+POST /purchase-orders
+Request:
+{
+  "po_no": "string",
+  "supplier_id": number,
+  "order_date": "date",
+  "requested_delivery_date": "date",
+  "currency": "string",
+  "payment_terms": "string",
+  "items": [
+    {
+      "product_id": number,
+      "qty": number,
+      "unit_price": number,
+      "notes": "string"
+    }
+  ]
+}
+Response: PurchaseOrder
+
+PUT /purchase-orders/{id}
+Request: Partial<PurchaseOrder>
+
+PUT /purchase-orders/{id}/submit
+Request:
+{
+  "approved_by": number
+}
+Response: PurchaseOrder (status: Submitted)
+
+PUT /purchase-orders/{id}/confirm
+Request:
+{
+  "confirmed_delivery_date": "date",
+  "notes": "string"
+}
+Response: PurchaseOrder (status: Confirmed)
+
+PUT /purchase-orders/{id}/cancel
+Request:
+{
+  "cancellation_reason": "string"
+}
+
+GET /purchase-receipts
+Query params:
+  - po_id: number
+  - location_id: number
+  - date_from: date
+  - date_to: date
+  - status: string
+Response: PurchaseReceipt[]
+
+GET /purchase-receipts/{id}
+Response: PurchaseReceipt with items
+
+POST /purchase-receipts
+Request:
+{
+  "receipt_no": "string",
+  "po_id": number,
+  "location_id": number,
+  "receipt_date": "date",
+  "items": [
+    {
+      "po_item_id": number,
+      "product_id": number,
+      "batch_no": "string",
+      "manufactured_date": "date",
+      "expiry_date": "date",
+      "ordered_qty": number,
+      "received_qty": number,
+      "unit_cost": number,
+      "quality_notes": "string"
+    }
+  ]
+}
+Response: PurchaseReceipt
+
+PUT /purchase-receipts/{id}/inspect
+Request:
+{
+  "items": [
+    {
+      "receipt_item_id": number,
+      "approved_qty": number,
+      "rejected_qty": number,
+      "rejection_reason": "string",
+      "quality_status": "Pass"|"Conditional_Pass"|"Fail",
+      "quality_notes": "string",
+      "inspection_photos": ["url1", "url2"]
+    }
+  ],
+  "inspector_id": number
+}
+Response: PurchaseReceipt (status: Inspecting)
+
+PUT /purchase-receipts/{id}/approve
+Request:
+{
+  "approved_by": number,
+  "notes": "string"
+}
+Response: PurchaseReceipt (status: Approved)
+Comment: 승인 시 stock_batches에 재고 자동 생성
+
+GET /purchase-orders/{id}/delivery-tracking
+Response:
+{
+  "po_id": number,
+  "status": "string",
+  "timeline": [
+    {
+      "status": "Confirmed",
+      "timestamp": "timestamp",
+      "notes": "string"
+    }
+  ],
+  "estimated_delivery": "date",
+  "tracking_info": "string"
+}
+```
+
+#### 6.2.4 원가 및 가격
+
+```http
+GET /products/{id}/cost-components
+POST /products/{id}/cost-components
+PUT /cost-components/{id}
+DELETE /cost-components/{id}
+
+GET /pricing-rules
+Query params:
+  - location_id: number
+  - product_id: number
+  - effective_date: date
+POST /pricing-rules
+PUT /pricing-rules/{id}
+
+POST /pricing/simulate
+Request:
+{
+  "product_id": number,
+  "location_id": number,
+  "exchange_rate": number,
+  "shipping_cost": number,
+  "customs_duty_rate": number,
+  "hq_margin_percent": number,
+  "branch_margin_percent": number,
+  "promotion_discount": number
+}
+Response:
+{
+  "product": Product,
+  "cost_breakdown": {
+    "purchase_cost": number,
+    "landed_cost": number,
+    "total_cost": number,
+    "marketing_alloc": number,
+    "overhead_alloc": number
+  },
+  "pricing": {
+    "base_price": number,
+    "price_before_tax": number,
+    "vat_amount": number,
+    "price_before_promotion": number,
+    "discount_amount": number,
+    "final_sale_price": number
+  },
+  "margins": {
+    "hq_margin_amount": number,
+    "hq_margin_percent": number,
+    "branch_margin_amount": number,
+    "branch_margin_percent": number,
+    "total_margin_percent": number
+  },
+  "break_even_quantity": number
+}
+
+GET /exchange-rates/latest
+Query params:
+  - from_currency: string
+  - to_currency: string
+Response: ExchangeRate[]
+
+POST /exchange-rates
+Request:
+{
+  "from_currency": string,
+  "to_currency": string,
+  "rate": number,
+  "is_manual_override": boolean
+}
+```
+
+#### 6.2.5 재고 관리
+
+```http
+GET /stock
+Query params:
+  - location_id: number
+  - product_id: number
+  - expiry_before: date
+  - min_qty: number
+Response: StockBatch[]
+
+GET /stock/summary
+Query params:
+  - location_id: number
+Response:
+{
+  "total_products": number,
+  "total_value": number,
+  "low_stock_count": number,
+  "expiring_soon_count": number,
+  "by_category": CategorySummary[]
+}
+
+GET /stock/{batch_id}
+Response: StockBatch
+
+POST /transfers
+Request:
+{
+  "from_location_id": number,
+  "to_location_id": number,
+  "product_id": number,
+  "batch_no": string,
+  "qty": number,
+  "shipping_cost": number,
+  "insurance_cost": number,
+  "customs_duty": number,
+  "estimated_arrival": date
+}
+Response: Transfer
+
+GET /transfers
+Query params:
+  - from_location_id: number
+  - to_location_id: number
+  - status: string
+  - date_from: date
+  - date_to: date
+Response: Transfer[]
+
+GET /transfers/{id}
+Response: Transfer
+
+PUT /transfers/{id}/ship
+Request:
+{
+  "tracking_no": string,
+  "shipped_at": timestamp
+}
+
+PUT /transfers/{id}/receive
+Request:
+{
+  "received_at": timestamp,
+  "quality_check_notes": string,
+  "received_qty": number,
+  "damaged_qty": number
+}
+
+POST /stock/adjustment
+Request:
+{
+  "batch_id": number,
+  "adjustment_qty": number, // 양수: 증가, 음수: 감소
+  "reason": string,
+  "notes": string
+}
+```
+
+#### 6.2.6 판매 관리
+
+```http
+POST /sales
+Request:
+{
+  "location_id": number,
+  "product_id": number,
+  "qty": number,
+  "sale_date": date,
+  "channel": string,
+  "promotion_id": number (optional),
+  "bundle_id": number (optional)
+}
+Response: Sale
+
+POST /sales/bulk
+Request:
+{
+  "sales": Sale[]
+}
+Response:
+{
+  "success_count": number,
+  "failed_count": number,
+  "errors": Error[]
+}
+
+POST /sales/upload
+Content-Type: multipart/form-data
+Request:
+{
+  "file": File (Excel/CSV),
+  "location_id": number,
+  "sale_date": date
+}
+Response:
+{
+  "preview": Sale[],
+  "validation_errors": Error[]
+}
+
+POST /sales/upload/confirm
+Request:
+{
+  "upload_session_id": string
+}
+
+GET /sales
+Query params:
+  - location_id: number
+  - product_id: number
+  - date_from: date
+  - date_to: date
+  - channel: string
+Response: Sale[]
+
+POST /returns
+Request:
+{
+  "sale_id": number,
+  "product_id": number,
+  "qty": number,
+  "return_type": string,
+  "reason": string
+}
+Response: Return
+
+PUT /returns/{id}/process
+Request:
+{
+  "status": string, // 'Approved', 'Restocked', 'Discarded'
+  "restocked_batch_id": number (if Restocked),
+  "notes": string
+}
+```
+
+#### 6.2.7 프로모션
+
+```http
+GET /promotions
+Query params:
+  - is_active: boolean
+  - location_id: number
+  - date: date (해당 날짜에 유효한 프로모션)
+Response: Promotion[]
+
+GET /promotions/{id}
+Response: Promotion
+
+POST /promotions
+Request: Promotion
+Response: Promotion
+
+PUT /promotions/{id}
+Request: Partial<Promotion>
+
+DELETE /promotions/{id}
+
+GET /bundles
+Response: ProductBundle[]
+
+POST /bundles
+Request: ProductBundle
+Response: ProductBundle
+```
+
+#### 6.2.8 리포트
+
+```http
+GET /reports/dashboard
+Query params:
+  - location_id: number (optional, 본사는 전체)
+Response:
+{
+  "total_sales_today": number,
+  "total_sales_month": number,
+  "low_stock_alerts": Alert[],
+  "expiring_soon": Product[],
+  "top_selling_products": ProductSales[],
+  "sales_by_channel": ChannelSales[]
+}
+
+GET /reports/sales
+Query params:
+  - location_id: number
+  - date_from: date
+  - date_to: date
+  - group_by: 'day'|'week'|'month'|'product'|'channel'
+Response:
+{
+  "data": SalesReport[],
+  "summary": {
+    "total_revenue": number,
+    "total_qty": number,
+    "average_price": number
+  }
+}
+
+GET /reports/inventory
+Query params:
+  - location_id: number
+  - as_of_date: date
+Response:
+{
+  "data": InventoryReport[],
+  "summary": {
+    "total_products": number,
+    "total_qty": number,
+    "total_value": number
+  }
+}
+
+GET /reports/profitability
+Query params:
+  - location_id: number
+  - date_from: date
+  - date_to: date
+  - group_by: 'product'|'category'|'location'
+Response:
+{
+  "data": ProfitabilityReport[],
+  "summary": {
+    "total_revenue": number,
+    "total_cogs": number,
+    "gross_profit": number,
+    "gross_margin_percent": number
+  }
+}
+
+GET /reports/turnover
+Query params:
+  - location_id: number
+  - period: 'month'|'quarter'|'year'
+Response:
+{
+  "data": TurnoverReport[]
+}
+
+POST /reports/export
+Request:
+{
+  "report_type": string,
+  "format": 'csv'|'xlsx'|'pdf',
+  "params": object
+}
+Response:
+{
+  "download_url": string,
+  "expires_at": timestamp
+}
+```
+
+#### 6.2.9 샘플 관리
+
+```http
+GET /samples
+Query params:
+  - location_id: number
+  - product_id: number
+  - date_from: date
+  - date_to: date
+Response: SampleDistribution[]
+
+POST /samples
+Request:
+{
+  "product_id": number,
+  "location_id": number,
+  "qty": number,
+  "distribution_date": date,
+  "distribution_type": string,
+  "cost_per_unit": number,
+  "purpose": string
+}
+
+GET /samples/effectiveness
+Query params:
+  - product_id: number
+  - location_id: number
+Response:
+{
+  "total_samples_distributed": number,
+  "total_cost": number,
+  "conversion_rate": number,
+  "revenue_generated": number,
+  "roi": number
+}
+```
+
+### 6.3 에러 코드
+
+```json
+{
+  "error": {
+    "code": "string",
+    "message": "string",
+    "details": object
+  }
+}
+```
+
+**표준 에러 코드:**
+- `AUTH_001`: 인증 실패
+- `AUTH_002`: 권한 없음
+- `VALIDATION_001`: 유효성 검사 실패
+- `STOCK_001`: 재고 부족
+- `STOCK_002`: 로트 찾을 수 없음
+- `PRODUCT_001`: 제품 찾을 수 없음
+- `CERT_001`: 인증 만료
+- `CERT_002`: 국가별 인증 없음
+- `INGREDIENT_001`: 금지 성분 포함
+- `PRICE_001`: 가격 계산 실패
+
+### 6.4 웹훅 (선택적)
+
+```http
+POST {customer_webhook_url}
+Headers:
+  X-Arno-Signature: HMAC-SHA256
+Body:
+{
+  "event": "stock.low"|"expiry.warning"|"transfer.received",
+  "timestamp": timestamp,
+  "data": object
+}
+```
+
+---
+
+## 7. 화면 설계 (UI/UX)
+
+### 7.1 웹 (본사 관리자용)
+
+#### 7.1.1 대시보드
+- **Layout**: 3-column grid
+- **위젯**:
+  - 오늘 매출 (전일 대비 %)
+  - 본사 재고 가치
+  - 지사별 재고 가치
+  - 발주 진행 중 (개수 + 링크)
+  - 입고 예정 (개수 + 링크)
+  - 안전재고 미달 품목 (개수 + 링크)
+  - 유통기한 임박 (1개월 이내, 개수 + 링크)
+  - 지사별 매출 차트 (Bar chart)
+  - 채널별 매출 비율 (Pie chart)
+  - 최근 7일 매출 추이 (Line chart)
+  - Top 10 판매 제품 (Table)
+  - 공장별 납품 성과 (품질, 납기)
+
+#### 7.1.2 공급처(공장) 관리 (신규 추가)
+- **공급처 목록**:
+  - 필터: 공급처 유형(OEM/ODM), 국가, 활성 상태
+  - 테이블: 코드, 이름, 유형, 국가, 연락처, 품질평가, 상태
+  - 액션: 상세보기, 편집, 비활성화
+- **공급처 상세/편집**:
+  - 기본정보: 코드, 이름, 유형, 국가, 주소
+  - 연락처: 담당자, 이메일, 전화, 팩스
+  - 사업자 정보: 사업자번호, 사업자등록증
+  - 거래 조건: 결제 조건, 주 거래 통화, 은행 정보
+  - 생산 능력: 월 생산 가능량, 평균 리드 타임, 최소 주문량
+  - 인증: ISO 9001, GMP 등
+  - 품질 평가: 평점, 이력
+  - 거래 이력: 최근 발주 목록
+
+#### 7.1.3 발주 관리 (신규 추가)
+- **발주서 목록**:
+  - 필터: 공급처, 상태, 날짜
+  - 테이블: 발주번호, 공급처, 발주일, 납기일, 금액, 상태
+  - 상태별 색상 표시:
+    - Draft (회색)
+    - Submitted (파란색)
+    - Confirmed (초록색)
+    - In_Production (주황색)
+    - Shipped (하늘색)
+    - Completed (진한 초록)
+    - Cancelled (빨간색)
+  - 액션: 상세보기, 편집, 취소, 추적
+- **발주서 생성**:
+  - Step 1: 기본 정보
+    - 공급처 선택
+    - 발주일, 희망 납기일
+    - 결제 조건
+    - 운송 방법
+    - Incoterm (EXW, FOB, CIF, DDP)
+  - Step 2: 제품 선택
+    - 제품 검색 및 추가
+    - 수량 입력
+    - 단가 입력 (협상 가능)
+    - 특별 요구사항
+  - Step 3: 요약 및 확인
+    - 총 금액 계산
+    - 선급금 설정 (옵션)
+    - 첨부 파일 (사양서, 계약서)
+  - Step 4: 승인 및 발송
+    - 승인자 선택
+    - 공급처로 이메일 자동 발송
+- **발주 추적**:
+  - 타임라인 뷰
+    - 각 상태별 날짜/시간
+    - 담당자 및 메모
+  - 문서: 발주서, 확인서, 송장
+  - 커뮤니케이션 로그
+
+#### 7.1.4 본사 입고 관리 (신규 추가)
+- **입고 예정 목록**:
+  - 필터: 공급처, 예정일, 상태
+  - 테이블: 입고번호, 발주번호, 공급처, 예정일, 상태
+  - 액션: 입고 처리
+- **입고 처리 화면**:
+  - 발주 정보 표시 (읽기 전용)
+  - 제품별 입고 처리:
+    - 발주 수량 표시
+    - 실제 입고 수량 입력
+    - 로트/배치 정보 입력
+      * 배치번호
+      * 제조번호
+      * 제조일
+      * 유통기한
+    - 품질 검사 체크리스트
+      * 포장 상태 (양호/불량)
+      * 라벨 확인 (일치/불일치)
+      * 외관 검사 (합격/불합격)
+      * 색상 (정상/이상)
+      * 향 (정상/이상)
+      * 질감 (정상/이상)
+    - 검사 결과: Pass / Conditional Pass / Fail
+    - 승인 수량 / 반려 수량
+    - 반려 사유
+    - 검사 사진 업로드
+    - 저장 위치 (창고 내)
+    - 특이사항 메모
+  - 전체 입고 승인 버튼
+- **입고 이력**:
+  - 필터: 기간, 공급처, 상태
+  - 테이블: 입고번호, 발주번호, 입고일, 제품, 수량, 품질 상태
+  - 품질 리포트: 공급처별 합격률
+
+#### 7.1.5 제품 관리
+#### 7.1.5 제품 관리
+- **제품 목록**:
+  - 필터: 카테고리, 활성 상태, 검색
+  - 테이블: SKU, 이름, 카테고리, 재고 (전체), 가격, 상태
+  - 액션: 상세보기, 편집, 복제, 비활성화
+- **제품 상세/편집**:
+  - 탭 구조:
+    - 기본정보: SKU, 이름, 카테고리, 규격, 단위, HS코드
+    - 성분: 성분 검색 및 추가, 농도 입력, 규제 체크 결과
+    - 인증: 국가별 인증 목록, 추가, 갱신 알림 설정
+    - 이미지: 다중 이미지 업로드, 드래그앤드롭 정렬
+    - 원가: 비용 항목별 입력 (아코디언 형태)
+    - 가격: 국가별 가격 규칙, 시뮬레이터 바로가기
+    - 재고: 전체 로케이션 재고 현황 (읽기 전용)
+
+#### 7.1.6 가격 시뮬레이터
+- **Layout**: 좌우 분할 (입력 / 결과)
+- **입력 섹션**:
+  - 제품 선택 (드롭다운)
+  - 목표 지역 선택 (베트남/중국)
+  - 비용 항목 입력 (접이식):
+    - 매입가
+    - 운송비 (국내, 국제, 현지)
+    - 관세율
+    - 마케팅 배부
+    - 기타 비용
+  - 환율 입력 (현재 환율 표시, 수동 조정 가능)
+  - 마진 설정:
+    - 본사 마진 (%)
+    - 지사 마진 (%)
+  - 프로모션 할인 (선택)
+  - 시나리오 저장 버튼
+- **결과 섹션**:
+  - 원가 분해 (Sankey diagram 또는 Waterfall chart)
+  - 최종 판매가 (대형 표시)
+  - 마진 분석:
+    - 본사 마진액/비율
+    - 지사 마진액/비율
+    - 총 마진액/비율
+  - 손익분기점 (판매량)
+  - 비교: 기존 가격 vs 시뮬레이션 가격
+  - 저장된 시나리오 목록 (비교 가능)
+
+#### 7.1.7 출고/입고 관리 (본사 → 지사)
+- **출고 목록**:
+  - 필터: 출발지, 도착지, 상태, 날짜
+  - 테이블: 출고번호, 제품, 수량, 출발지→도착지, 상태, 출고일, 예상도착일
+  - 액션: 상세보기, 추적, 취소
+- **출고 생성**:
+  - Step 1: 도착 지사 선택
+  - Step 2: 제품 및 로트 선택 (재고 확인)
+  - Step 3: 수량 입력
+  - Step 4: 운송 정보 (운송사, 비용, 예상 도착일)
+  - Step 5: 확인 및 승인
+- **입고 처리** (지사용):
+  - 입고 대기 목록
+  - 입고 상세:
+    - 제품 정보
+    - 예상 수량 vs 실제 수량
+    - 품질 검사 체크리스트
+    - 사진 업로드 (이상 발견 시)
+    - 특이사항 메모
+  - 입고 완료 버튼
+
+#### 7.1.8 판매 관리 (지사용)
+- **일별 판매 입력**:
+  - 날짜 선택 (기본: 오늘)
+  - 제품 검색/선택
+  - 수량 입력
+  - 채널 선택 (온라인/오프라인/라이브)
+  - 프로모션 선택 (자동 할인 적용)
+  - 추가 버튼
+  - 입력 목록 (편집/삭제 가능)
+  - 일괄 저장 버튼
+- **엑셀 업로드**:
+  - 템플릿 다운로드 버튼
+  - 파일 업로드 (드래그앤드롭)
+  - 데이터 미리보기
+  - 검증 결과 (에러 표시)
+  - 확인 및 저장
+- **판매 내역**:
+  - 필터: 날짜, 제품, 채널
+  - 테이블: 일자, 제품, 수량, 단가, 총액, 채널
+  - 차트: 일별 추이, 채널별 비율
+
+#### 7.1.9 재고 관리
+- **재고 현황**:
+  - 필터: 지사, 제품, 카테고리, 유통기한
+  - 테이블: 제품, 로트번호, 수량, 제조일, 유통기한, 상태
+  - 알림 뱃지: 안전재고 미달, 유통기한 임박
+  - 액션: 재고조정, 재주문, 폐기
+- **안전재고 설정**:
+  - 제품별 안전재고 수량 입력
+  - 자동 재주문 포인트 설정
+- **재고 실사**:
+  - 실사 세션 시작
+  - 제품별 실사 수량 입력 (바코드 스캔 지원)
+  - 차이 조정 및 사유 기록
+  - 실사 완료
+
+#### 7.1.10 리포트
+- **리포트 선택**:
+  - 판매 리포트
+  - 재고 리포트
+  - 손익 리포트 (P&L)
+  - 회전율 리포트
+  - 프로모션 효과 분석
+  - 샘플 ROI 분석
+- **필터 옵션**:
+  - 기간 선택 (오늘, 이번주, 이번달, 지난달, 커스텀)
+  - 지사 선택 (본사는 전체/개별 선택)
+  - 제품/카테고리 선택
+  - 채널 선택
+- **결과 표시**:
+  - 차트 (선택 가능: 막대, 선, 파이, 테이블)
+  - 요약 지표 (카드 형태)
+  - 데이터 테이블 (정렬, 페이징)
+- **내보내기**:
+  - Excel, CSV, PDF
+  - 이메일 전송 (예약 리포트)
+
+#### 7.1.11 프로모션 관리
+- **프로모션 목록**:
+  - 필터: 상태 (진행중, 예정, 종료), 날짜
+  - 테이블: 코드, 이름, 유형, 할인, 기간, 사용횟수, 상태
+  - 액션: 상세보기, 편집, 활성화/비활성화
+- **프로모션 생성/편집**:
+  - 기본정보: 코드, 이름, 설명
+  - 유형: 할인율, 정액할인, 번들, 사은품, BOGO
+  - 할인 설정: 값, 최소 구매금액, 최대 할인금액
+  - 적용 대상: 제품, 카테고리, 지사, 채널
+  - 기간: 시작일, 종료일
+  - 사용 제한: 고객당, 전체
+  - 저장 및 활성화
+
+#### 7.1.12 인증 관리
+- **인증 현황 대시보드**:
+  - 국가별 인증 현황 (진행상태별 개수)
+  - 갱신 예정 알림 (D-30, D-60, D-90)
+  - 만료된 인증 (긴급)
+- **인증 목록**:
+  - 필터: 제품, 국가, 상태, 만료일
+  - 테이블: 제품, 국가, 인증유형, 인증번호, 발급일, 만료일, 상태
+  - 액션: 상세보기, 갱신, 인증서 다운로드
+- **인증 등록/갱신**:
+  - 제품 선택
+  - 국가 선택
+  - 인증 유형 (식약처, NMPA, MOH 등)
+  - 인증번호
+  - 발급일, 만료일
+  - 인증서 업로드 (PDF, 이미지)
+  - 갱신 알림 설정 (D-30, D-60, D-90)
+
+#### 7.1.13 사용자 및 권한 관리
+- **사용자 목록**:
+  - 필터: 지사, 역할, 상태
+  - 테이블: 이름, 이메일, 지사, 역할, 상태, 마지막 로그인
+  - 액션: 편집, 비활성화, 비밀번호 초기화
+- **사용자 생성/편집**:
+  - 기본정보: 이름, 이메일
+  - 소속: 회사, 지사
+  - 역할: 드롭다운 (HQ_Admin, HQ_Viewer, Branch_Manager, Branch_Clerk)
+  - 권한: 체크박스 (세부 권한 커스터마이징)
+  - 언어: 한국어, 베트남어, 중국어
+  - 2FA 설정
+
+### 7.2 모바일 앱 (지사 실무자용)
+
+#### 7.2.1 홈 화면
+- **요약 카드**:
+  - 오늘 판매 수량
+  - 안전재고 미달 (빨간색 뱃지)
+  - 유통기한 임박 (주황색 뱃지)
+- **퀵 액션 버튼**:
+  - 판매 입력
+  - 입고 처리
+  - 재고 조회
+  - 바코드 스캔
+
+#### 7.2.2 판매 입력
+- **제품 검색**: 검색창 또는 바코드 스캔
+- **수량 입력**: 숫자 키패드
+- **채널 선택**: 버튼 (온라인/오프라인/라이브)
+- **프로모션 적용**: 자동 또는 수동 선택
+- **저장 버튼**: 큰 버튼 (하단 고정)
+
+#### 7.2.3 입고 처리
+- **입고 대기 목록**: 카드 형태
+- **상세 화면**:
+  - 제품 정보 (이미지, 이름, SKU)
+  - 예상 수량
+  - 실제 수량 입력
+  - 품질 체크: 
+    - 파손 (예/아니오)
+    - 변색 (예/아니오)
+    - 누수 (예/아니오)
+  - 사진 촬영 (이상 발견 시)
+  - 메모
+  - 입고 완료 버튼
+
+#### 7.2.4 재고 조회
+- **검색**: 제품명, SKU, 바코드
+- **결과**:
+  - 제품 이미지
+  - 현재 재고 수량 (크게 표시)
+  - 로트별 수량 (접이식)
+  - 유통기한 (가장 빠른 것)
+  - 안전재고 (색상 표시: 초록/주황/빨강)
+
+#### 7.2.5 알림
+- **푸시 알림**:
+  - 안전재고 미달
+  - 유통기한 임박
+  - 입고 예정
+  - 출고 요청 승인
+- **알림 목록**: 시간순 정렬, 읽음/안읽음 표시
+
+#### 7.2.6 프로필/설정
+- **사용자 정보**: 이름, 이메일, 지사
+- **언어 설정**: 한국어, 베트남어, 중국어
+- **알림 설정**: 푸시 알림 on/off, 알림 유형별 설정
+- **로그아웃**
+
+### 7.3 디자인 가이드라인
+
+#### 7.3.1 컬러 팔레트
+- **Primary**: #2563EB (파랑 - 신뢰, 전문성)
+- **Secondary**: #10B981 (초록 - 성공, 안전)
+- **Accent**: #F59E0B (주황 - 경고, 주의)
+- **Danger**: #EF4444 (빨강 - 위험, 긴급)
+- **Neutral**: #6B7280 (회색 - 텍스트, 배경)
+- **Background**: #F9FAFB (밝은 회색)
+- **White**: #FFFFFF
+
+#### 7.3.2 타이포그래피
+- **폰트**: Pretendard (한글), Noto Sans (베트남어, 중국어)
+- **크기**:
+  - Heading 1: 32px (bold)
+  - Heading 2: 24px (semibold)
+  - Heading 3: 20px (semibold)
+  - Body: 16px (regular)
+  - Caption: 14px (regular)
+  - Small: 12px (regular)
+
+#### 7.3.3 아이콘
+- **스타일**: Heroicons (Outline, Solid)
+- **크기**: 20px, 24px, 32px
+
+#### 7.3.4 반응형
+- **Desktop**: 1280px 이상 (3-column grid)
+- **Tablet**: 768px - 1279px (2-column grid)
+- **Mobile**: 767px 이하 (1-column stack)
+
+---
+
+## 8. 비기능 요구사항
+
+### 8.1 성능
+
+- **응답 시간**:
+  - API 평균 응답: < 200ms
+  - 복잡한 리포트: < 2초
+  - 대시보드 로딩: < 1초
+- **동시 사용자**: 최소 100명 (확장 가능)
+- **데이터 처리**:
+  - 대량 판매 업로드: 10,000건 < 30초
+  - 엑셀 내보내기: 50,000건 < 10초
+- **데이터베이스**:
+  - 쿼리 최적화: 인덱스 필수
+  - 복잡한 집계 쿼리: 머티리얼라이즈드 뷰 사용
+
+### 8.2 확장성
+
+- **수평 확장**: 로드밸런서 + 다중 서버
+- **데이터베이스**: 읽기 복제본 (read replica) 사용
+- **캐싱**: Redis를 통한 자주 조회되는 데이터 캐싱
+  - 제품 마스터
+  - 환율
+  - 사용자 권한
+  - TTL: 5분 - 1시간
+- **CDN**: 이미지 및 정적 파일
+
+### 8.3 보안
+
+#### 8.3.1 인증 및 권한
+- **JWT 토큰**: 
+  - Access Token: 1시간 유효
+  - Refresh Token: 7일 유효
+- **비밀번호**:
+  - 최소 8자 (대소문자, 숫자, 특수문자 포함)
+  - bcrypt 해싱 (cost factor: 12)
+- **2FA**: 관리자 계정 필수 (TOTP)
+- **RBAC**: 역할 기반 접근 제어 철저히 적용
+
+#### 8.3.2 데이터 보호
+- **전송 암호화**: TLS 1.3 (HTTPS)
+- **저장 암호화**:
+  - 비밀번호: bcrypt
+  - 민감 정보 (은행 정보 등): AES-256
+- **데이터베이스**: 
+  - 암호화된 백업
+  - 접근 제어 (화이트리스트 IP)
+
+#### 8.3.3 감사 및 로깅
+- **감사 로그**:
+  - 모든 CRUD 작업
+  - 로그인/로그아웃
+  - 가격 변경
+  - 재고 조정
+  - 권한 변경
+- **보존 기간**: 최소 3년
+- **로그 분석**: ELK 스택 또는 클라우드 로깅
+
+#### 8.3.4 API 보안
+- **Rate Limiting**: 
+  - 인증 전: 10 req/min/IP
+  - 인증 후: 100 req/min/user
+- **Input Validation**: 모든 입력값 검증
+- **SQL Injection 방지**: Prepared Statement
+- **XSS 방지**: 출력 이스케이핑
+- **CSRF 방지**: 토큰 검증
+
+### 8.4 가용성
+
+- **목표**: 99.5% uptime (연간 약 43시간 다운타임 허용)
+- **백업**:
+  - 데이터베이스: 매일 자동 백업 (RPO: 24시간)
+  - 트랜잭션 로그: 1시간마다
+  - 백업 보관: 30일
+- **복구**:
+  - RTO (Recovery Time Objective): 4시간
+  - RPO (Recovery Point Objective): 1시간
+  - 정기 복구 테스트: 분기별
+
+### 8.5 모니터링
+
+- **시스템 모니터링**:
+  - CPU, 메모리, 디스크 사용률
+  - 네트워크 트래픽
+  - 데이터베이스 성능
+- **애플리케이션 모니터링**:
+  - API 응답 시간
+  - 에러율
+  - 동시 접속자 수
+- **비즈니스 모니터링**:
+  - 일별 판매액
+  - 재고 이상 알림 개수
+  - 사용자 활동 (DAU, MAU)
+- **알림**:
+  - Slack/Email/SMS 통합
+  - 심각도별 에스컬레이션
+
+### 8.6 규정 준수
+
+- **GDPR**: 
+  - 사용자 데이터 내보내기
+  - 삭제 요청 처리 (30일 이내)
+  - 동의 관리
+- **개인정보 보호법 (한국)**:
+  - 개인정보 처리방침 명시
+  - 최소 수집 원칙
+  - 보관 기간 명시
+- **국가별 규정**:
+  - 베트남: 데이터 로컬라이제이션 고려
+  - 중국: 사이버보안법 준수
+
+### 8.7 다국어 지원
+
+- **지원 언어**: 
+  - 한국어 (ko)
+  - 베트남어 (vi)
+  - 중국어 간체 (zh-CN)
+- **번역 관리**:
+  - i18n 라이브러리 사용
+  - JSON 기반 번역 파일
+  - 번역 관리 도구 (Lokalise, Crowdin 등)
+- **RTL 지원**: 향후 아랍어 지원 시 대비
+
+### 8.8 접근성
+
+- **WCAG 2.1 AA 준수**:
+  - 키보드 네비게이션
+  - 스크린 리더 지원
+  - 색상 대비 4.5:1 이상
+  - 대체 텍스트 (이미지, 아이콘)
+
+---
+
+## 9. 기술 스택 권장사항
+
+### 9.1 백엔드
+
+**프레임워크**: 
+- **Option A**: Node.js + NestJS (TypeScript)
+  - 장점: 빠른 개발, 풍부한 생태계, TypeScript 타입 안정성
+  - 추천 라이브러리: TypeORM, Passport, Bull
+- **Option B**: Python + Django + Django REST Framework
+  - 장점: 관리자 패널 내장, ORM 강력, 데이터 분석 라이브러리 풍부
+  - 추천 라이브러리: Celery, Pandas
+
+**데이터베이스**:
+- **Primary**: PostgreSQL 14+
+  - JSONB 컬럼 활용 (유연한 데이터 구조)
+  - Partial Index, GiST Index 활용
+  - Materialized View (리포트 성능)
+- **Cache**: Redis 7+
+  - 세션 관리
+  - 빈번한 조회 데이터 캐싱
+  - Rate Limiting
+
+**메시지 큐**:
+- **Redis + BullMQ** (Node.js) 또는 **Celery** (Python)
+  - 환율 자동 업데이트
+  - 대량 데이터 처리 (엑셀 업로드, 리포트 생성)
+  - 이메일/푸시 알림 발송
+  - 재고 알림 배치
+
+**파일 저장**:
+- **AWS S3** 또는 **Google Cloud Storage**
+  - 제품 이미지
+  - 인증서 파일
+  - 엑셀 업로드/다운로드 파일
+  - 리포트 PDF
+
+### 9.2 프론트엔드
+
+**웹**:
+- **React 18** + **TypeScript**
+- **상태 관리**: Zustand 또는 Redux Toolkit
+- **UI 라이브러리**: 
+  - **Option A**: shadcn/ui (Radix UI 기반, Tailwind)
+  - **Option B**: Material-UI
+- **차트**: Recharts 또는 Chart.js
+- **테이블**: TanStack Table (React Table v8)
+- **폼**: React Hook Form + Zod (유효성 검사)
+- **빌드 도구**: Vite
+
+**모바일**:
+- **React Native** + **TypeScript**
+- **네비게이션**: React Navigation
+- **상태 관리**: Zustand
+- **UI**: React Native Paper 또는 NativeBase
+- **카메라**: react-native-camera (바코드 스캔)
+
+### 9.3 인증
+
+- **Keycloak** (오픈소스 IAM)
+  - SSO 지원
+  - OAuth2, OIDC
+  - 사용자 관리 UI 내장
+- **대안**: 자체 JWT 구현 + Passport.js
+
+### 9.4 API 문서
+
+- **OpenAPI 3.0** (Swagger)
+- **Redoc** 또는 **Swagger UI**
+- 자동 생성 도구: @nestjs/swagger (NestJS) 또는 drf-yasg (Django)
+
+### 9.5 배포 및 인프라
+
+**컨테이너**:
+- **Docker**
+- **Orchestration**: Kubernetes (프로덕션) 또는 Docker Compose (개발)
+
+**클라우드**:
+- **AWS**:
+  - ECS/EKS (컨테이너)
+  - RDS (PostgreSQL)
+  - ElastiCache (Redis)
+  - S3 (파일 저장)
+  - CloudFront (CDN)
+  - Route 53 (DNS)
+- **대안**: Google Cloud Platform, Azure
+
+**CI/CD**:
+- **GitHub Actions** 또는 **GitLab CI**
+- 파이프라인:
+  - Lint (ESLint, Prettier)
+  - Test (Jest, Pytest)
+  - Build (Docker 이미지)
+  - Deploy (자동 배포)
+
+**모니터링**:
+- **애플리케이션**: Sentry (에러 추적)
+- **인프라**: Prometheus + Grafana
+- **로그**: ELK Stack (Elasticsearch, Logstash, Kibana) 또는 AWS CloudWatch
+
+**알림**:
+- **Slack** 웹훅
+- **Email**: SendGrid, AWS SES
+- **SMS**: Twilio (긴급 알림)
+
+### 9.6 외부 서비스
+
+**환율 API**:
+- **Open Exchange Rates** (유료, 신뢰성 높음)
+- **대안**: Fixer.io, CurrencyLayer
+
+**바코드/QR**:
+- **ZXing** (프론트엔드)
+- **React Native Camera** (모바일)
+
+**PDF 생성**:
+- **Backend**: Puppeteer (Node.js), WeasyPrint (Python)
+- **리포트 디자인**: HTML + CSS → PDF
+
+**엑셀 처리**:
+- **Backend**: ExcelJS (Node.js), openpyxl (Python)
+
+---
+
+## 10. 테스트 전략
+
+### 10.1 단위 테스트
+
+**백엔드**:
+- **프레임워크**: Jest (Node.js), Pytest (Python)
+- **커버리지**: 최소 80%
+- **테스트 대상**:
+  - 비즈니스 로직 (가격 계산, 재고 차감)
+  - 유틸리티 함수
+  - 데이터 검증
+
+**프론트엔드**:
+- **프레임워크**: Jest + React Testing Library
+- **커버리지**: 최소 70%
+- **테스트 대상**:
+  - 컴포넌트 렌더링
+  - 사용자 인터랙션
+  - 상태 관리
+
+### 10.2 통합 테스트
+
+- **API 테스트**: Supertest (Node.js), Django TestCase
+- **데이터베이스 테스트**: 트랜잭션 롤백
+- **테스트 시나리오**:
+  - 제품 등록 → 출고 → 입고 → 판매 (전체 흐름)
+  - 가격 시뮬레이션 → 가격 적용
+  - 프로모션 적용 → 판매
+
+### 10.3 E2E 테스트
+
+- **도구**: Playwright 또는 Cypress
+- **시나리오**:
+  - 사용자 로그인 → 대시보드 조회
+  - 제품 등록 → 가격 시뮬레이션 → 저장
+  - 판매 입력 → 재고 차감 확인
+  - 리포트 생성 → 엑셀 다운로드
+
+### 10.4 성능 테스트
+
+- **도구**: Apache JMeter, k6
+- **시나리오**:
+  - 동시 사용자 100명 (API 부하 테스트)
+  - 대량 데이터 업로드 (10,000건 판매)
+  - 복잡한 리포트 생성
+- **목표**:
+  - 평균 응답 시간 < 200ms
+  - 에러율 < 0.1%
+
+### 10.5 보안 테스트
+
+- **도구**: OWASP ZAP, Burp Suite
+- **체크리스트**:
+  - SQL Injection
+  - XSS
+  - CSRF
+  - 권한 우회
+  - Rate Limiting
+  - 민감 정보 노출
+
+### 10.6 사용자 수용 테스트 (UAT)
+
+- **대상**: 실제 사용자 (본사 관리자, 지사 실무자)
+- **기간**: 최소 2주
+- **체크리스트**:
+  - 모든 MVP 기능 동작 확인
+  - 데이터 정확성 검증
+  - 사용자 경험 피드백
+  - 버그 발견 및 수정
+
+---
+
+## 11. 품질 체크리스트
+
+### 11.1 발주 및 입고 정확성 (신규 추가)
+
+- [ ] 발주서 생성 시 제품 정보 정확성
+- [ ] 발주 수량과 공급처 MOQ 일치 여부
+- [ ] 본사 입고 시 발주 수량 vs 실제 입고 수량 일치
+- [ ] 품질 검사 결과에 따른 재고 처리 (합격/조건부/불합격)
+- [ ] 합격 수량만 본사 재고 증가
+- [ ] 불합격 제품 반품/폐기 처리
+- [ ] 로트/배치 정보 정확히 기록 (제조일, 유통기한)
+- [ ] 본사 입고 후 실제 매입가 확정
+
+### 11.2 데이터 정확성
+
+### 11.2 데이터 정확성
+
+- [ ] 본사 재고 + 지사 재고 입출고 후 수량 일치
+- [ ] 판매 후 재고 정확히 차감
+- [ ] 가격 계산 로직 정확성 (수동 검증과 비교)
+- [ ] 환율 적용 정확성
+- [ ] 마진 계산 정확성 (본사/지사 분배)
+- [ ] 프로모션 할인 적용 정확성
+- [ ] 번들 판매 시 개별 제품 재고 차감
+- [ ] 반품 시 재고 복귀 정확성
+
+### 11.3 동시성 제어
+
+### 11.3 동시성 제어
+
+- [ ] 동일 SKU에 다수 판매 입력 시 재고 음수 방지
+- [ ] 동일 로트에 다수 출고 요청 시 오버커밋 방지
+- [ ] 가격 변경 시 동시 수정 충돌 방지
+- [ ] 재고 조정 시 낙관적 잠금 또는 비관적 잠금
+- [ ] 본사 입고와 출고 동시 발생 시 재고 정합성
+
+### 11.4 유통기한 관리
+
+- [ ] FIFO 자동 적용 (가장 오래된 로트부터 판매)
+- [ ] 유통기한 6개월 이내 알림 발송
+- [ ] 유통기한 3개월 이내 경고 표시
+- [ ] 유통기한 1개월 이내 긴급 알림
+- [ ] 유통기한 지난 제품 자동 폐기 처리 또는 알림
+
+### 11.5 환율 처리
+
+- [ ] 환율 자동 업데이트 (일 1회)
+- [ ] 환율 변동 ±5% 시 알림
+- [ ] 환율 수동 조정 가능
+- [ ] 과거 환율 이력 조회 가능
+- [ ] 가격 시뮬레이션에 환율 시나리오 적용
+
+### 11.6 권한 관리
+
+- [ ] 본사 Admin: 모든 기능 접근
+- [ ] 본사 Viewer: 읽기 전용
+- [ ] 지사 Manager: 해당 지사 데이터만 전체 권한
+- [ ] 지사 Clerk: 입출고/판매 입력만
+- [ ] 타 지사 데이터 접근 차단
+- [ ] 감사 로그에 모든 작업 기록
+
+### 11.7 인증 관리
+
+- [ ] 국가별 인증 정보 관리
+- [ ] 인증 만료 D-30, D-60, D-90 알림
+- [ ] 인증 없는 제품 판매 차단 (옵션)
+- [ ] 인증서 파일 업로드 및 다운로드
+- [ ] 성분 기반 국가별 규제 자동 체크
+
+### 11.8 프로모션
+
+- [ ] 프로모션 기간 자동 적용/종료
+- [ ] 중복 프로모션 적용 규칙
+- [ ] 프로모션 사용 횟수 제한
+- [ ] 프로모션 효과 추적 (매출 증가율)
+- [ ] 번들 할인 자동 계산
+
+### 11.9 리포트 정확성
+
+- [ ] 일별 판매 합계와 개별 판매 합 일치
+- [ ] 본사 재고 + 지사 재고 합계와 입출고 이력 일치
+- [ ] P&L 계산 정확성 (매출 - 원가 - 비용)
+- [ ] 채널별 매출 합계와 전체 매출 일치
+- [ ] 엑셀 내보내기 데이터와 화면 데이터 일치
+- [ ] 공급처별 납품 성과 정확성 (품질, 납기)
+
+### 11.10 성능
+
+- [ ] API 평균 응답 시간 < 200ms
+- [ ] 대시보드 로딩 시간 < 1초
+- [ ] 리포트 생성 시간 < 2초 (일반) / < 10초 (복잡)
+- [ ] 대량 업로드 (10,000건) < 30초
+- [ ] 동시 사용자 100명 안정적 처리
+
+### 11.11 보안
+
+- [ ] HTTPS 적용
+- [ ] JWT 토큰 유효성 검증
+- [ ] 비밀번호 해싱 (bcrypt)
+- [ ] 민감 정보 암호화
+- [ ] SQL Injection 방지
+- [ ] XSS 방지
+- [ ] CSRF 방지
+- [ ] Rate Limiting
+- [ ] 2FA (관리자)
+
+---
+
+## 12. 확장 로드맵
+
+### Phase 1: MVP (개발 기간: 3-4개월)
+
+**Month 1-2**: 핵심 기능 개발
+- 제품 관리 (마스터, 성분, 인증)
+- 원가 및 가격 계산
+- 재고 관리 (로트, 출고, 입고)
+- 판매 입력 (수동, 엑셀)
+- 사용자 및 권한 관리
+
+**Month 3**: 리포트 및 대시보드
+- 대시보드 (요약 지표, 차트)
+- 판매/재고/손익 리포트
+- 가격 시뮬레이터
+
+**Month 4**: QA 및 UAT
+- 단위/통합/E2E 테스트
+- 사용자 수용 테스트
+- 버그 수정 및 최적화
+- 배포 준비
+
+### Phase 2: 초기 확장 (개발 기간: 2-3개월)
+
+**추가 기능**:
+- 바코드/QR 스캔 입출고
+- 모바일 앱 (React Native)
+- POS 통합 (API 연동)
+- 회계 시스템 연동 (전표 생성)
+- 오프라인 입력 후 동기화
+- 고급 프로모션 엔진
+- 채널 자동 정산 (쇼핑몰 API)
+
+### Phase 3: 고도화 (개발 기간: 3-4개월)
+
+**추가 기능**:
+- AI 기반 수요 예측
+- 고급 원가 분석 (ABC costing)
+- 다중 창고 관리
+- CRM 통합
+- 라이브커머스 플랫폼 직접 연동
+- 블록체인 기반 정품 인증
+
+### Phase 4+: 장기 비전
+
+- **글로벌 확장**: 동남아 다른 국가 (태국, 인도네시아, 필리핀)
+- **B2B 포털**: 도매 고객 주문 시스템
+- **제조 연동**: 공장 생산 계획 및 원자재 관리
+- **고객 앱**: 소비자 직접 구매 (D2C)
+- **AI 챗봇**: 고객 문의 자동 응답
+
+---
+
+## 13. 리스크 및 대응 방안
+
+### 13.1 기술적 리스크
+
+| 리스크 | 영향 | 확률 | 대응 방안 |
+|--------|------|------|-----------|
+| 데이터베이스 성능 저하 | 높음 | 중 | 쿼리 최적화, 인덱스 추가, Read Replica |
+| 환율 API 장애 | 중 | 낮음 | 백업 API 사용, 수동 입력 대체 |
+| 동시성 이슈 (재고 음수) | 높음 | 중 | 낙관적 잠금, 트랜잭션 격리 수준 조정 |
+| 대량 데이터 처리 지연 | 중 | 중 | 메시지 큐 사용, 백그라운드 작업 |
+| 클라우드 서비스 장애 | 높음 | 낮음 | 다중 가용 영역, 자동 장애 조치 |
+
+### 13.2 비즈니스 리스크
+
+| 리스크 | 영향 | 확률 | 대응 방안 |
+|--------|------|------|-----------|
+| 사용자 교육 부족 | 중 | 높음 | 사용자 매뉴얼, 교육 세션, 온보딩 가이드 |
+| 데이터 마이그레이션 오류 | 높음 | 중 | 단계적 마이그레이션, 검증 프로세스 |
+| 국가별 규제 변경 | 중 | 중 | 유연한 설정, 정기 법규 모니터링 |
+| 환율 급변 | 중 | 중 | 환율 헤지, 가격 자동 조정 규칙 |
+| 유통기한 관리 실패 | 높음 | 낮음 | 다단계 알림, 자동 폐기 처리 |
+| 공장 납품 지연 | 중 | 중 | 다중 공급처 확보, 안전재고 확대, 리드 타임 버퍼 |
+| 공장 품질 불량 | 높음 | 중 | 엄격한 품질 검사, 공급처 평가, 페널티 조항 |
+| 발주 오류 (수량/제품) | 중 | 중 | 승인 프로세스, 발주 전 재고 확인, 수요 예측 |
+
+### 13.3 보안 리스크
+
+| 리스크 | 영향 | 확률 | 대응 방안 |
+|--------|------|------|-----------|
+| 데이터 유출 | 매우 높음 | 낮음 | 암호화, 접근 제어, 정기 보안 감사 |
+| 권한 우회 | 높음 | 낮음 | RBAC 철저히 적용, 감사 로그 |
+| DDoS 공격 | 중 | 중 | Rate Limiting, CDN, WAF |
+| 내부자 위협 | 높음 | 낮음 | 최소 권한 원칙, 감사 로그, 2FA |
+
+---
+
+## 14. 성공 지표 (KPI)
+
+### 14.1 시스템 지표
+
+- **가동률**: 99.5% 이상
+- **평균 응답 시간**: < 200ms
+- **에러율**: < 0.1%
+- **동시 사용자**: 100명 이상 안정 처리
+
+### 14.2 운영 지표
+
+- **재고 정확도**: 99% 이상 (실사 시)
+- **가격 계산 정확도**: 100% (수동 검증과 비교)
+- **유통기한 알림 적시성**: 100% (알림 미스 없음)
+- **본사 입고 처리 시간**: 평균 30분 이내 (품질 검사 포함)
+- **지사 입고 처리 시간**: 평균 10분 이내
+- **판매 입력 시간**: 평균 2분 이내 (제품 1개)
+- **공급처 납기 준수율**: 90% 이상
+- **공급처 품질 합격률**: 95% 이상
+
+### 14.3 비즈니스 지표
+
+- **사용자 만족도**: NPS 50 이상
+- **일별 활성 사용자**: 목표 80% 이상
+- **리포트 생성 횟수**: 주 10회 이상 (의사결정 활용도)
+- **재고 회전율 개선**: 기존 대비 20% 향상
+- **가격 조정 주기**: 월 1회 이상 (데이터 기반 의사결정)
+- **발주 정확도**: 95% 이상 (오발주율 5% 이하)
+- **재고 부족 발생률**: 5% 이하 (안전재고 관리)
+
+### 14.4 ROI 지표
+
+- **재고 감소**: 과잉 재고 30% 감소 (안전재고 최적화)
+- **폐기 비용 절감**: 유통기한 관리로 20% 절감
+- **마진 개선**: 정확한 원가 계산으로 마진 5% 개선
+- **업무 시간 절감**: 수작업 대비 50% 시간 절약
+- **발주 오류 감소**: 시스템화로 오발주 70% 감소
+- **품질 불량 감소**: 체계적 검사로 불량률 30% 감소
+
+---
+
+## 15. 부록
+
+### 15.1 용어 정의
+
+- **SKU**: Stock Keeping Unit (재고 관리 단위)
+- **로트**: 동일 제조일/조건으로 생산된 제품 그룹
+- **FIFO**: First In First Out (선입선출)
+- **Landed Cost**: 제품이 최종 목적지에 도착하기까지의 총 비용
+- **HS Code**: Harmonized System Code (관세 분류 코드)
+- **NMPA**: 중국 국가약품감독관리국 (화장품 인증 기관)
+- **MOH**: Ministry of Health (베트남 보건부)
+- **INCI**: International Nomenclature of Cosmetic Ingredients (화장품 성분 국제 명칭)
+- **CAS Number**: Chemical Abstracts Service Registry Number (화학물질 고유 번호)
+- **VAT**: Value Added Tax (부가가치세)
+- **2FA**: Two-Factor Authentication (이중 인증)
+- **RBAC**: Role-Based Access Control (역할 기반 접근 제어)
+
+### 15.2 참고 자료
+
+- PostgreSQL 공식 문서: https://www.postgresql.org/docs/
+- NestJS 공식 문서: https://docs.nestjs.com/
+- React 공식 문서: https://react.dev/
+- Open Exchange Rates API: https://openexchangerates.org/
+- 한국 식약처 화장품 안전정보: https://www.mfds.go.kr/
+- 중국 NMPA: http://english.nmpa.gov.cn/
+- 베트남 화장품 규정: Ministry of Health 웹사이트
+
+### 15.3 문의처
+
+- **프로젝트 매니저**: [이름], [이메일]
+- **기술 리드**: [이름], [이메일]
+- **비즈니스 담당**: [이름], [이메일]
+
+---
+
+**문서 승인**:
+
+- [ ] 프로젝트 스폰서
+- [ ] 제품 책임자
+- [ ] 기술 리드
+- [ ] 사용자 대표 (본사)
+- [ ] 사용자 대표 (베트남 지사)
+- [ ] 사용자 대표 (중국 지사)
+
+---
+
+**문서 이력**:
+
+| 버전 | 날짜 | 작성자 | 변경 내용 |
+|------|------|--------|-----------|
+| 1.0 | 2025-10-28 | Claude | 초안 작성 |
+|  |  |  |  |
+|  |  |  |  |
+
+---
+
+**다음 단계**:
+
+1. ✅ PRD 검토 및 승인
+2. ⏭️ 기술 스택 최종 결정
+3. ⏭️ 개발 팀 구성
+4. ⏭️ 프로젝트 일정 수립
+5. ⏭️ 디자인 시안 작성
+6. ⏭️ MVP 개발 착수
