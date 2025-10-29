@@ -18,15 +18,20 @@ export default async function DashboardLayout({
   }
 
   // Fetch user data from public.users table
-  const { data: userData } = await supabase
+  const { data: userData, error: userError } = await supabase
     .from("users")
     .select("*")
     .eq("id", user.id)
     .single()
 
+  console.log('[DASHBOARD LAYOUT] User ID:', user.id)
+  console.log('[DASHBOARD LAYOUT] User data:', userData)
+  console.log('[DASHBOARD LAYOUT] Error:', userError)
+
   if (!userData) {
     // User exists in auth but not in public.users table
     // For now, redirect to login. In production, you might want to handle this differently
+    console.log('[DASHBOARD LAYOUT] No user data found, redirecting to /login')
     redirect("/login")
   }
 
