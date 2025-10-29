@@ -33,8 +33,8 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        router.push("/dashboard")
-        router.refresh()
+        // 로그인 성공 시 페이지 새로고침으로 인증 상태 업데이트
+        window.location.href = '/dashboard'
       }
     } catch (err) {
       setError("An unexpected error occurred")
