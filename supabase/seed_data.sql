@@ -16,7 +16,7 @@
 -- 1. SUPPLIERS (공급업체) - 5개
 -- ============================================================
 
-INSERT INTO public.suppliers (id, name, contact_person, phone, email, address, country, notes)
+INSERT INTO public.suppliers (id, name, contact_person, phone, email, address, notes)
 VALUES
   (
     'a1b2c3d4-0001-0001-0001-000000000001',
@@ -24,8 +24,7 @@ VALUES
     'Kim Min-ji',
     '+82-2-1234-5678',
     'sales@seoulbeauty.kr',
-    '123 Gangnam-daero, Gangnam-gu, Seoul',
-    'South Korea',
+    '123 Gangnam-daero, Gangnam-gu, Seoul, South Korea',
     'Premium skincare manufacturer with 20+ years experience'
   ),
   (
@@ -34,8 +33,7 @@ VALUES
     'Park Ji-hoon',
     '+82-64-987-6543',
     'info@jejunatural.com',
-    '456 Hallasan-ro, Jeju-si, Jeju',
-    'South Korea',
+    '456 Hallasan-ro, Jeju-si, Jeju, South Korea',
     'Natural ingredients from Jeju Island. Certified organic.'
   ),
   (
@@ -44,18 +42,16 @@ VALUES
     'Lee Soo-jin',
     '+82-31-555-8888',
     'contact@kbeautylabs.kr',
-    '789 Innovation-ro, Bundang-gu, Seongnam',
-    'South Korea',
+    '789 Innovation-ro, Bundang-gu, Seongnam, South Korea',
     'Innovative K-beauty formulations. Strong R&D team.'
   ),
   (
     'a1b2c3d4-0004-0004-0004-000000000004',
     'Busan Marine Skincare',
-    '+82-51-222-3333',
     'Choi Hyun-woo',
+    '+82-51-222-3333',
     'export@busanmarine.co.kr',
-    '321 Haeundae-ro, Haeundae-gu, Busan',
-    'South Korea',
+    '321 Haeundae-ro, Haeundae-gu, Busan, South Korea',
     'Marine collagen and seaweed-based products'
   ),
   (
@@ -64,8 +60,7 @@ VALUES
     'Jung Yeon-hee',
     '+82-2-777-9999',
     'sales@hanbokherbal.com',
-    '567 Insadong-gil, Jongno-gu, Seoul',
-    'South Korea',
+    '567 Insadong-gil, Jongno-gu, Seoul, South Korea',
     'Traditional Korean herbal cosmetics. Hanbang formulas.'
   );
 
