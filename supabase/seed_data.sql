@@ -262,7 +262,7 @@ VALUES
 -- 3. EXCHANGE_RATES (환율) - 현재 기준
 -- ============================================================
 
-INSERT INTO public.exchange_rates (id, from_currency, to_currency, rate, effective_date, notes)
+INSERT INTO public.exchange_rates (id, from_currency, to_currency, rate, effective_date)
 VALUES
   -- KRW → VND
   (
@@ -270,8 +270,7 @@ VALUES
     'KRW',
     'VND',
     18.50,
-    '2025-10-01',
-    'Korea Won to Vietnamese Dong - October 2025 rate'
+    '2025-10-01'
   ),
   -- KRW → CNY
   (
@@ -279,8 +278,7 @@ VALUES
     'KRW',
     'CNY',
     0.0052,
-    '2025-10-01',
-    'Korea Won to Chinese Yuan - October 2025 rate'
+    '2025-10-01'
   ),
   -- VND → KRW (역환율)
   (
@@ -288,8 +286,7 @@ VALUES
     'VND',
     'KRW',
     0.054,
-    '2025-10-01',
-    'Vietnamese Dong to Korea Won - October 2025 rate'
+    '2025-10-01'
   ),
   -- CNY → KRW (역환율)
   (
@@ -297,8 +294,7 @@ VALUES
     'CNY',
     'KRW',
     192.31,
-    '2025-10-01',
-    'Chinese Yuan to Korea Won - October 2025 rate'
+    '2025-10-01'
   );
 
 -- ============================================================
@@ -306,10 +302,11 @@ VALUES
 -- ============================================================
 
 -- Vietnam Branch 가격 설정 (10개 제품)
-INSERT INTO public.pricing_configs (id, product_id, to_location_id, purchase_price, transfer_cost, hq_margin_percent, branch_margin_percent, exchange_rate, local_cost, final_price, currency, notes)
+INSERT INTO public.pricing_configs (id, product_id, from_location_id, to_location_id, purchase_price, transfer_cost, hq_margin_percent, branch_margin_percent, exchange_rate, final_price, currency)
 SELECT
   gen_random_uuid(),
   p.id,
+  (SELECT id FROM locations WHERE location_type = 'HQ' LIMIT 1),
   (SELECT id FROM locations WHERE location_type = 'Branch' AND country = 'Vietnam' LIMIT 1),
   CASE p.sku
     WHEN 'SKN-HYA-SRM-100' THEN 25000  -- KRW
@@ -328,18 +325,6 @@ SELECT
   30.0,   -- branch_margin_percent
   18.50,  -- exchange_rate (KRW to VND)
   CASE p.sku
-    WHEN 'SKN-HYA-SRM-100' THEN 1459   -- (25000 + 2000) / 18.5 = 1459 VND
-    WHEN 'SKN-VTC-CRM-50' THEN 2000
-    WHEN 'SKN-SNL-MSK-10' THEN 919
-    WHEN 'SKN-GRN-CLN-150' THEN 757
-    WHEN 'SKN-RET-SRM-30' THEN 2541
-    WHEN 'MKP-CSH-21' THEN 1622
-    WHEN 'MKP-LIP-RD01' THEN 1081
-    WHEN 'MKP-MSC-BLK' THEN 919
-    WHEN 'HAR-RPR-SHP-500' THEN 1189
-    WHEN 'BDY-LOT-CHR-300' THEN 973
-  END,
-  CASE p.sku
     WHEN 'SKN-HYA-SRM-100' THEN 2400   -- Final price (rounded)
     WHEN 'SKN-VTC-CRM-50' THEN 3300
     WHEN 'SKN-SNL-MSK-10' THEN 1500
@@ -351,8 +336,7 @@ SELECT
     WHEN 'HAR-RPR-SHP-500' THEN 2000
     WHEN 'BDY-LOT-CHR-300' THEN 1600
   END,
-  'VND',
-  'Vietnam branch pricing - Q4 2025'
+  'VND'
 FROM products p
 WHERE p.sku IN (
   'SKN-HYA-SRM-100', 'SKN-VTC-CRM-50', 'SKN-SNL-MSK-10', 'SKN-GRN-CLN-150', 'SKN-RET-SRM-30',
@@ -361,10 +345,11 @@ WHERE p.sku IN (
 );
 
 -- China Branch 가격 설정 (5개 주요 제품)
-INSERT INTO public.pricing_configs (id, product_id, to_location_id, purchase_price, transfer_cost, hq_margin_percent, branch_margin_percent, exchange_rate, local_cost, final_price, currency, notes)
+INSERT INTO public.pricing_configs (id, product_id, from_location_id, to_location_id, purchase_price, transfer_cost, hq_margin_percent, branch_margin_percent, exchange_rate, final_price, currency)
 SELECT
   gen_random_uuid(),
   p.id,
+  (SELECT id FROM locations WHERE location_type = 'HQ' LIMIT 1),
   (SELECT id FROM locations WHERE location_type = 'Branch' AND country = 'China' LIMIT 1),
   CASE p.sku
     WHEN 'SKN-HYA-SRM-100' THEN 25000
@@ -378,21 +363,13 @@ SELECT
   35.0,   -- China has higher margin
   0.0052, -- exchange_rate (KRW to CNY)
   CASE p.sku
-    WHEN 'SKN-HYA-SRM-100' THEN 140.4   -- (25000 + 2000) * 0.0052 = 140.4 CNY
-    WHEN 'SKN-VTC-CRM-50' THEN 192.4
-    WHEN 'MKP-CSH-21' THEN 156.0
-    WHEN 'MKP-LIP-RD01' THEN 104.0
-    WHEN 'HAR-RPR-SHP-500' THEN 114.4
-  END,
-  CASE p.sku
     WHEN 'SKN-HYA-SRM-100' THEN 250.00   -- Final price
     WHEN 'SKN-VTC-CRM-50' THEN 340.00
     WHEN 'MKP-CSH-21' THEN 280.00
     WHEN 'MKP-LIP-RD01' THEN 185.00
     WHEN 'HAR-RPR-SHP-500' THEN 205.00
   END,
-  'CNY',
-  'China branch pricing - Q4 2025'
+  'CNY'
 FROM products p
 WHERE p.sku IN (
   'SKN-HYA-SRM-100', 'SKN-VTC-CRM-50',
