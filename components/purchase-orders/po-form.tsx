@@ -17,9 +17,24 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import { Plus, Trash2 } from 'lucide-react'
 
+interface SupplierProduct {
+  supplier_id: string
+  product_id: string
+  unit_price: number
+  lead_time_days: number
+  minimum_order_qty: number
+  is_primary_supplier: boolean
+  products: {
+    id: string
+    sku: string
+    name: string
+    unit: string
+  }
+}
+
 interface POFormProps {
   suppliers: Array<{ id: string; name: string }>
-  products: Array<{ id: string; sku: string; name: string; unit: string }>
+  supplierProducts: SupplierProduct[]
   mode: 'create' | 'edit'
 }
 
@@ -29,7 +44,7 @@ interface POItem {
   unit_price: number
 }
 
-export function POForm({ suppliers, products, mode }: POFormProps) {
+export function POForm({ suppliers, supplierProducts, mode }: POFormProps) {
   const [formData, setFormData] = useState({
     po_no: `PO-${Date.now()}`,
     supplier_id: '',
@@ -42,6 +57,30 @@ export function POForm({ suppliers, products, mode }: POFormProps) {
   const { toast } = useToast()
   const supabase = createClient()
 
+  // 선택된 supplier의 제품만 필터링
+  const getAvailableProducts = () => {
+    if (!formData.supplier_id) {
+      return []
+    }
+    return supplierProducts
+      .filter((sp) => sp.supplier_id === formData.supplier_id)
+      .map((sp) => ({
+        id: sp.products.id,
+        sku: sp.products.sku,
+        name: sp.products.name,
+        unit: sp.products.unit,
+        unit_price: sp.unit_price,
+        minimum_order_qty: sp.minimum_order_qty,
+      }))
+  }
+
+  // supplier 변경 시 items 초기화
+  const handleSupplierChange = (supplierId: string) => {
+    setFormData({ ...formData, supplier_id: supplierId })
+    // 기존 아이템 초기화
+    setItems([{ product_id: '', qty: 1, unit_price: 0 }])
+  }
+
   const addItem = () => {
     setItems([...items, { product_id: '', qty: 1, unit_price: 0 }])
   }
@@ -53,6 +92,21 @@ export function POForm({ suppliers, products, mode }: POFormProps) {
   const updateItem = (index: number, field: keyof POItem, value: any) => {
     const newItems = [...items]
     newItems[index] = { ...newItems[index], [field]: value }
+
+    // 제품 선택 시 자동으로 단가 입력
+    if (field === 'product_id' && value) {
+      const supplierProduct = supplierProducts.find(
+        (sp) => sp.supplier_id === formData.supplier_id && sp.products.id === value
+      )
+      if (supplierProduct) {
+        newItems[index].unit_price = supplierProduct.unit_price
+        // MOQ 이상으로 수량 설정
+        if (newItems[index].qty < supplierProduct.minimum_order_qty) {
+          newItems[index].qty = supplierProduct.minimum_order_qty
+        }
+      }
+    }
+
     setItems(newItems)
   }
 
@@ -100,13 +154,13 @@ export function POForm({ suppliers, products, mode }: POFormProps) {
       if (poError) throw poError
 
       // PO 아이템 생성
+      // Note: total_price는 GENERATED COLUMN이므로 명시적으로 전송하지 않음
       const { error: itemsError } = await supabase.from('purchase_order_items').insert(
         items.map((item) => ({
           po_id: po.id,
           product_id: item.product_id,
           qty: item.qty,
           unit_price: item.unit_price,
-          total_price: item.qty * item.unit_price,
         }))
       )
 
@@ -126,10 +180,7 @@ export function POForm({ suppliers, products, mode }: POFormProps) {
     }
   }
 
-  const getProductDisplay = (productId: string) => {
-    const product = products.find((p) => p.id === productId)
-    return product ? `${product.sku} - ${product.name} (${product.unit})` : ''
-  }
+  const availableProducts = getAvailableProducts()
 
   return (
     <Card>
@@ -163,10 +214,7 @@ export function POForm({ suppliers, products, mode }: POFormProps) {
 
           <div>
             <Label htmlFor="supplier_id">Supplier *</Label>
-            <Select
-              value={formData.supplier_id}
-              onValueChange={(value) => setFormData({ ...formData, supplier_id: value })}
-            >
+            <Select value={formData.supplier_id} onValueChange={handleSupplierChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Select supplier" />
               </SelectTrigger>
@@ -178,6 +226,11 @@ export function POForm({ suppliers, products, mode }: POFormProps) {
                 ))}
               </SelectContent>
             </Select>
+            {formData.supplier_id && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {availableProducts.length} products available from this supplier
+              </p>
+            )}
           </div>
 
           {/* PO 아이템 */}
@@ -198,14 +251,22 @@ export function POForm({ suppliers, products, mode }: POFormProps) {
                     <Select
                       value={item.product_id}
                       onValueChange={(value) => updateItem(index, 'product_id', value)}
+                      disabled={!formData.supplier_id}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select product" />
+                        <SelectValue
+                          placeholder={
+                            formData.supplier_id
+                              ? 'Select product'
+                              : 'Select supplier first'
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
-                        {products.map((product) => (
+                        {availableProducts.map((product) => (
                           <SelectItem key={product.id} value={product.id}>
-                            {product.sku} - {product.name} ({product.unit})
+                            {product.sku} - {product.name} ({product.unit}) - MOQ:{' '}
+                            {product.minimum_order_qty}
                           </SelectItem>
                         ))}
                       </SelectContent>

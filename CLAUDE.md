@@ -55,18 +55,44 @@ Two requirement documents exist in `docs/`:
 
 ## Data Architecture
 
-### Core Tables (MVP - 10 tables)
+### Core Tables (MVP - 11 tables)
 
 1. **users** - Authentication and role-based access (HQ_Admin, Branch_Manager)
 2. **locations** - HQ and branch locations (Korea HQ, Vietnam Branch, China Branch)
 3. **suppliers** - Factory/supplier information
 4. **products** - Product master data (SKU, name, category, shelf life)
-5. **purchase_orders** - Purchase orders to factories
-6. **purchase_order_items** - Line items for purchase orders
-7. **stock_batches** - Inventory by location and batch with FIFO tracking
-8. **pricing_configs** - Price calculation parameters by product and destination
-9. **sales** - Sales transactions by branch
-10. **exchange_rates** - Currency conversion rates (manual entry in MVP)
+5. **supplier_products** - Junction table: which supplier provides which products (many-to-many)
+6. **purchase_orders** - Purchase orders to factories
+7. **purchase_order_items** - Line items for purchase orders
+8. **stock_batches** - Inventory by location and batch with FIFO tracking
+9. **pricing_configs** - Price calculation parameters by product and destination
+10. **sales** - Sales transactions by branch
+11. **exchange_rates** - Currency conversion rates (manual entry in MVP)
+
+### Supplier-Product Relationship
+
+**Design Pattern:** Many-to-Many relationship via `supplier_products` junction table
+
+**Why needed:**
+- One supplier can provide multiple products
+- One product can be supplied by multiple suppliers (alternative suppliers)
+- Track supplier-specific pricing, lead times, and minimum order quantities
+- Filter products in PO creation based on selected supplier
+
+**Key fields in `supplier_products`:**
+- `unit_price` - Supplier's price for this product (in KRW)
+- `lead_time_days` - Days from order to delivery
+- `minimum_order_qty` - Minimum order quantity (MOQ)
+- `is_primary_supplier` - Preferred supplier flag
+- `is_active` - Whether we can currently order from this supplier
+
+**Example:**
+```
+Seoul Beauty (Supplier) → supplies → [Serum, Cream, Cleanser]
+Jeju Natural (Supplier) → supplies → [Cleanser, Body Lotion]  // Cleanser has 2 suppliers!
+```
+
+See [docs/database_design/supplier_products_relationship.md](docs/database_design/supplier_products_relationship.md) for detailed implementation guide.
 
 ### Price Calculation Formula (Simplified MVP)
 
@@ -90,13 +116,17 @@ Example:
 ## Key Business Workflows
 
 ### 1. Factory Purchase → HQ Receiving
-1. Create purchase order (PO) for supplier with products, quantities, unit prices
-2. Approve PO (Draft → Approved)
-3. Receive goods at HQ warehouse
+1. **Select Supplier** - Choose supplier from list
+2. **Add Products** - System shows only products from selected supplier (via `supplier_products` table)
+   - Unit price auto-filled from supplier's price
+   - MOQ and lead time displayed as reference
+3. **Create PO** - Draft purchase order with items
+4. **Approve PO** - Change status (Draft → Approved)
+5. **Receive Goods** at HQ warehouse
    - Verify quantities
    - Simple quality approval (Pass/Fail)
    - Enter batch number, manufacture date, expiry date
-   - **HQ stock auto-increments**
+   - **HQ stock auto-increments** (creates `stock_batches` record)
 
 ### 2. HQ → Branch Transfer
 1. Create transfer from HQ to branch (Vietnam or China)
@@ -179,6 +209,21 @@ Example:
 ### Key Endpoints
 
 ```
+GET /api/v1/suppliers/:supplierId/products
+  - Get products that a specific supplier can provide
+  - Returns products with supplier-specific pricing, MOQ, lead time
+  - Used in PO creation to filter product list
+
+GET /api/v1/products/:productId/suppliers
+  - Get all suppliers who can provide a specific product
+  - Sorted by is_primary_supplier first, then by price
+  - Used for supplier comparison and alternative supplier selection
+
+POST /api/v1/purchase-orders
+  - Create new purchase order
+  - Validates that all products belong to selected supplier
+  - Auto-fills unit prices from supplier_products table
+
 POST /api/v1/purchase-orders/{id}/receive
   - Receives goods at HQ
   - Creates stock_batches records

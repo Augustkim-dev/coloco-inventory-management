@@ -26,21 +26,40 @@ export default async function NewPOPage() {
     redirect('/dashboard')
   }
 
-  // 공급업체 및 제품 목록 조회
+  // 공급업체 목록 조회
   const { data: suppliers } = await supabase
     .from('suppliers')
     .select('id, name')
     .order('name')
 
-  const { data: products } = await supabase
-    .from('products')
-    .select('id, sku, name, unit')
-    .order('sku')
+  // 공급업체-제품 관계 조회 (supplier_products 테이블에서)
+  const { data: supplierProducts } = await supabase
+    .from('supplier_products')
+    .select(`
+      supplier_id,
+      product_id,
+      unit_price,
+      lead_time_days,
+      minimum_order_qty,
+      is_primary_supplier,
+      products (
+        id,
+        sku,
+        name,
+        unit
+      )
+    `)
+    .eq('is_active', true)
+    .order('supplier_id')
 
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Create Purchase Order</h1>
-      <POForm suppliers={suppliers || []} products={products || []} mode="create" />
+      <POForm
+        suppliers={suppliers || []}
+        supplierProducts={supplierProducts || []}
+        mode="create"
+      />
     </div>
   )
 }
