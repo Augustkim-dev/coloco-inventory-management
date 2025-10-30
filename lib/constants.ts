@@ -10,6 +10,7 @@ import {
   MapPin,
   DollarSign,
   Calculator,
+  FileText,
 } from "lucide-react"
 
 export const navItems: NavItem[] = [
@@ -65,6 +66,12 @@ export const navItems: NavItem[] = [
     title: "Sales",
     href: "/sales",
     icon: TrendingUp,
+    roles: ["HQ_Admin", "Branch_Manager"],
+  },
+  {
+    title: "Reports",
+    href: "/reports",
+    icon: FileText,
     roles: ["HQ_Admin", "Branch_Manager"],
   },
   {

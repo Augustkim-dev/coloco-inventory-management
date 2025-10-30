@@ -1,18 +1,95 @@
 import { createClient } from "@/lib/supabase/server"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { DashboardStats } from "@/components/dashboard/dashboard-stats"
+import { ExpiryWarnings } from "@/components/dashboard/expiry-warnings"
+import { RecentSales } from "@/components/dashboard/recent-sales"
 
 export default async function DashboardPage() {
   const supabase = await createClient()
 
+  // Get current user information
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const { data: userData } = await supabase
+  const { data: profile } = await supabase
     .from("users")
-    .select("*")
+    .select("role, location_id")
     .eq("id", user?.id)
     .single()
+
+  // Get today's sales
+  const today = new Date().toISOString().split('T')[0]
+  let salesQuery = supabase
+    .from('sales')
+    .select('total_amount, currency')
+    .eq('sale_date', today)
+
+  if (profile?.role === 'Branch_Manager') {
+    salesQuery = salesQuery.eq('location_id', profile.location_id)
+  }
+
+  const { data: todaySales } = await salesQuery
+
+  // Get stock value
+  let stockQuery = supabase
+    .from('stock_batches')
+    .select(`
+      qty_on_hand,
+      unit_cost,
+      location:locations(name, currency)
+    `)
+    .eq('quality_status', 'OK')
+    .gt('qty_on_hand', 0)
+
+  if (profile?.role === 'Branch_Manager') {
+    stockQuery = stockQuery.eq('location_id', profile.location_id)
+  }
+
+  const { data: stockBatches } = await stockQuery
+
+  // Get expiry warnings (within 3 months)
+  const threeMonthsLater = new Date()
+  threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3)
+
+  let expiryQuery = supabase
+    .from('stock_batches')
+    .select(`
+      *,
+      product:products(sku, name, unit),
+      location:locations(name)
+    `)
+    .eq('quality_status', 'OK')
+    .gt('qty_on_hand', 0)
+    .lte('expiry_date', threeMonthsLater.toISOString().split('T')[0])
+    .order('expiry_date', { ascending: true })
+
+  if (profile?.role === 'Branch_Manager') {
+    expiryQuery = expiryQuery.eq('location_id', profile.location_id)
+  }
+
+  const { data: expiringStock } = await expiryQuery
+
+  // Get recent sales (last 7 days)
+  const sevenDaysAgo = new Date()
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+  let recentSalesQuery = supabase
+    .from('sales')
+    .select(`
+      *,
+      product:products(sku, name),
+      location:locations(name)
+    `)
+    .gte('sale_date', sevenDaysAgo.toISOString().split('T')[0])
+    .order('sale_date', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(10)
+
+  if (profile?.role === 'Branch_Manager') {
+    recentSalesQuery = recentSalesQuery.eq('location_id', profile.location_id)
+  }
+
+  const { data: recentSales } = await recentSalesQuery
 
   return (
     <div className="space-y-6">
@@ -23,68 +100,16 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Welcome</CardTitle>
-            <CardDescription>You are logged in as</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <p className="text-sm">
-                <span className="font-medium">Name:</span> {userData?.name}
-              </p>
-              <p className="text-sm">
-                <span className="font-medium">Email:</span> {userData?.email}
-              </p>
-              <p className="text-sm">
-                <span className="font-medium">Role:</span>{" "}
-                {userData?.role.replace("_", " ")}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+      <DashboardStats
+        todaySales={todaySales || []}
+        stockBatches={stockBatches || []}
+        userRole={profile?.role || 'HQ_Admin'}
+      />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Stats</CardTitle>
-            <CardDescription>System overview</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Statistics will be available after Phase 02 implementation
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Latest updates</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Activity tracking will be available in future phases
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ExpiryWarnings expiringStock={expiringStock || []} />
+        <RecentSales recentSales={recentSales || []} />
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Getting Started</CardTitle>
-          <CardDescription>Next steps to set up your system</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Set up locations (HQ and branches) - Phase 02</li>
-            <li>Add suppliers and products - Phase 02</li>
-            <li>Create purchase orders - Phase 03-04</li>
-            <li>Manage inventory and transfers - Phase 05-06</li>
-            <li>Record sales transactions - Phase 05-06</li>
-          </ol>
-        </CardContent>
-      </Card>
     </div>
   )
 }
