@@ -7,7 +7,11 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Currency formatting
-export function formatCurrency(amount: number, currency: Currency): string {
+export function formatCurrency(amount: number | null | undefined, currency: Currency | null | undefined): string {
+  if (amount === null || amount === undefined || currency === null || currency === undefined) {
+    return '-'
+  }
+
   const decimals = currency === 'CNY' ? 2 : 0
 
   return `${amount.toLocaleString('en-US', {
