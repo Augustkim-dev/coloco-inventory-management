@@ -84,11 +84,11 @@ export const PRODUCT_CATEGORIES = [
   { value: 'fragrance', label: 'Fragrance' },
 ] as const
 
-// Currency symbols
+// Currency symbols (kept for backward compatibility, but using 3-letter codes now)
 export const CURRENCY_SYMBOLS: Record<Currency, string> = {
-  KRW: '₩',
-  VND: '₫',
-  CNY: '¥',
+  KRW: 'KRW',
+  VND: 'VND',
+  CNY: 'CNY',
 }
 
 // Location type options
@@ -99,7 +99,7 @@ export const LOCATION_TYPES = [
 
 // Currency options
 export const CURRENCIES = [
-  { value: 'KRW', label: 'KRW (₩)' },
-  { value: 'VND', label: 'VND (₫)' },
-  { value: 'CNY', label: 'CNY (¥)' },
+  { value: 'KRW', label: 'KRW (Korean Won)' },
+  { value: 'VND', label: 'VND (Vietnamese Dong)' },
+  { value: 'CNY', label: 'CNY (Chinese Yuan)' },
 ] as const

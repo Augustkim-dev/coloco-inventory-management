@@ -8,18 +8,12 @@ export function cn(...inputs: ClassValue[]) {
 
 // Currency formatting
 export function formatCurrency(amount: number, currency: Currency): string {
-  const symbols: Record<Currency, string> = {
-    KRW: '₩',
-    VND: '₫',
-    CNY: '¥',
-  }
-
   const decimals = currency === 'CNY' ? 2 : 0
 
-  return `${symbols[currency]}${amount.toLocaleString('en-US', {
+  return `${amount.toLocaleString('en-US', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  })}`
+  })} ${currency}`
 }
 
 // Date formatting
