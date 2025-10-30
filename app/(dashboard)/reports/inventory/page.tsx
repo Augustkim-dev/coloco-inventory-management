@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table"
 import { formatDate, formatCurrency } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import { Currency } from "@/types"
 
 export default async function InventoryReportPage() {
   const supabase = await createClient()
@@ -97,14 +98,14 @@ export default async function InventoryReportPage() {
           </CardContent>
         </Card>
 
-        {Object.entries(totalsByLocation).map(([location, data]) => (
+        {(Object.entries(totalsByLocation) as [string, { value: number, currency: string, qty: number, batches: number }][]).map(([location, data]) => (
           <Card key={location}>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium">{location}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {formatCurrency(data.value, data.currency)}
+                {formatCurrency(data.value, data.currency as Currency)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
                 {data.qty} units • {data.batches} batches

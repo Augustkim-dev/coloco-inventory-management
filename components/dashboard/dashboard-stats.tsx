@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DollarSign, Package, TrendingUp, Layers } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
+import { Currency } from '@/types'
 
 interface DashboardStatsProps {
   todaySales: any[]
@@ -46,9 +47,9 @@ export function DashboardStats({ todaySales, stockBatches, userRole }: Dashboard
           {Object.entries(salesByCurrency).length === 0 ? (
             <div className="text-2xl font-bold">No sales today</div>
           ) : (
-            Object.entries(salesByCurrency).map(([currency, amount]) => (
+            (Object.entries(salesByCurrency) as [string, number][]).map(([currency, amount]) => (
               <div key={currency} className="text-2xl font-bold">
-                {formatCurrency(amount, currency)}
+                {formatCurrency(amount, currency as Currency)}
               </div>
             ))
           )}
@@ -67,9 +68,9 @@ export function DashboardStats({ todaySales, stockBatches, userRole }: Dashboard
           {Object.entries(stockValueByCurrency).length === 0 ? (
             <div className="text-2xl font-bold">No stock</div>
           ) : (
-            Object.entries(stockValueByCurrency).map(([currency, value]) => (
+            (Object.entries(stockValueByCurrency) as [string, number][]).map(([currency, value]) => (
               <div key={currency} className="text-2xl font-bold">
-                {formatCurrency(value, currency)}
+                {formatCurrency(value, currency as Currency)}
               </div>
             ))
           )}

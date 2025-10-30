@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table"
 import { formatDate, formatCurrency } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import { Currency } from "@/types"
 
 export default async function SalesReportPage() {
   const supabase = await createClient()
@@ -83,9 +84,9 @@ export default async function SalesReportPage() {
             <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
           </CardHeader>
           <CardContent>
-            {Object.entries(totalsByCurrency).map(([currency, amount]) => (
+            {(Object.entries(totalsByCurrency) as [string, number][]).map(([currency, amount]) => (
               <div key={currency} className="text-2xl font-bold">
-                {formatCurrency(amount, currency)}
+                {formatCurrency(amount, currency as Currency)}
               </div>
             ))}
             <p className="text-xs text-muted-foreground mt-1">
@@ -94,14 +95,14 @@ export default async function SalesReportPage() {
           </CardContent>
         </Card>
 
-        {Object.entries(totalsByLocation).map(([location, data]) => (
+        {(Object.entries(totalsByLocation) as [string, { total: number, currency: string, count: number }][]).map(([location, data]) => (
           <Card key={location}>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium">{location}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {formatCurrency(data.total, data.currency)}
+                {formatCurrency(data.total, data.currency as Currency)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
                 {data.count} transactions
