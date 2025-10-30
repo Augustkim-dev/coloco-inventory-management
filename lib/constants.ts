@@ -8,6 +8,7 @@ import {
   Users,
   Settings,
   MapPin,
+  DollarSign,
 } from "lucide-react"
 
 export const navItems: NavItem[] = [
@@ -46,6 +47,12 @@ export const navItems: NavItem[] = [
     href: "/inventory",
     icon: Warehouse,
     roles: ["HQ_Admin", "Branch_Manager"],
+  },
+  {
+    title: "Exchange Rates",
+    href: "/exchange-rates",
+    icon: DollarSign,
+    roles: ["HQ_Admin"],
   },
   {
     title: "Sales",
