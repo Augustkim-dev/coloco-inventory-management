@@ -29,6 +29,22 @@ export type PricingConfig = Database['public']['Tables']['pricing_configs']['Row
 export type Sale = Database['public']['Tables']['sales']['Row']
 export type ExchangeRate = Database['public']['Tables']['exchange_rates']['Row']
 
+// Supplier Product type (manually defined)
+export interface SupplierProduct {
+  id: string
+  supplier_id: string
+  product_id: string
+  supplier_product_code: string | null
+  unit_price: number | null
+  lead_time_days: number | null
+  minimum_order_qty: number | null
+  is_primary_supplier: boolean | null
+  is_active: boolean | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
 // Insert types
 export type LocationInsert = Database['public']['Tables']['locations']['Insert']
 export type SupplierInsert = Database['public']['Tables']['suppliers']['Insert']

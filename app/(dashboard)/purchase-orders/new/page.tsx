@@ -57,7 +57,7 @@ export default async function NewPOPage() {
       <h1 className="text-3xl font-bold mb-6">Create Purchase Order</h1>
       <POForm
         suppliers={suppliers || []}
-        supplierProducts={supplierProducts || []}
+        supplierProducts={supplierProducts as any || []}
         mode="create"
       />
     </div>

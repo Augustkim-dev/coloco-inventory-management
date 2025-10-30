@@ -90,7 +90,14 @@ export function SuppliersList({ suppliers }: SuppliersListProps) {
             ) : (
               suppliers.map((supplier) => (
                 <TableRow key={supplier.id}>
-                  <TableCell className="font-medium">{supplier.name}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link
+                      href={`/suppliers/${supplier.id}`}
+                      className="hover:underline hover:text-blue-600"
+                    >
+                      {supplier.name}
+                    </Link>
+                  </TableCell>
                   <TableCell>{supplier.contact_person || '-'}</TableCell>
                   <TableCell>{supplier.phone || '-'}</TableCell>
                   <TableCell>{supplier.email || '-'}</TableCell>

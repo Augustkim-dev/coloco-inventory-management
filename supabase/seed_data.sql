@@ -13,6 +13,44 @@
 -- ============================================================
 
 -- ============================================================
+-- 0. 기존 시드 데이터 삭제 (Clean slate)
+-- ============================================================
+-- 주의: 이 작업은 기존 테스트 데이터를 모두 삭제합니다.
+-- 실제 운영 데이터가 있는 경우 실행하지 마세요!
+
+DO $$
+BEGIN
+  RAISE NOTICE '========================================';
+  RAISE NOTICE 'Cleaning existing seed data...';
+  RAISE NOTICE '========================================';
+END $$;
+
+-- Delete in reverse order of dependencies (most dependent first)
+-- Step 1: Delete transaction data that references products
+DELETE FROM sales WHERE product_id IN (SELECT id FROM products WHERE id::text LIKE 'b%');
+DELETE FROM stock_batches WHERE product_id IN (SELECT id FROM products WHERE id::text LIKE 'b%');
+
+-- Step 2: Delete purchase order data (must delete items before orders)
+-- Note: Column name is 'po_id' not 'purchase_order_id'
+DELETE FROM purchase_order_items WHERE po_id IN (SELECT id FROM purchase_orders WHERE supplier_id::text LIKE 'a%');
+DELETE FROM purchase_orders WHERE supplier_id::text LIKE 'a%';
+
+-- Step 3: Delete configuration/relationship data
+DELETE FROM pricing_configs WHERE product_id IN (SELECT id FROM products WHERE id::text LIKE 'b%');
+DELETE FROM supplier_products WHERE supplier_id::text LIKE 'a%' OR product_id::text LIKE 'b%';
+DELETE FROM exchange_rates WHERE id::text LIKE 'c%';
+
+-- Step 4: Finally delete master data (no more foreign key references)
+DELETE FROM products WHERE id::text LIKE 'b%';
+DELETE FROM suppliers WHERE id::text LIKE 'a%';
+
+DO $$
+BEGIN
+  RAISE NOTICE 'Cleanup completed. Starting fresh data insertion...';
+  RAISE NOTICE '========================================';
+END $$;
+
+-- ============================================================
 -- 1. SUPPLIERS (공급업체) - 5개
 -- ============================================================
 
@@ -259,7 +297,121 @@ VALUES
   );
 
 -- ============================================================
--- 3. EXCHANGE_RATES (환율) - 현재 기준
+-- 3. SUPPLIER_PRODUCTS (공급업체-제품 관계) - 어떤 업체가 어떤 제품을 공급하는지
+-- ============================================================
+
+-- Seoul Beauty Co. supplies skincare products (7 items)
+INSERT INTO public.supplier_products (supplier_id, product_id, supplier_product_code, unit_price, lead_time_days, minimum_order_qty, is_primary_supplier, is_active)
+SELECT
+  'a1b2c3d4-0001-0001-0001-000000000001', -- Seoul Beauty
+  p.id,
+  'SB-' || p.sku,
+  CASE p.sku
+    WHEN 'SKN-HYA-SRM-100' THEN 25000
+    WHEN 'SKN-VTC-CRM-50' THEN 35000
+    WHEN 'SKN-SNL-MSK-10' THEN 15000
+    WHEN 'SKN-GRN-CLN-150' THEN 12000
+    WHEN 'SKN-RET-SRM-30' THEN 45000
+    WHEN 'SKN-AHA-TON-200' THEN 18000
+    WHEN 'SKN-CNT-EYE-20' THEN 22000
+  END,
+  7,    -- lead_time_days
+  100,  -- minimum_order_qty
+  true, -- is_primary_supplier
+  true
+FROM products p
+WHERE p.sku IN (
+  'SKN-HYA-SRM-100', 'SKN-VTC-CRM-50', 'SKN-SNL-MSK-10',
+  'SKN-GRN-CLN-150', 'SKN-RET-SRM-30', 'SKN-AHA-TON-200', 'SKN-CNT-EYE-20'
+);
+
+-- Jeju Natural supplies natural/organic products (4 items)
+INSERT INTO public.supplier_products (supplier_id, product_id, supplier_product_code, unit_price, lead_time_days, minimum_order_qty, is_primary_supplier, is_active)
+SELECT
+  'a1b2c3d4-0002-0002-0002-000000000002', -- Jeju Natural
+  p.id,
+  'JN-' || p.sku,
+  CASE p.sku
+    WHEN 'SKN-GRN-CLN-150' THEN 13000  -- Alternative supplier (higher price)
+    WHEN 'SKN-CNT-EYE-20' THEN 21000   -- Alternative supplier (lower price)
+    WHEN 'BDY-LOT-CHR-300' THEN 16000
+    WHEN 'BDY-SCR-GRN-250' THEN 14000
+  END,
+  10,   -- longer lead time (island shipping)
+  50,
+  CASE p.sku
+    WHEN 'BDY-LOT-CHR-300' THEN true  -- Primary for body care
+    WHEN 'BDY-SCR-GRN-250' THEN true
+    ELSE false  -- Alternative supplier for others
+  END,
+  true
+FROM products p
+WHERE p.sku IN (
+  'SKN-GRN-CLN-150', 'SKN-CNT-EYE-20',
+  'BDY-LOT-CHR-300', 'BDY-SCR-GRN-250'
+);
+
+-- K-Beauty Labs supplies makeup products (4 items)
+INSERT INTO public.supplier_products (supplier_id, product_id, supplier_product_code, unit_price, lead_time_days, minimum_order_qty, is_primary_supplier, is_active)
+SELECT
+  'a1b2c3d4-0003-0003-0003-000000000003', -- K-Beauty Labs
+  p.id,
+  'KBL-' || p.sku,
+  CASE p.sku
+    WHEN 'MKP-CSH-21' THEN 28000
+    WHEN 'MKP-LIP-RD01' THEN 18000
+    WHEN 'MKP-MSC-BLK' THEN 15000
+    WHEN 'MKP-EYE-NUD' THEN 25000
+  END,
+  5,    -- fast lead time
+  200,  -- higher minimum order
+  true,
+  true
+FROM products p
+WHERE p.sku IN (
+  'MKP-CSH-21', 'MKP-LIP-RD01', 'MKP-MSC-BLK', 'MKP-EYE-NUD'
+);
+
+-- Busan Marine supplies marine-based products (2 items)
+INSERT INTO public.supplier_products (supplier_id, product_id, supplier_product_code, unit_price, lead_time_days, minimum_order_qty, is_primary_supplier, is_active)
+SELECT
+  'a1b2c3d4-0004-0004-0004-000000000004', -- Busan Marine
+  p.id,
+  'BM-' || p.sku,
+  CASE p.sku
+    WHEN 'SKN-HYA-SRM-100' THEN 26000  -- Alternative supplier (higher price)
+    WHEN 'SKN-SNL-MSK-10' THEN 14500   -- Alternative supplier (lower price)
+  END,
+  7,
+  150,
+  false, -- All alternative suppliers
+  true
+FROM products p
+WHERE p.sku IN (
+  'SKN-HYA-SRM-100', 'SKN-SNL-MSK-10'
+);
+
+-- Hanbok Herbal supplies haircare products (2 items)
+INSERT INTO public.supplier_products (supplier_id, product_id, supplier_product_code, unit_price, lead_time_days, minimum_order_qty, is_primary_supplier, is_active)
+SELECT
+  'a1b2c3d4-0005-0005-0005-000000000005', -- Hanbok Herbal
+  p.id,
+  'HH-' || p.sku,
+  CASE p.sku
+    WHEN 'HAR-RPR-SHP-500' THEN 20000
+    WHEN 'HAR-TRT-MSK-200' THEN 16000
+  END,
+  14,   -- herbal products need longer preparation
+  100,
+  true,
+  true
+FROM products p
+WHERE p.sku IN (
+  'HAR-RPR-SHP-500', 'HAR-TRT-MSK-200'
+);
+
+-- ============================================================
+-- 4. EXCHANGE_RATES (환율) - 현재 기준
 -- ============================================================
 
 INSERT INTO public.exchange_rates (id, from_currency, to_currency, rate, effective_date)
@@ -298,7 +450,7 @@ VALUES
   );
 
 -- ============================================================
--- 4. PRICING_CONFIGS (가격 설정) - 주요 제품별
+-- 5. PRICING_CONFIGS (가격 설정) - 주요 제품별
 -- ============================================================
 
 -- Vietnam Branch 가격 설정 (10개 제품)
@@ -307,7 +459,7 @@ SELECT
   gen_random_uuid(),
   p.id,
   (SELECT id FROM locations WHERE location_type = 'HQ' LIMIT 1),
-  (SELECT id FROM locations WHERE location_type = 'Branch' AND country = 'Vietnam' LIMIT 1),
+  (SELECT id FROM locations WHERE location_type = 'Branch' AND country_code = 'VN' LIMIT 1),
   CASE p.sku
     WHEN 'SKN-HYA-SRM-100' THEN 25000  -- KRW
     WHEN 'SKN-VTC-CRM-50' THEN 35000
@@ -350,7 +502,7 @@ SELECT
   gen_random_uuid(),
   p.id,
   (SELECT id FROM locations WHERE location_type = 'HQ' LIMIT 1),
-  (SELECT id FROM locations WHERE location_type = 'Branch' AND country = 'China' LIMIT 1),
+  (SELECT id FROM locations WHERE location_type = 'Branch' AND country_code = 'CN' LIMIT 1),
   CASE p.sku
     WHEN 'SKN-HYA-SRM-100' THEN 25000
     WHEN 'SKN-VTC-CRM-50' THEN 35000
@@ -389,15 +541,24 @@ BEGIN
   RAISE NOTICE '========================================';
   RAISE NOTICE 'Suppliers inserted: %', (SELECT COUNT(*) FROM suppliers);
   RAISE NOTICE 'Products inserted: %', (SELECT COUNT(*) FROM products);
+  RAISE NOTICE 'Supplier-Product relationships: %', (SELECT COUNT(*) FROM supplier_products);
   RAISE NOTICE 'Exchange rates inserted: %', (SELECT COUNT(*) FROM exchange_rates);
   RAISE NOTICE 'Pricing configs inserted: %', (SELECT COUNT(*) FROM pricing_configs);
+  RAISE NOTICE '========================================';
+  RAISE NOTICE 'Supplier-Product Mapping:';
+  RAISE NOTICE '- Seoul Beauty: 7 skincare products';
+  RAISE NOTICE '- Jeju Natural: 4 natural/body products';
+  RAISE NOTICE '- K-Beauty Labs: 4 makeup products';
+  RAISE NOTICE '- Busan Marine: 2 products (alternative supplier)';
+  RAISE NOTICE '- Hanbok Herbal: 2 haircare products';
   RAISE NOTICE '========================================';
   RAISE NOTICE 'You can now test Phase 03 workflow:';
   RAISE NOTICE '1. Login to http://localhost:3000';
   RAISE NOTICE '2. Navigate to Purchase Orders';
-  RAISE NOTICE '3. Create PO → Select Supplier → Add Products';
-  RAISE NOTICE '4. Approve PO';
-  RAISE NOTICE '5. Receive at HQ → Enter batch info';
-  RAISE NOTICE '6. Check stock_batches table for inventory';
+  RAISE NOTICE '3. Create PO → Select Supplier';
+  RAISE NOTICE '4. Add Products (only products from selected supplier shown)';
+  RAISE NOTICE '5. Approve PO';
+  RAISE NOTICE '6. Receive at HQ → Enter batch info';
+  RAISE NOTICE '7. Check stock_batches table for inventory';
   RAISE NOTICE '========================================';
 END $$;

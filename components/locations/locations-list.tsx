@@ -44,8 +44,8 @@ export function LocationsList({ locations }: LocationsListProps) {
               <TableCell>{location.country_code}</TableCell>
               <TableCell>{location.currency}</TableCell>
               <TableCell>
-                {location.contact_person || '-'}
-                {location.phone && ` (${location.phone})`}
+                {(location as any).contact_person || '-'}
+                {(location as any).phone && ` (${(location as any).phone})`}
               </TableCell>
               <TableCell className="text-right">
                 <Link href={`/locations/${location.id}/edit`}>

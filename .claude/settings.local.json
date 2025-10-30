@@ -13,7 +13,21 @@
       "Bash(npx shadcn@latest add table)",
       "Bash(npx shadcn@latest add textarea)",
       "Bash(npx shadcn@latest add:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(if [ -f .env.local ])",
+      "Bash(then echo \"Found .env.local\")",
+      "Bash(else echo \".env.local not found\")",
+      "Bash(fi)",
+      "Bash(npm run dev:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(tasklist:*)",
+      "Bash(cmd /c \"netstat -ano | findstr LISTENING\")",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(timeout 10 bash:*)",
+      "Bash(timeout 5 bash:*)",
+      "Bash(timeout 3 bash:*)"
     ],
     "deny": [],
     "ask": []

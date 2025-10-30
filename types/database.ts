@@ -1,54 +1,40 @@
-// Database types for Supabase
-// This file defines TypeScript types for all database tables
-
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+// Database types
+// This file should be generated using: npx supabase gen types typescript --local > types/database.ts
+// For now, we're using a minimal type definition
 
 export interface Database {
   public: {
     Tables: {
+      users: {
+        Row: {
+          id: string
+          email: string
+          name: string
+          role: string
+          location_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['users']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['users']['Insert']>
+      }
       locations: {
         Row: {
           id: string
           name: string
-          location_type: 'HQ' | 'Branch'
+          location_type: string
           country_code: string
-          currency: 'KRW' | 'VND' | 'CNY'
           address: string | null
-          contact_person: string | null
-          phone: string | null
+          currency: string
+          timezone: string
+          display_order: number
           created_at: string
           updated_at: string
         }
-        Insert: {
-          id?: string
-          name: string
-          location_type: 'HQ' | 'Branch'
-          country_code: string
-          currency: 'KRW' | 'VND' | 'CNY'
-          address?: string | null
-          contact_person?: string | null
-          phone?: string | null
-          created_at?: string
-          updated_at?: string
+        Insert: Omit<Database['public']['Tables']['locations']['Row'], 'id' | 'created_at' | 'updated_at'> & {
+          display_order?: number
         }
-        Update: {
-          id?: string
-          name?: string
-          location_type?: 'HQ' | 'Branch'
-          country_code?: string
-          currency?: 'KRW' | 'VND' | 'CNY'
-          address?: string | null
-          contact_person?: string | null
-          phone?: string | null
-          created_at?: string
-          updated_at?: string
-        }
+        Update: Partial<Database['public']['Tables']['locations']['Insert']>
       }
       suppliers: {
         Row: {
@@ -58,32 +44,14 @@ export interface Database {
           phone: string | null
           email: string | null
           address: string | null
+          business_registration_no: string | null
           notes: string | null
+          is_active: boolean
           created_at: string
           updated_at: string
         }
-        Insert: {
-          id?: string
-          name: string
-          contact_person?: string | null
-          phone?: string | null
-          email?: string | null
-          address?: string | null
-          notes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          contact_person?: string | null
-          phone?: string | null
-          email?: string | null
-          address?: string | null
-          notes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
+        Insert: Omit<Database['public']['Tables']['suppliers']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['suppliers']['Insert']>
       }
       products: {
         Row: {
@@ -93,121 +61,65 @@ export interface Database {
           name_ko: string | null
           name_vn: string | null
           name_cn: string | null
-          category: string | null
+          category: string
           unit: string
           shelf_life_days: number
           description: string | null
           created_at: string
           updated_at: string
         }
-        Insert: {
-          id?: string
-          sku: string
-          name: string
-          name_ko?: string | null
-          name_vn?: string | null
-          name_cn?: string | null
-          category?: string | null
-          unit?: string
-          shelf_life_days?: number
-          description?: string | null
-          created_at?: string
-          updated_at?: string
+        Insert: Omit<Database['public']['Tables']['products']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['products']['Insert']>
+      }
+      supplier_products: {
+        Row: {
+          id: string
+          supplier_id: string
+          product_id: string
+          supplier_product_code: string | null
+          unit_price: number | null
+          lead_time_days: number | null
+          minimum_order_qty: number | null
+          is_primary_supplier: boolean | null
+          is_active: boolean | null
+          notes: string | null
+          created_at: string
+          updated_at: string
         }
-        Update: {
-          id?: string
-          sku?: string
-          name?: string
-          name_ko?: string | null
-          name_vn?: string | null
-          name_cn?: string | null
-          category?: string | null
-          unit?: string
-          shelf_life_days?: number
-          description?: string | null
-          created_at?: string
-          updated_at?: string
-        }
+        Insert: Omit<Database['public']['Tables']['supplier_products']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['supplier_products']['Insert']>
       }
       purchase_orders: {
         Row: {
           id: string
-          po_no: string
+          po_number: string
           supplier_id: string
+          location_id: string
           order_date: string
-          status: 'Draft' | 'Approved' | 'Received'
+          expected_delivery_date: string | null
+          status: string
           total_amount: number
-          currency: string
           notes: string | null
-          created_by: string | null
-          approved_by: string | null
-          approved_at: string | null
-          received_at: string | null
+          created_by: string
           created_at: string
           updated_at: string
         }
-        Insert: {
-          id?: string
-          po_no: string
-          supplier_id: string
-          order_date?: string
-          status?: 'Draft' | 'Approved' | 'Received'
-          total_amount?: number
-          currency?: string
-          notes?: string | null
-          created_by?: string | null
-          approved_by?: string | null
-          approved_at?: string | null
-          received_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          po_no?: string
-          supplier_id?: string
-          order_date?: string
-          status?: 'Draft' | 'Approved' | 'Received'
-          total_amount?: number
-          currency?: string
-          notes?: string | null
-          created_by?: string | null
-          approved_by?: string | null
-          approved_at?: string | null
-          received_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
+        Insert: Omit<Database['public']['Tables']['purchase_orders']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['purchase_orders']['Insert']>
       }
       purchase_order_items: {
         Row: {
           id: string
-          po_id: string
+          purchase_order_id: string
           product_id: string
-          qty: number
+          quantity: number
           unit_price: number
           total_price: number
           created_at: string
           updated_at: string
         }
-        Insert: {
-          id?: string
-          po_id: string
-          product_id: string
-          qty: number
-          unit_price: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          po_id?: string
-          product_id?: string
-          qty?: number
-          unit_price?: number
-          created_at?: string
-          updated_at?: string
-        }
+        Insert: Omit<Database['public']['Tables']['purchase_order_items']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['purchase_order_items']['Insert']>
       }
       stock_batches: {
         Row: {
@@ -221,38 +133,12 @@ export interface Database {
           unit_cost: number
           manufactured_date: string
           expiry_date: string
-          quality_status: 'OK' | 'Damaged' | 'Quarantine'
+          quality_status: string
           created_at: string
           updated_at: string
         }
-        Insert: {
-          id?: string
-          product_id: string
-          location_id: string
-          batch_no: string
-          qty_on_hand?: number
-          qty_reserved?: number
-          unit_cost: number
-          manufactured_date: string
-          expiry_date: string
-          quality_status?: 'OK' | 'Damaged' | 'Quarantine'
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          product_id?: string
-          location_id?: string
-          batch_no?: string
-          qty_on_hand?: number
-          qty_reserved?: number
-          unit_cost?: number
-          manufactured_date?: string
-          expiry_date?: string
-          quality_status?: 'OK' | 'Damaged' | 'Quarantine'
-          created_at?: string
-          updated_at?: string
-        }
+        Insert: Omit<Database['public']['Tables']['stock_batches']['Row'], 'id' | 'qty_available' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['stock_batches']['Insert']>
       }
       pricing_configs: {
         Row: {
@@ -262,47 +148,17 @@ export interface Database {
           to_location_id: string
           purchase_price: number
           transfer_cost: number
+          exchange_rate: number
           hq_margin_percent: number
           branch_margin_percent: number
-          exchange_rate: number
-          calculated_price: number | null
+          calculated_price: number
           final_price: number
-          currency: string
+          effective_date: string
           created_at: string
           updated_at: string
         }
-        Insert: {
-          id?: string
-          product_id: string
-          from_location_id: string
-          to_location_id: string
-          purchase_price: number
-          transfer_cost?: number
-          hq_margin_percent?: number
-          branch_margin_percent?: number
-          exchange_rate: number
-          calculated_price?: number | null
-          final_price: number
-          currency: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          product_id?: string
-          from_location_id?: string
-          to_location_id?: string
-          purchase_price?: number
-          transfer_cost?: number
-          hq_margin_percent?: number
-          branch_margin_percent?: number
-          exchange_rate?: number
-          calculated_price?: number | null
-          final_price?: number
-          currency?: string
-          created_at?: string
-          updated_at?: string
-        }
+        Insert: Omit<Database['public']['Tables']['pricing_configs']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['pricing_configs']['Insert']>
       }
       sales: {
         Row: {
@@ -310,77 +166,43 @@ export interface Database {
           location_id: string
           product_id: string
           sale_date: string
-          qty: number
+          quantity: number
           unit_price: number
           total_amount: number
-          currency: string
-          created_by: string | null
+          channel: string | null
+          notes: string | null
+          created_by: string
           created_at: string
           updated_at: string
         }
-        Insert: {
-          id?: string
-          location_id: string
-          product_id: string
-          sale_date?: string
-          qty: number
-          unit_price: number
-          currency: string
-          created_by?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          location_id?: string
-          product_id?: string
-          sale_date?: string
-          qty?: number
-          unit_price?: number
-          currency?: string
-          created_by?: string | null
-          created_at?: string
-          updated_at?: string
-        }
+        Insert: Omit<Database['public']['Tables']['sales']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['sales']['Insert']>
       }
       exchange_rates: {
         Row: {
           id: string
-          from_currency: 'KRW' | 'VND' | 'CNY'
-          to_currency: 'KRW' | 'VND' | 'CNY'
+          from_currency: string
+          to_currency: string
           rate: number
           effective_date: string
-          created_by: string | null
+          notes: string | null
           created_at: string
+          updated_at: string
         }
-        Insert: {
-          id?: string
-          from_currency: 'KRW' | 'VND' | 'CNY'
-          to_currency: 'KRW' | 'VND' | 'CNY'
-          rate: number
-          effective_date?: string
-          created_by?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          from_currency?: 'KRW' | 'VND' | 'CNY'
-          to_currency?: 'KRW' | 'VND' | 'CNY'
-          rate?: number
-          effective_date?: string
-          created_by?: string | null
-          created_at?: string
-        }
+        Insert: Omit<Database['public']['Tables']['exchange_rates']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['exchange_rates']['Insert']>
       }
     }
-    Views: {
-      [_ in never]: never
-    }
+    Views: {}
     Functions: {
-      [_ in never]: never
+      get_available_stock: {
+        Args: {
+          p_location_id: string
+          p_product_id: string
+        }
+        Returns: number
+      }
     }
-    Enums: {
-      [_ in never]: never
-    }
+    Enums: {}
   }
 }

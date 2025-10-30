@@ -18,8 +18,8 @@ interface LocationFormProps {
 export function LocationForm({ location }: LocationFormProps) {
   const [formData, setFormData] = useState({
     address: location.address || '',
-    contact_person: location.contact_person || '',
-    phone: location.phone || '',
+    contact_person: (location as any).contact_person || '',
+    phone: (location as any).phone || '',
   })
   const [loading, setLoading] = useState(false)
   const router = useRouter()
