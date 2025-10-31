@@ -38,7 +38,7 @@
     "updateError": "定价配置更新失败",
     "deleteError": "定价配置删除失败",
     "loadError": "加载定价配置列表失败",
-    "calculateFirst": "请先点击"计算价格"",
+    "calculateFirst": "请先点击\"计算价格\"",
     "invalidMargin": "总利润率不能超过 100%"
   },
   "calculation": {
