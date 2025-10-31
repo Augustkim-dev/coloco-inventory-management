@@ -34,7 +34,7 @@ interface PricingInfo {
 export function SaleForm({ location, products }: SaleFormProps) {
   const [formData, setFormData] = useState({
     product_id: '',
-    qty: 1,
+    qty: 0,
     sale_date: new Date().toISOString().split('T')[0],
   })
   const [pricing, setPricing] = useState<PricingInfo | null>(null)
@@ -250,8 +250,9 @@ export function SaleForm({ location, products }: SaleFormProps) {
               type="number"
               min="1"
               max={pricing?.available_stock || undefined}
-              value={formData.qty}
-              onChange={(e) => setFormData({ ...formData, qty: parseInt(e.target.value) || 1 })}
+              value={formData.qty || ''}
+              onChange={(e) => setFormData({ ...formData, qty: parseInt(e.target.value) || 0 })}
+              placeholder="1 이상 입력하세요"
               disabled={!pricing || loadingPrice}
               required
             />
