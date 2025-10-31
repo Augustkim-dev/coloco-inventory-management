@@ -74,6 +74,32 @@ COMMENT ON FUNCTION public.update_updated_at_column() IS 'Automatically updates 
 
 
 -- -----------------------------------------------------
+-- 2.1.2 Create get_current_user_role() function
+-- (Required by users table RLS policies to avoid infinite recursion)
+-- -----------------------------------------------------
+CREATE OR REPLACE FUNCTION public.get_current_user_role()
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER  -- Run with the privileges of the function owner (bypasses RLS)
+SET search_path = public
+STABLE
+AS $$
+DECLARE
+  user_role TEXT;
+BEGIN
+  -- Get role directly without triggering RLS
+  SELECT role INTO user_role
+  FROM public.users
+  WHERE id = auth.uid();
+
+  RETURN user_role;
+END;
+$$;
+
+COMMENT ON FUNCTION public.get_current_user_role() IS 'Returns the role of the currently authenticated user, bypassing RLS to avoid infinite recursion';
+
+
+-- -----------------------------------------------------
 -- 2.2 locations - HQ and branch locations
 -- -----------------------------------------------------
 CREATE TABLE public.locations (
@@ -482,38 +508,36 @@ CREATE POLICY "Users can view own profile"
   FOR SELECT
   USING (auth.uid() = id);
 
--- HQ_Admin can view all users
+-- HQ_Admin can view all users (using helper function to avoid infinite recursion)
 CREATE POLICY "HQ_Admin can view all users"
   ON public.users
   FOR SELECT
   USING (
-    EXISTS (
-      SELECT 1 FROM public.users
-      WHERE id = auth.uid() AND role = 'HQ_Admin'
-    )
+    public.get_current_user_role() = 'HQ_Admin'
   );
 
--- HQ_Admin can insert users
+-- HQ_Admin can insert users (using helper function to avoid infinite recursion)
 CREATE POLICY "HQ_Admin can insert users"
   ON public.users
   FOR INSERT
   WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM public.users
-      WHERE id = auth.uid() AND role = 'HQ_Admin'
-    )
+    public.get_current_user_role() = 'HQ_Admin'
   );
 
--- HQ_Admin can update users
+-- HQ_Admin can update users (using helper function to avoid infinite recursion)
 CREATE POLICY "HQ_Admin can update users"
   ON public.users
   FOR UPDATE
   USING (
-    EXISTS (
-      SELECT 1 FROM public.users
-      WHERE id = auth.uid() AND role = 'HQ_Admin'
-    )
+    public.get_current_user_role() = 'HQ_Admin'
   );
+
+-- Users can update own profile (for preferred_language, etc.)
+CREATE POLICY "Users can update own profile"
+  ON public.users
+  FOR UPDATE
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
 
 
 -- -----------------------------------------------------
