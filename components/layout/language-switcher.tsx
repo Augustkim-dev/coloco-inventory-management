@@ -30,15 +30,13 @@ export function LanguageSwitcher() {
 
   return (
     <Select value={language} onValueChange={handleLanguageChange}>
-      <SelectTrigger className="w-[180px]">
-        <div className="flex items-center gap-2">
-          <Globe className="h-4 w-4" />
-          <SelectValue>
-            <span className="flex items-center gap-2">
-              <span>{languageFlags[language]}</span>
-              <span>{languageNames[language]}</span>
-            </span>
-          </SelectValue>
+      <SelectTrigger className="w-[180px] bg-gray-800 text-white border-gray-700 hover:bg-gray-700">
+        <div className="flex items-center gap-2 w-full">
+          <Globe className="h-4 w-4 flex-shrink-0" />
+          <div className="flex items-center gap-2">
+            <span>{languageFlags[language]}</span>
+            <span>{languageNames[language]}</span>
+          </div>
         </div>
       </SelectTrigger>
       <SelectContent>
