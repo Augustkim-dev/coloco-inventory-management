@@ -80,13 +80,26 @@ export function ExchangeRateSelector({
         <Input
           id="exchange_rate"
           type="number"
-          step="0.0001"
+          step="any"
           min="0"
           value={value || ''}
-          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+          onChange={(e) => {
+            const inputValue = e.target.value
+            // Allow empty input
+            if (inputValue === '') {
+              onChange(0)
+              return
+            }
+            // Parse with full precision
+            const numValue = parseFloat(inputValue)
+            if (!isNaN(numValue) && numValue >= 0) {
+              onChange(numValue)
+            }
+          }}
           required
           disabled={loading}
           className="flex-1"
+          placeholder="0.0000"
         />
         <span className="text-sm text-gray-600 whitespace-nowrap">
           {toCurrency}

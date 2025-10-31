@@ -169,7 +169,7 @@ export function ExchangeRateForm() {
               <Input
                 id="rate"
                 type="number"
-                step="0.0001"
+                step="any"
                 min="0"
                 placeholder="0.0000"
                 value={formData.rate}
