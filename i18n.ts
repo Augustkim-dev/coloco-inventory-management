@@ -24,12 +24,14 @@ export const languageFlags: Record<Language, string> = {
 
 export default getRequestConfig(async ({ locale }) => {
   // Validate that the incoming `locale` parameter is valid
-  if (!locales.includes(locale as Language)) {
+  const validLocale = locale && locales.includes(locale as Language) ? locale : defaultLocale
+
+  if (!locale || !locales.includes(locale as Language)) {
     notFound()
   }
 
   return {
-    locale,
-    messages: (await import(`./locales/${locale}/common.json`)).default,
+    locale: validLocale,
+    messages: (await import(`./locales/${validLocale}/common.json`)).default,
   }
 })
