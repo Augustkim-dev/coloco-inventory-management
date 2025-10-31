@@ -1,0 +1,24 @@
+{
+  "menu": {
+    "dashboard": "Dashboard",
+    "inventory": "Inventory",
+    "products": "Products",
+    "suppliers": "Suppliers",
+    "purchase": "Purchase",
+    "purchaseOrders": "Purchase Orders",
+    "receiving": "Receiving",
+    "sales": "Sales",
+    "pricing": "Pricing",
+    "pricingConfig": "Pricing Configuration",
+    "exchangeRates": "Exchange Rates",
+    "settings": "Settings",
+    "users": "Users",
+    "locations": "Locations",
+    "reports": "Reports",
+    "logout": "Logout"
+  },
+  "breadcrumb": {
+    "home": "Home",
+    "back": "Back"
+  }
+}

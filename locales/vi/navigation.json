@@ -1,0 +1,24 @@
+{
+  "menu": {
+    "dashboard": "Bảng điều khiển",
+    "inventory": "Kho hàng",
+    "products": "Sản phẩm",
+    "suppliers": "Nhà cung cấp",
+    "purchase": "Mua hàng",
+    "purchaseOrders": "Đơn đặt hàng",
+    "receiving": "Nhập kho",
+    "sales": "Bán hàng",
+    "pricing": "Định giá",
+    "pricingConfig": "Cấu hình giá",
+    "exchangeRates": "Tỷ giá",
+    "settings": "Cài đặt",
+    "users": "Người dùng",
+    "locations": "Vị trí",
+    "reports": "Báo cáo",
+    "logout": "Đăng xuất"
+  },
+  "breadcrumb": {
+    "home": "Trang chủ",
+    "back": "Quay lại"
+  }
+}

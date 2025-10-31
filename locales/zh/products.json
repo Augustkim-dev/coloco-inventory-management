@@ -1,0 +1,54 @@
+{
+  "title": "产品",
+  "addProduct": "添加产品",
+  "editProduct": "编辑产品",
+  "deleteProduct": "删除产品",
+  "productDetails": "产品详情",
+  "fields": {
+    "sku": "SKU",
+    "name": "产品名称",
+    "nameKo": "产品名称（韩语）",
+    "nameVi": "产品名称（越南语）",
+    "nameCn": "产品名称（中文）",
+    "category": "类别",
+    "unit": "单位",
+    "shelfLifeDays": "保质期（天）",
+    "description": "描述",
+    "isActive": "活跃",
+    "createdAt": "创建日期",
+    "updatedAt": "更新日期"
+  },
+  "placeholders": {
+    "sku": "例如：SKU-001",
+    "name": "输入产品名称",
+    "nameKo": "제품명을 입력하세요",
+    "nameVi": "Nhập tên sản phẩm",
+    "nameCn": "输入产品名称",
+    "category": "选择类别",
+    "unit": "选择单位",
+    "shelfLifeDays": "例如：365",
+    "description": "输入产品描述"
+  },
+  "categories": {
+    "skincare": "护肤品",
+    "cosmetics": "化妆品",
+    "haircare": "护发",
+    "bodycare": "身体护理",
+    "other": "其他"
+  },
+  "units": {
+    "EA": "个",
+    "BOX": "盒",
+    "PACK": "包"
+  },
+  "messages": {
+    "createSuccess": "产品创建成功",
+    "updateSuccess": "产品更新成功",
+    "deleteSuccess": "产品删除成功",
+    "createError": "创建产品失败",
+    "updateError": "更新产品失败",
+    "deleteError": "删除产品失败",
+    "loadError": "加载产品列表失败",
+    "skuExists": "SKU 已存在"
+  }
+}

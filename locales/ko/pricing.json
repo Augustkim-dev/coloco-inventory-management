@@ -1,0 +1,50 @@
+{
+  "title": "가격 설정",
+  "addConfig": "가격 설정 추가",
+  "editConfig": "가격 설정 수정",
+  "deleteConfig": "설정 삭제",
+  "calculate": "가격 계산",
+  "fields": {
+    "product": "제품",
+    "fromLocation": "출발 위치",
+    "toLocation": "도착 위치 (지점)",
+    "purchasePrice": "구매가 (KRW)",
+    "transferCost": "운송비 (KRW)",
+    "exchangeRate": "환율",
+    "hqMargin": "본사 마진 (%)",
+    "branchMargin": "지점 마진 (%)",
+    "localCost": "현지 원가",
+    "calculatedPrice": "계산된 가격",
+    "finalPrice": "최종 가격",
+    "effectiveDate": "적용일",
+    "isActive": "활성"
+  },
+  "placeholders": {
+    "product": "제품 선택",
+    "fromLocation": "한국 본사",
+    "toLocation": "도착 지점 선택",
+    "purchasePrice": "예: 5000",
+    "transferCost": "예: 500",
+    "exchangeRate": "예: 18.5",
+    "hqMargin": "예: 10",
+    "branchMargin": "예: 30",
+    "finalPrice": "최종 판매가 입력"
+  },
+  "messages": {
+    "createSuccess": "가격 설정이 저장되었습니다",
+    "updateSuccess": "가격 설정이 업데이트되었습니다",
+    "deleteSuccess": "가격 설정이 삭제되었습니다",
+    "createError": "가격 설정 저장에 실패했습니다",
+    "updateError": "가격 설정 업데이트에 실패했습니다",
+    "deleteError": "가격 설정 삭제에 실패했습니다",
+    "loadError": "가격 설정 목록을 불러오는데 실패했습니다",
+    "calculateFirst": "먼저 '가격 계산'을 클릭해주세요",
+    "invalidMargin": "총 마진이 100%를 초과할 수 없습니다"
+  },
+  "calculation": {
+    "formula": "가격 계산 공식",
+    "step1": "현지 원가 = (구매가 + 운송비) / 환율",
+    "step2": "판매가 = 현지 원가 / (1 - 본사 마진% - 지점 마진%)",
+    "result": "계산 결과"
+  }
+}

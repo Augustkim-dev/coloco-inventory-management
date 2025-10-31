@@ -1,0 +1,24 @@
+{
+  "menu": {
+    "dashboard": "仪表板",
+    "inventory": "库存",
+    "products": "产品",
+    "suppliers": "供应商",
+    "purchase": "采购",
+    "purchaseOrders": "采购订单",
+    "receiving": "收货",
+    "sales": "销售",
+    "pricing": "定价",
+    "pricingConfig": "定价配置",
+    "exchangeRates": "汇率",
+    "settings": "设置",
+    "users": "用户",
+    "locations": "位置",
+    "reports": "报告",
+    "logout": "退出登录"
+  },
+  "breadcrumb": {
+    "home": "首页",
+    "back": "返回"
+  }
+}

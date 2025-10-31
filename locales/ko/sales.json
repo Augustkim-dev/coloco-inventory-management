@@ -1,0 +1,41 @@
+{
+  "title": "판매",
+  "addSale": "판매 추가",
+  "editSale": "판매 수정",
+  "deleteSale": "판매 삭제",
+  "saleDetails": "판매 상세",
+  "fields": {
+    "saleDate": "판매일",
+    "location": "지점",
+    "product": "제품",
+    "quantity": "수량",
+    "unitPrice": "단가",
+    "totalAmount": "총액",
+    "channel": "판매 채널",
+    "notes": "메모",
+    "createdAt": "생성일"
+  },
+  "placeholders": {
+    "saleDate": "판매일 선택",
+    "location": "지점 선택",
+    "product": "제품 선택",
+    "quantity": "수량 입력",
+    "unitPrice": "가격이 자동으로 입력됩니다",
+    "notes": "메모 입력 (선택사항)"
+  },
+  "channels": {
+    "online": "온라인",
+    "offline": "오프라인",
+    "live_commerce": "라이브 커머스"
+  },
+  "messages": {
+    "createSuccess": "판매가 기록되었습니다",
+    "createError": "판매 기록에 실패했습니다",
+    "deleteSuccess": "판매가 삭제되었습니다",
+    "deleteError": "판매 삭제에 실패했습니다",
+    "loadError": "판매 목록을 불러오는데 실패했습니다",
+    "insufficientStock": "재고가 부족합니다. 사용 가능: {available}",
+    "priceNotConfigured": "이 제품과 지점의 가격이 설정되지 않았습니다",
+    "quantityRequired": "수량을 입력해주세요"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "menu": {
+    "dashboard": "대시보드",
+    "inventory": "재고",
+    "products": "제품",
+    "suppliers": "공급업체",
+    "purchase": "구매",
+    "purchaseOrders": "구매 주문",
+    "receiving": "입고",
+    "sales": "판매",
+    "pricing": "가격 설정",
+    "pricingConfig": "가격 구성",
+    "exchangeRates": "환율",
+    "settings": "설정",
+    "users": "사용자",
+    "locations": "위치",
+    "reports": "보고서",
+    "logout": "로그아웃"
+  },
+  "breadcrumb": {
+    "home": "홈",
+    "back": "뒤로"
+  }
+}

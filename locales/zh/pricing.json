@@ -1,0 +1,50 @@
+{
+  "title": "定价配置",
+  "addConfig": "添加定价配置",
+  "editConfig": "编辑定价配置",
+  "deleteConfig": "删除配置",
+  "calculate": "计算价格",
+  "fields": {
+    "product": "产品",
+    "fromLocation": "起始位置",
+    "toLocation": "目标位置（分店）",
+    "purchasePrice": "采购价（KRW）",
+    "transferCost": "运输成本（KRW）",
+    "exchangeRate": "汇率",
+    "hqMargin": "总部利润率（%）",
+    "branchMargin": "分店利润率（%）",
+    "localCost": "本地成本",
+    "calculatedPrice": "计算价格",
+    "finalPrice": "最终价格",
+    "effectiveDate": "生效日期",
+    "isActive": "活跃"
+  },
+  "placeholders": {
+    "product": "选择产品",
+    "fromLocation": "韩国总部",
+    "toLocation": "选择目标分店",
+    "purchasePrice": "例如：5000",
+    "transferCost": "例如：500",
+    "exchangeRate": "例如：18.5",
+    "hqMargin": "例如：10",
+    "branchMargin": "例如：30",
+    "finalPrice": "输入最终销售价格"
+  },
+  "messages": {
+    "createSuccess": "定价配置保存成功",
+    "updateSuccess": "定价配置更新成功",
+    "deleteSuccess": "定价配置删除成功",
+    "createError": "定价配置保存失败",
+    "updateError": "定价配置更新失败",
+    "deleteError": "定价配置删除失败",
+    "loadError": "加载定价配置列表失败",
+    "calculateFirst": "请先点击"计算价格"",
+    "invalidMargin": "总利润率不能超过 100%"
+  },
+  "calculation": {
+    "formula": "定价公式",
+    "step1": "本地成本 = (采购价 + 运输成本) / 汇率",
+    "step2": "销售价 = 本地成本 / (1 - 总部利润率% - 分店利润率%)",
+    "result": "计算结果"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "title": "제품",
+  "addProduct": "제품 추가",
+  "editProduct": "제품 수정",
+  "deleteProduct": "제품 삭제",
+  "productDetails": "제품 상세",
+  "fields": {
+    "sku": "SKU",
+    "name": "제품명",
+    "nameKo": "제품명 (한국어)",
+    "nameVi": "제품명 (베트남어)",
+    "nameCn": "제품명 (중국어)",
+    "category": "카테고리",
+    "unit": "단위",
+    "shelfLifeDays": "유통기한 (일)",
+    "description": "설명",
+    "isActive": "활성",
+    "createdAt": "생성일",
+    "updatedAt": "수정일"
+  },
+  "placeholders": {
+    "sku": "예: SKU-001",
+    "name": "제품명을 입력하세요",
+    "nameKo": "제품명을 입력하세요",
+    "nameVi": "Nhập tên sản phẩm",
+    "nameCn": "输入产品名称",
+    "category": "카테고리 선택",
+    "unit": "단위 선택",
+    "shelfLifeDays": "예: 365",
+    "description": "제품 설명을 입력하세요"
+  },
+  "categories": {
+    "skincare": "스킨케어",
+    "cosmetics": "화장품",
+    "haircare": "헤어케어",
+    "bodycare": "바디케어",
+    "other": "기타"
+  },
+  "units": {
+    "EA": "개",
+    "BOX": "박스",
+    "PACK": "팩"
+  },
+  "messages": {
+    "createSuccess": "제품이 생성되었습니다",
+    "updateSuccess": "제품이 업데이트되었습니다",
+    "deleteSuccess": "제품이 삭제되었습니다",
+    "createError": "제품 생성에 실패했습니다",
+    "updateError": "제품 업데이트에 실패했습니다",
+    "deleteError": "제품 삭제에 실패했습니다",
+    "loadError": "제품 목록을 불러오는데 실패했습니다",
+    "skuExists": "이미 존재하는 SKU입니다"
+  }
+}

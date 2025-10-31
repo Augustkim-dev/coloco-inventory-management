@@ -1,0 +1,20 @@
+{
+  "title": "仪表板",
+  "welcome": "欢迎回来",
+  "overview": "概览",
+  "stats": {
+    "totalProducts": "总产品数",
+    "totalStock": "总库存价值",
+    "todaySales": "今日销售",
+    "monthlySales": "月度销售",
+    "lowStock": "低库存商品",
+    "expiringItems": "即将过期商品",
+    "pendingOrders": "待处理订单",
+    "totalLocations": "总位置数"
+  },
+  "recentActivity": "最近活动",
+  "quickActions": "快速操作",
+  "stockAlerts": "库存警报",
+  "salesChart": "销售概览",
+  "inventoryStatus": "库存状态"
+}

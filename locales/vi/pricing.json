@@ -1,0 +1,50 @@
+{
+  "title": "Cấu hình giá",
+  "addConfig": "Thêm cấu hình giá",
+  "editConfig": "Chỉnh sửa cấu hình giá",
+  "deleteConfig": "Xóa cấu hình",
+  "calculate": "Tính giá",
+  "fields": {
+    "product": "Sản phẩm",
+    "fromLocation": "Từ vị trí",
+    "toLocation": "Đến vị trí (Chi nhánh)",
+    "purchasePrice": "Giá mua (KRW)",
+    "transferCost": "Chi phí vận chuyển (KRW)",
+    "exchangeRate": "Tỷ giá",
+    "hqMargin": "Lợi nhuận trụ sở (%)",
+    "branchMargin": "Lợi nhuận chi nhánh (%)",
+    "localCost": "Giá vốn địa phương",
+    "calculatedPrice": "Giá tính toán",
+    "finalPrice": "Giá cuối cùng",
+    "effectiveDate": "Ngày hiệu lực",
+    "isActive": "Hoạt động"
+  },
+  "placeholders": {
+    "product": "Chọn sản phẩm",
+    "fromLocation": "Trụ sở Hàn Quốc",
+    "toLocation": "Chọn chi nhánh đích",
+    "purchasePrice": "VD: 5000",
+    "transferCost": "VD: 500",
+    "exchangeRate": "VD: 18.5",
+    "hqMargin": "VD: 10",
+    "branchMargin": "VD: 30",
+    "finalPrice": "Nhập giá bán cuối cùng"
+  },
+  "messages": {
+    "createSuccess": "Lưu cấu hình giá thành công",
+    "updateSuccess": "Cập nhật cấu hình giá thành công",
+    "deleteSuccess": "Xóa cấu hình giá thành công",
+    "createError": "Lưu cấu hình giá thất bại",
+    "updateError": "Cập nhật cấu hình giá thất bại",
+    "deleteError": "Xóa cấu hình giá thất bại",
+    "loadError": "Tải danh sách cấu hình giá thất bại",
+    "calculateFirst": "Vui lòng nhấp 'Tính giá' trước",
+    "invalidMargin": "Tổng lợi nhuận không thể vượt quá 100%"
+  },
+  "calculation": {
+    "formula": "Công thức tính giá",
+    "step1": "Giá vốn địa phương = (Giá mua + Chi phí vận chuyển) / Tỷ giá",
+    "step2": "Giá bán = Giá vốn địa phương / (1 - Lợi nhuận trụ sở% - Lợi nhuận chi nhánh%)",
+    "result": "Kết quả tính toán"
+  }
+}

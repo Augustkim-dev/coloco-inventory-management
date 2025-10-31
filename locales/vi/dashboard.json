@@ -1,0 +1,20 @@
+{
+  "title": "Bảng điều khiển",
+  "welcome": "Chào mừng trở lại",
+  "overview": "Tổng quan",
+  "stats": {
+    "totalProducts": "Tổng số sản phẩm",
+    "totalStock": "Tổng giá trị hàng tồn kho",
+    "todaySales": "Doanh số hôm nay",
+    "monthlySales": "Doanh số tháng",
+    "lowStock": "Mặt hàng tồn kho thấp",
+    "expiringItems": "Mặt hàng sắp hết hạn",
+    "pendingOrders": "Đơn hàng chờ xử lý",
+    "totalLocations": "Tổng số vị trí"
+  },
+  "recentActivity": "Hoạt động gần đây",
+  "quickActions": "Hành động nhanh",
+  "stockAlerts": "Cảnh báo hàng tồn kho",
+  "salesChart": "Tổng quan doanh số",
+  "inventoryStatus": "Trạng thái hàng tồn kho"
+}

@@ -1,0 +1,76 @@
+{
+  "appName": "Hệ Thống Quản Lý Kho Arno",
+  "buttons": {
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "edit": "Chỉnh sửa",
+    "delete": "Xóa",
+    "add": "Thêm",
+    "create": "Tạo",
+    "update": "Cập nhật",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "reset": "Đặt lại",
+    "submit": "Gửi",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "close": "Đóng",
+    "confirm": "Xác nhận",
+    "export": "Xuất",
+    "import": "Nhập",
+    "download": "Tải xuống",
+    "upload": "Tải lên",
+    "print": "In",
+    "refresh": "Làm mới",
+    "view": "Xem",
+    "select": "Chọn"
+  },
+  "status": {
+    "loading": "Đang tải...",
+    "saving": "Đang lưu...",
+    "success": "Thành công",
+    "error": "Lỗi",
+    "warning": "Cảnh báo",
+    "info": "Thông tin",
+    "active": "Hoạt động",
+    "inactive": "Không hoạt động",
+    "pending": "Đang chờ",
+    "completed": "Hoàn thành"
+  },
+  "messages": {
+    "saveSuccess": "Lưu thành công",
+    "saveError": "Lưu thất bại",
+    "deleteSuccess": "Xóa thành công",
+    "deleteError": "Xóa thất bại",
+    "updateSuccess": "Cập nhật thành công",
+    "updateError": "Cập nhật thất bại",
+    "loadError": "Tải dữ liệu thất bại",
+    "noData": "Không có dữ liệu",
+    "confirmDelete": "Bạn có chắc chắn muốn xóa mục này không?",
+    "confirmAction": "Bạn có chắc chắn muốn tiếp tục không?"
+  },
+  "table": {
+    "noResults": "Không tìm thấy kết quả",
+    "actions": "Hành động",
+    "rowsPerPage": "Số hàng mỗi trang",
+    "of": "của",
+    "showing": "Hiển thị",
+    "to": "đến"
+  },
+  "form": {
+    "required": "Trường này là bắt buộc",
+    "invalidEmail": "Định dạng email không hợp lệ",
+    "invalidNumber": "Định dạng số không hợp lệ",
+    "minLength": "Độ dài tối thiểu là {min} ký tự",
+    "maxLength": "Độ dài tối đa là {max} ký tự",
+    "selectOption": "Vui lòng chọn một tùy chọn"
+  },
+  "date": {
+    "today": "Hôm nay",
+    "yesterday": "Hôm qua",
+    "tomorrow": "Ngày mai",
+    "selectDate": "Chọn ngày",
+    "from": "Từ",
+    "to": "Đến"
+  }
+}

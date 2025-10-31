@@ -1,0 +1,41 @@
+{
+  "title": "Sales",
+  "addSale": "Add Sale",
+  "editSale": "Edit Sale",
+  "deleteSale": "Delete Sale",
+  "saleDetails": "Sale Details",
+  "fields": {
+    "saleDate": "Sale Date",
+    "location": "Branch",
+    "product": "Product",
+    "quantity": "Quantity",
+    "unitPrice": "Unit Price",
+    "totalAmount": "Total Amount",
+    "channel": "Sales Channel",
+    "notes": "Notes",
+    "createdAt": "Created At"
+  },
+  "placeholders": {
+    "saleDate": "Select sale date",
+    "location": "Select branch",
+    "product": "Select product",
+    "quantity": "Enter quantity",
+    "unitPrice": "Price will be auto-filled",
+    "notes": "Enter notes (optional)"
+  },
+  "channels": {
+    "online": "Online",
+    "offline": "Offline",
+    "live_commerce": "Live Commerce"
+  },
+  "messages": {
+    "createSuccess": "Sale recorded successfully",
+    "createError": "Failed to record sale",
+    "deleteSuccess": "Sale deleted successfully",
+    "deleteError": "Failed to delete sale",
+    "loadError": "Failed to load sales",
+    "insufficientStock": "Insufficient stock. Available: {available}",
+    "priceNotConfigured": "Price not configured for this product and location",
+    "quantityRequired": "Please enter quantity"
+  }
+}

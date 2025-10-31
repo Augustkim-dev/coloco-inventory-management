@@ -1,0 +1,54 @@
+{
+  "title": "Products",
+  "addProduct": "Add Product",
+  "editProduct": "Edit Product",
+  "deleteProduct": "Delete Product",
+  "productDetails": "Product Details",
+  "fields": {
+    "sku": "SKU",
+    "name": "Product Name",
+    "nameKo": "Product Name (Korean)",
+    "nameVi": "Product Name (Vietnamese)",
+    "nameCn": "Product Name (Chinese)",
+    "category": "Category",
+    "unit": "Unit",
+    "shelfLifeDays": "Shelf Life (Days)",
+    "description": "Description",
+    "isActive": "Active",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At"
+  },
+  "placeholders": {
+    "sku": "e.g., SKU-001",
+    "name": "Enter product name",
+    "nameKo": "제품명을 입력하세요",
+    "nameVi": "Nhập tên sản phẩm",
+    "nameCn": "输入产品名称",
+    "category": "Select category",
+    "unit": "Select unit",
+    "shelfLifeDays": "e.g., 365",
+    "description": "Enter product description"
+  },
+  "categories": {
+    "skincare": "Skincare",
+    "cosmetics": "Cosmetics",
+    "haircare": "Hair Care",
+    "bodycare": "Body Care",
+    "other": "Other"
+  },
+  "units": {
+    "EA": "Each",
+    "BOX": "Box",
+    "PACK": "Pack"
+  },
+  "messages": {
+    "createSuccess": "Product created successfully",
+    "updateSuccess": "Product updated successfully",
+    "deleteSuccess": "Product deleted successfully",
+    "createError": "Failed to create product",
+    "updateError": "Failed to update product",
+    "deleteError": "Failed to delete product",
+    "loadError": "Failed to load products",
+    "skuExists": "SKU already exists"
+  }
+}

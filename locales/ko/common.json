@@ -1,0 +1,76 @@
+{
+  "appName": "아르노 재고 관리 시스템",
+  "buttons": {
+    "save": "저장",
+    "cancel": "취소",
+    "edit": "수정",
+    "delete": "삭제",
+    "add": "추가",
+    "create": "생성",
+    "update": "업데이트",
+    "search": "검색",
+    "filter": "필터",
+    "reset": "초기화",
+    "submit": "제출",
+    "back": "뒤로",
+    "next": "다음",
+    "close": "닫기",
+    "confirm": "확인",
+    "export": "내보내기",
+    "import": "가져오기",
+    "download": "다운로드",
+    "upload": "업로드",
+    "print": "인쇄",
+    "refresh": "새로고침",
+    "view": "보기",
+    "select": "선택"
+  },
+  "status": {
+    "loading": "로딩 중...",
+    "saving": "저장 중...",
+    "success": "성공",
+    "error": "오류",
+    "warning": "경고",
+    "info": "정보",
+    "active": "활성",
+    "inactive": "비활성",
+    "pending": "대기 중",
+    "completed": "완료"
+  },
+  "messages": {
+    "saveSuccess": "성공적으로 저장되었습니다",
+    "saveError": "저장에 실패했습니다",
+    "deleteSuccess": "성공적으로 삭제되었습니다",
+    "deleteError": "삭제에 실패했습니다",
+    "updateSuccess": "성공적으로 업데이트되었습니다",
+    "updateError": "업데이트에 실패했습니다",
+    "loadError": "데이터를 불러오는데 실패했습니다",
+    "noData": "데이터가 없습니다",
+    "confirmDelete": "정말로 삭제하시겠습니까?",
+    "confirmAction": "계속 진행하시겠습니까?"
+  },
+  "table": {
+    "noResults": "결과가 없습니다",
+    "actions": "작업",
+    "rowsPerPage": "페이지당 행 수",
+    "of": "/",
+    "showing": "표시 중",
+    "to": "~"
+  },
+  "form": {
+    "required": "필수 입력 항목입니다",
+    "invalidEmail": "올바른 이메일 형식이 아닙니다",
+    "invalidNumber": "올바른 숫자 형식이 아닙니다",
+    "minLength": "최소 {min}자 이상 입력해야 합니다",
+    "maxLength": "최대 {max}자까지 입력 가능합니다",
+    "selectOption": "옵션을 선택해주세요"
+  },
+  "date": {
+    "today": "오늘",
+    "yesterday": "어제",
+    "tomorrow": "내일",
+    "selectDate": "날짜 선택",
+    "from": "시작일",
+    "to": "종료일"
+  }
+}

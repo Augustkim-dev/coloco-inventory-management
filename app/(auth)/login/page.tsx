@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { login } from "./actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,6 +9,8 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function LoginPage() {
+  const t = useTranslations('auth.login')
+  const tCommon = useTranslations('common')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -36,32 +39,32 @@ export default function LoginPage() {
     <Card className="w-full max-w-md">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">
-          Arno Inventory
+          {t('title')}
         </CardTitle>
         <CardDescription className="text-center">
-          Korean Cosmetics Global Inventory Management
+          {t('subtitle')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('email')}</Label>
             <Input
               id="email"
               name="email"
               type="email"
-              placeholder="your@email.com"
+              placeholder={t('emailPlaceholder')}
               required
               disabled={loading}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t('password')}</Label>
             <Input
               id="password"
               name="password"
               type="password"
-              placeholder="••••••••"
+              placeholder={t('passwordPlaceholder')}
               required
               disabled={loading}
             />
@@ -76,7 +79,7 @@ export default function LoginPage() {
             className="w-full"
             disabled={loading}
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? t('loggingIn') : t('loginButton')}
           </Button>
         </form>
       </CardContent>

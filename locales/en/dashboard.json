@@ -1,0 +1,20 @@
+{
+  "title": "Dashboard",
+  "welcome": "Welcome back",
+  "overview": "Overview",
+  "stats": {
+    "totalProducts": "Total Products",
+    "totalStock": "Total Stock Value",
+    "todaySales": "Today's Sales",
+    "monthlySales": "Monthly Sales",
+    "lowStock": "Low Stock Items",
+    "expiringItems": "Items Expiring Soon",
+    "pendingOrders": "Pending Orders",
+    "totalLocations": "Total Locations"
+  },
+  "recentActivity": "Recent Activity",
+  "quickActions": "Quick Actions",
+  "stockAlerts": "Stock Alerts",
+  "salesChart": "Sales Overview",
+  "inventoryStatus": "Inventory Status"
+}

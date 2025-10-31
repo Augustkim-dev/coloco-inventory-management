@@ -1,0 +1,41 @@
+{
+  "title": "销售",
+  "addSale": "添加销售",
+  "editSale": "编辑销售",
+  "deleteSale": "删除销售",
+  "saleDetails": "销售详情",
+  "fields": {
+    "saleDate": "销售日期",
+    "location": "分店",
+    "product": "产品",
+    "quantity": "数量",
+    "unitPrice": "单价",
+    "totalAmount": "总额",
+    "channel": "销售渠道",
+    "notes": "备注",
+    "createdAt": "创建日期"
+  },
+  "placeholders": {
+    "saleDate": "选择销售日期",
+    "location": "选择分店",
+    "product": "选择产品",
+    "quantity": "输入数量",
+    "unitPrice": "价格将自动填充",
+    "notes": "输入备注（可选）"
+  },
+  "channels": {
+    "online": "在线",
+    "offline": "线下",
+    "live_commerce": "直播电商"
+  },
+  "messages": {
+    "createSuccess": "销售记录成功",
+    "createError": "销售记录失败",
+    "deleteSuccess": "销售删除成功",
+    "deleteError": "销售删除失败",
+    "loadError": "加载销售列表失败",
+    "insufficientStock": "库存不足。可用：{available}",
+    "priceNotConfigured": "未配置此产品和位置的价格",
+    "quantityRequired": "请输入数量"
+  }
+}

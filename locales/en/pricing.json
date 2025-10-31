@@ -1,0 +1,50 @@
+{
+  "title": "Pricing Configuration",
+  "addConfig": "Add Pricing Config",
+  "editConfig": "Edit Pricing Config",
+  "deleteConfig": "Delete Config",
+  "calculate": "Calculate Price",
+  "fields": {
+    "product": "Product",
+    "fromLocation": "From Location",
+    "toLocation": "To Location (Branch)",
+    "purchasePrice": "Purchase Price (KRW)",
+    "transferCost": "Transfer Cost (KRW)",
+    "exchangeRate": "Exchange Rate",
+    "hqMargin": "HQ Margin (%)",
+    "branchMargin": "Branch Margin (%)",
+    "localCost": "Local Cost",
+    "calculatedPrice": "Calculated Price",
+    "finalPrice": "Final Price",
+    "effectiveDate": "Effective Date",
+    "isActive": "Active"
+  },
+  "placeholders": {
+    "product": "Select product",
+    "fromLocation": "Korea HQ",
+    "toLocation": "Select destination branch",
+    "purchasePrice": "e.g., 5000",
+    "transferCost": "e.g., 500",
+    "exchangeRate": "e.g., 18.5",
+    "hqMargin": "e.g., 10",
+    "branchMargin": "e.g., 30",
+    "finalPrice": "Enter final selling price"
+  },
+  "messages": {
+    "createSuccess": "Pricing configuration saved successfully",
+    "updateSuccess": "Pricing configuration updated successfully",
+    "deleteSuccess": "Pricing configuration deleted successfully",
+    "createError": "Failed to save pricing configuration",
+    "updateError": "Failed to update pricing configuration",
+    "deleteError": "Failed to delete pricing configuration",
+    "loadError": "Failed to load pricing configurations",
+    "calculateFirst": "Please click 'Calculate Price' first",
+    "invalidMargin": "Total margin cannot exceed 100%"
+  },
+  "calculation": {
+    "formula": "Pricing Formula",
+    "step1": "Local Cost = (Purchase Price + Transfer Cost) / Exchange Rate",
+    "step2": "Selling Price = Local Cost / (1 - HQ Margin% - Branch Margin%)",
+    "result": "Calculated Result"
+  }
+}

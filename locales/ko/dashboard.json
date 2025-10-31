@@ -1,0 +1,20 @@
+{
+  "title": "대시보드",
+  "welcome": "환영합니다",
+  "overview": "개요",
+  "stats": {
+    "totalProducts": "전체 제품 수",
+    "totalStock": "총 재고 가치",
+    "todaySales": "오늘 판매",
+    "monthlySales": "월간 판매",
+    "lowStock": "재고 부족 품목",
+    "expiringItems": "유통기한 임박 품목",
+    "pendingOrders": "대기 중인 주문",
+    "totalLocations": "총 위치 수"
+  },
+  "recentActivity": "최근 활동",
+  "quickActions": "빠른 작업",
+  "stockAlerts": "재고 알림",
+  "salesChart": "판매 현황",
+  "inventoryStatus": "재고 상태"
+}

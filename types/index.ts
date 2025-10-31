@@ -9,6 +9,9 @@ export type LocationType = 'HQ' | 'Branch'
 // Currency types
 export type Currency = 'KRW' | 'VND' | 'CNY'
 
+// Language types
+export type Language = 'en' | 'ko' | 'vi' | 'zh'
+
 // Purchase order status
 export type POStatus = 'Draft' | 'Approved' | 'Received'
 
@@ -62,6 +65,7 @@ export interface User {
   name: string
   role: UserRole
   location_id: string | null
+  preferred_language: Language
   created_at: string
   updated_at: string
 }

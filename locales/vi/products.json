@@ -1,0 +1,54 @@
+{
+  "title": "Sản phẩm",
+  "addProduct": "Thêm sản phẩm",
+  "editProduct": "Chỉnh sửa sản phẩm",
+  "deleteProduct": "Xóa sản phẩm",
+  "productDetails": "Chi tiết sản phẩm",
+  "fields": {
+    "sku": "SKU",
+    "name": "Tên sản phẩm",
+    "nameKo": "Tên sản phẩm (Tiếng Hàn)",
+    "nameVi": "Tên sản phẩm (Tiếng Việt)",
+    "nameCn": "Tên sản phẩm (Tiếng Trung)",
+    "category": "Danh mục",
+    "unit": "Đơn vị",
+    "shelfLifeDays": "Hạn sử dụng (Ngày)",
+    "description": "Mô tả",
+    "isActive": "Hoạt động",
+    "createdAt": "Ngày tạo",
+    "updatedAt": "Ngày cập nhật"
+  },
+  "placeholders": {
+    "sku": "VD: SKU-001",
+    "name": "Nhập tên sản phẩm",
+    "nameKo": "제품명을 입력하세요",
+    "nameVi": "Nhập tên sản phẩm",
+    "nameCn": "输入产品名称",
+    "category": "Chọn danh mục",
+    "unit": "Chọn đơn vị",
+    "shelfLifeDays": "VD: 365",
+    "description": "Nhập mô tả sản phẩm"
+  },
+  "categories": {
+    "skincare": "Chăm sóc da",
+    "cosmetics": "Mỹ phẩm",
+    "haircare": "Chăm sóc tóc",
+    "bodycare": "Chăm sóc cơ thể",
+    "other": "Khác"
+  },
+  "units": {
+    "EA": "Cái",
+    "BOX": "Hộp",
+    "PACK": "Gói"
+  },
+  "messages": {
+    "createSuccess": "Tạo sản phẩm thành công",
+    "updateSuccess": "Cập nhật sản phẩm thành công",
+    "deleteSuccess": "Xóa sản phẩm thành công",
+    "createError": "Tạo sản phẩm thất bại",
+    "updateError": "Cập nhật sản phẩm thất bại",
+    "deleteError": "Xóa sản phẩm thất bại",
+    "loadError": "Tải danh sách sản phẩm thất bại",
+    "skuExists": "SKU đã tồn tại"
+  }
+}

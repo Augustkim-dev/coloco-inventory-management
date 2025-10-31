@@ -1,0 +1,41 @@
+{
+  "title": "Bán hàng",
+  "addSale": "Thêm bán hàng",
+  "editSale": "Chỉnh sửa bán hàng",
+  "deleteSale": "Xóa bán hàng",
+  "saleDetails": "Chi tiết bán hàng",
+  "fields": {
+    "saleDate": "Ngày bán",
+    "location": "Chi nhánh",
+    "product": "Sản phẩm",
+    "quantity": "Số lượng",
+    "unitPrice": "Đơn giá",
+    "totalAmount": "Tổng tiền",
+    "channel": "Kênh bán hàng",
+    "notes": "Ghi chú",
+    "createdAt": "Ngày tạo"
+  },
+  "placeholders": {
+    "saleDate": "Chọn ngày bán",
+    "location": "Chọn chi nhánh",
+    "product": "Chọn sản phẩm",
+    "quantity": "Nhập số lượng",
+    "unitPrice": "Giá sẽ được điền tự động",
+    "notes": "Nhập ghi chú (tùy chọn)"
+  },
+  "channels": {
+    "online": "Trực tuyến",
+    "offline": "Ngoại tuyến",
+    "live_commerce": "Live Commerce"
+  },
+  "messages": {
+    "createSuccess": "Ghi nhận bán hàng thành công",
+    "createError": "Ghi nhận bán hàng thất bại",
+    "deleteSuccess": "Xóa bán hàng thành công",
+    "deleteError": "Xóa bán hàng thất bại",
+    "loadError": "Tải danh sách bán hàng thất bại",
+    "insufficientStock": "Hàng tồn kho không đủ. Có sẵn: {available}",
+    "priceNotConfigured": "Giá chưa được cấu hình cho sản phẩm và chi nhánh này",
+    "quantityRequired": "Vui lòng nhập số lượng"
+  }
+}
