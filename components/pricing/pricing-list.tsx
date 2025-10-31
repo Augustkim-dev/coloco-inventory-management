@@ -32,6 +32,7 @@ interface PricingConfig {
     name: string
     country_code: string
     currency: string
+    display_order: number
   }
   purchase_price: number
   transfer_cost: number
@@ -48,6 +49,7 @@ interface GroupedPricing {
   branchName: string
   countryCode: string
   currency: string
+  displayOrder: number
   configs: PricingConfig[]
 }
 
@@ -68,6 +70,7 @@ export function PricingList({
           branchName: config.to_location.name,
           countryCode: config.to_location.country_code,
           currency: config.currency,
+          displayOrder: config.to_location.display_order,
           configs: [],
         }
       }
@@ -75,10 +78,8 @@ export function PricingList({
       groups[key].configs.push(config)
     })
 
-    // Branch 이름순으로 정렬
-    return Object.values(groups).sort((a, b) =>
-      a.branchName.localeCompare(b.branchName)
-    )
+    // display_order 기준으로 정렬 (Reorder Location 설정 따름)
+    return Object.values(groups).sort((a, b) => a.displayOrder - b.displayOrder)
   }, [pricingConfigs])
 
   // 데이터가 없는 경우

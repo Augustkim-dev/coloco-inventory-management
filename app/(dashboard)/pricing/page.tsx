@@ -13,7 +13,7 @@ export default async function PricingPage() {
       `
       *,
       product:products!inner(sku, name),
-      to_location:locations!pricing_configs_to_location_id_fkey(name, country_code, currency)
+      to_location:locations!pricing_configs_to_location_id_fkey(name, country_code, currency, display_order)
     `
     )
     .order('updated_at', { ascending: false })
