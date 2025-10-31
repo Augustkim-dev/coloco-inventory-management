@@ -1,0 +1,14 @@
+
+> arno-inventory@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.18
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 3s
+ ✓ Compiled /middleware in 359ms (157 modules)
+[MIDDLEWARE] Path: /dashboard
+[MIDDLEWARE] User: NO USER
+[MIDDLEWARE] Redirecting to /login

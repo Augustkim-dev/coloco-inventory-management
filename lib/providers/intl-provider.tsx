@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react'
 export function IntlProvider({ children }: { children: React.ReactNode }) {
   const { language, isLoading } = useLanguage()
   const [messages, setMessages] = useState<any>({
-    common: {},
     navigation: {},
     auth: {},
     products: {},
@@ -51,7 +50,7 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
         ])
 
         setMessages({
-          common: common.default,
+          ...common.default,
           navigation: navigation.default,
           auth: auth.default,
           products: products.default,
