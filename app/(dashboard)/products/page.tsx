@@ -4,8 +4,11 @@ import { ProductsList } from '@/components/products/products-list'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
+import { getServerTranslations, getCommonTranslations } from '@/lib/i18n/server-translations'
 
 export default async function ProductsPage() {
+  const t = await getServerTranslations('products')
+  const tCommon = await getCommonTranslations()
   const supabase = await createClient()
 
   // Check authentication
@@ -34,20 +37,20 @@ export default async function ProductsPage() {
     .order('created_at', { ascending: false })
 
   if (error) {
-    return <div>Error loading products: {error.message}</div>
+    return <div>{tCommon.messages.loadError}: {error.message}</div>
   }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Products</h1>
+          <h1 className="text-3xl font-bold">{t.title}</h1>
           <p className="text-gray-500 mt-2">Manage product catalog and information</p>
         </div>
         <Link href="/products/new">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Add Product
+            {t.addProduct}
           </Button>
         </Link>
       </div>

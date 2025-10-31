@@ -1,0 +1,36 @@
+{
+  "title": "Suppliers",
+  "addSupplier": "Add Supplier",
+  "editSupplier": "Edit Supplier",
+  "deleteSupplier": "Delete Supplier",
+  "supplierDetails": "Supplier Details",
+  "fields": {
+    "name": "Supplier Name",
+    "code": "Supplier Code",
+    "contactPerson": "Contact Person",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "country": "Country",
+    "isActive": "Active",
+    "createdAt": "Created At"
+  },
+  "placeholders": {
+    "name": "Enter supplier name",
+    "code": "e.g., SUP-001",
+    "contactPerson": "Enter contact person name",
+    "email": "supplier@example.com",
+    "phone": "Enter phone number",
+    "address": "Enter full address",
+    "country": "Select country"
+  },
+  "messages": {
+    "createSuccess": "Supplier created successfully",
+    "updateSuccess": "Supplier updated successfully",
+    "deleteSuccess": "Supplier deleted successfully",
+    "createError": "Failed to create supplier",
+    "updateError": "Failed to update supplier",
+    "deleteError": "Failed to delete supplier",
+    "loadError": "Failed to load suppliers"
+  }
+}

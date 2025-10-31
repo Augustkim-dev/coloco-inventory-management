@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { redirect } from 'next/navigation'
+import { getServerTranslations } from '@/lib/i18n/server-translations'
 
 export default async function ExchangeRatesPage() {
+  const t = await getServerTranslations('exchangeRates')
   const supabase = await createClient()
 
   // 인증 확인
@@ -36,7 +38,7 @@ export default async function ExchangeRatesPage() {
 
   if (error) {
     console.error('Error fetching exchange rates:', error)
-    return <div>Error loading exchange rates: {error.message}</div>
+    return <div>{t.messages.loadError}: {error.message}</div>
   }
 
   return (
@@ -44,7 +46,7 @@ export default async function ExchangeRatesPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Exchange Rates</h1>
+          <h1 className="text-3xl font-bold">{t.title}</h1>
           <p className="text-gray-500 mt-2">
             Manage exchange rates for currency conversions in pricing
             calculations
@@ -53,7 +55,7 @@ export default async function ExchangeRatesPage() {
         <Link href="/exchange-rates/new">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Add Exchange Rate
+            {t.addRate}
           </Button>
         </Link>
       </div>

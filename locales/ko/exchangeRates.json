@@ -1,0 +1,27 @@
+{
+  "title": "환율",
+  "addRate": "환율 추가",
+  "editRate": "환율 수정",
+  "deleteRate": "환율 삭제",
+  "fields": {
+    "fromCurrency": "출발 통화",
+    "toCurrency": "도착 통화",
+    "rate": "환율",
+    "effectiveDate": "적용일",
+    "notes": "비고",
+    "isActive": "활성"
+  },
+  "placeholders": {
+    "rate": "예: 18.5",
+    "notes": "비고를 입력하세요 (선택사항)"
+  },
+  "messages": {
+    "createSuccess": "환율이 성공적으로 생성되었습니다",
+    "updateSuccess": "환율이 성공적으로 수정되었습니다",
+    "deleteSuccess": "환율이 성공적으로 삭제되었습니다",
+    "createError": "환율 생성에 실패했습니다",
+    "updateError": "환율 수정에 실패했습니다",
+    "deleteError": "환율 삭제에 실패했습니다",
+    "loadError": "환율 불러오기에 실패했습니다"
+  }
+}

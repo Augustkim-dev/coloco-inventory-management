@@ -1,0 +1,38 @@
+{
+  "title": "Inventory",
+  "transfer": "Transfer",
+  "transferInventory": "Transfer Inventory",
+  "viewMode": {
+    "table": "Table View",
+    "kanban": "Kanban View"
+  },
+  "fields": {
+    "location": "Location",
+    "product": "Product",
+    "batch": "Batch",
+    "quantity": "Quantity",
+    "available": "Available",
+    "reserved": "Reserved",
+    "expiryDate": "Expiry Date",
+    "manufactureDate": "Manufacture Date",
+    "qualityStatus": "Quality Status"
+  },
+  "transfer": {
+    "from": "From Location",
+    "to": "To Location",
+    "selectProduct": "Select Product",
+    "quantity": "Transfer Quantity",
+    "submit": "Transfer Stock"
+  },
+  "messages": {
+    "transferSuccess": "Stock transferred successfully",
+    "transferError": "Failed to transfer stock",
+    "insufficientStock": "Insufficient stock",
+    "loadError": "Failed to load inventory"
+  },
+  "status": {
+    "OK": "OK",
+    "Damaged": "Damaged",
+    "Quarantine": "Quarantine"
+  }
+}

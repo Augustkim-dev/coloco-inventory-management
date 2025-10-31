@@ -1,0 +1,36 @@
+{
+  "title": "공급업체",
+  "addSupplier": "공급업체 추가",
+  "editSupplier": "공급업체 수정",
+  "deleteSupplier": "공급업체 삭제",
+  "supplierDetails": "공급업체 상세정보",
+  "fields": {
+    "name": "공급업체명",
+    "code": "공급업체 코드",
+    "contactPerson": "담당자",
+    "email": "이메일",
+    "phone": "전화번호",
+    "address": "주소",
+    "country": "국가",
+    "isActive": "활성",
+    "createdAt": "생성일"
+  },
+  "placeholders": {
+    "name": "공급업체명을 입력하세요",
+    "code": "예: SUP-001",
+    "contactPerson": "담당자명을 입력하세요",
+    "email": "supplier@example.com",
+    "phone": "전화번호를 입력하세요",
+    "address": "전체 주소를 입력하세요",
+    "country": "국가를 선택하세요"
+  },
+  "messages": {
+    "createSuccess": "공급업체가 성공적으로 생성되었습니다",
+    "updateSuccess": "공급업체가 성공적으로 수정되었습니다",
+    "deleteSuccess": "공급업체가 성공적으로 삭제되었습니다",
+    "createError": "공급업체 생성에 실패했습니다",
+    "updateError": "공급업체 수정에 실패했습니다",
+    "deleteError": "공급업체 삭제에 실패했습니다",
+    "loadError": "공급업체 불러오기에 실패했습니다"
+  }
+}

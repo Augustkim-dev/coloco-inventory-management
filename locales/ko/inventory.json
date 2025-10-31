@@ -1,0 +1,38 @@
+{
+  "title": "재고",
+  "transfer": "이동",
+  "transferInventory": "재고 이동",
+  "viewMode": {
+    "table": "테이블 보기",
+    "kanban": "칸반 보기"
+  },
+  "fields": {
+    "location": "위치",
+    "product": "제품",
+    "batch": "배치",
+    "quantity": "수량",
+    "available": "가용",
+    "reserved": "예약",
+    "expiryDate": "유통기한",
+    "manufactureDate": "제조일자",
+    "qualityStatus": "품질 상태"
+  },
+  "transfer": {
+    "from": "출발 위치",
+    "to": "도착 위치",
+    "selectProduct": "제품 선택",
+    "quantity": "이동 수량",
+    "submit": "재고 이동"
+  },
+  "messages": {
+    "transferSuccess": "재고가 성공적으로 이동되었습니다",
+    "transferError": "재고 이동에 실패했습니다",
+    "insufficientStock": "재고가 부족합니다",
+    "loadError": "재고 불러오기에 실패했습니다"
+  },
+  "status": {
+    "OK": "정상",
+    "Damaged": "손상",
+    "Quarantine": "격리"
+  }
+}

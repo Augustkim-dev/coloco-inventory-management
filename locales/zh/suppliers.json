@@ -1,0 +1,36 @@
+{
+  "title": "供应商",
+  "addSupplier": "添加供应商",
+  "editSupplier": "编辑供应商",
+  "deleteSupplier": "删除供应商",
+  "supplierDetails": "供应商详情",
+  "fields": {
+    "name": "供应商名称",
+    "code": "供应商代码",
+    "contactPerson": "联系人",
+    "email": "邮箱",
+    "phone": "电话",
+    "address": "地址",
+    "country": "国家",
+    "isActive": "启用",
+    "createdAt": "创建日期"
+  },
+  "placeholders": {
+    "name": "请输入供应商名称",
+    "code": "例如: SUP-001",
+    "contactPerson": "请输入联系人姓名",
+    "email": "supplier@example.com",
+    "phone": "请输入电话号码",
+    "address": "请输入完整地址",
+    "country": "请选择国家"
+  },
+  "messages": {
+    "createSuccess": "供应商创建成功",
+    "updateSuccess": "供应商更新成功",
+    "deleteSuccess": "供应商删除成功",
+    "createError": "供应商创建失败",
+    "updateError": "供应商更新失败",
+    "deleteError": "供应商删除失败",
+    "loadError": "加载供应商列表失败"
+  }
+}

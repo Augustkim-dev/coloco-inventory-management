@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ArrowRightLeft } from 'lucide-react'
 import { redirect } from 'next/navigation'
+import { getServerTranslations } from '@/lib/i18n/server-translations'
 
 export default async function InventoryPage() {
+  const t = await getServerTranslations('inventory')
   const supabase = await createClient()
 
   // Check authentication
@@ -53,7 +55,7 @@ export default async function InventoryPage() {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
-          <p className="text-destructive mb-2">Error loading inventory</p>
+          <p className="text-destructive mb-2">{t.messages.loadError}</p>
           <p className="text-sm text-muted-foreground">{error.message}</p>
         </div>
       </div>
@@ -70,7 +72,7 @@ export default async function InventoryPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Inventory</h1>
+          <h1 className="text-3xl font-bold">{t.title}</h1>
           <p className="text-muted-foreground mt-1">
             {profile.role === 'HQ_Admin'
               ? 'View and manage inventory across all locations'
@@ -81,7 +83,7 @@ export default async function InventoryPage() {
           <Link href="/inventory/transfer">
             <Button>
               <ArrowRightLeft className="mr-2 h-4 w-4" />
-              Transfer Stock
+              {t.transfer}
             </Button>
           </Link>
         )}

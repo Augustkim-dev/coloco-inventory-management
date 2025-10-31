@@ -37,6 +37,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           if (userData?.preferred_language && locales.includes(userData.preferred_language as Language)) {
             setLanguageState(userData.preferred_language as Language)
             localStorage.setItem(STORAGE_KEY, userData.preferred_language)
+            document.cookie = `preferred-language=${userData.preferred_language}; path=/; max-age=31536000; SameSite=Lax`
             setIsLoading(false)
             return
           }
@@ -46,6 +47,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         const stored = localStorage.getItem(STORAGE_KEY)
         if (stored && locales.includes(stored as Language)) {
           setLanguageState(stored as Language)
+          document.cookie = `preferred-language=${stored}; path=/; max-age=31536000; SameSite=Lax`
           setIsLoading(false)
           return
         }
@@ -55,6 +57,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         if (locales.includes(browserLang as Language)) {
           setLanguageState(browserLang as Language)
           localStorage.setItem(STORAGE_KEY, browserLang)
+          document.cookie = `preferred-language=${browserLang}; path=/; max-age=31536000; SameSite=Lax`
           setIsLoading(false)
           return
         }
@@ -62,6 +65,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         // Priority 4: Use default
         setLanguageState(defaultLocale)
         localStorage.setItem(STORAGE_KEY, defaultLocale)
+        document.cookie = `preferred-language=${defaultLocale}; path=/; max-age=31536000; SameSite=Lax`
       } catch (error) {
         console.error('Error initializing language:', error)
         setLanguageState(defaultLocale)
@@ -81,6 +85,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
       // Update localStorage
       localStorage.setItem(STORAGE_KEY, newLanguage)
+
+      // Update cookie for server-side access
+      document.cookie = `preferred-language=${newLanguage}; path=/; max-age=31536000; SameSite=Lax`
 
       // Update DB if user is logged in
       const { data: { user } } = await supabase.auth.getUser()

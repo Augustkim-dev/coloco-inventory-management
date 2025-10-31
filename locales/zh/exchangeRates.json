@@ -1,0 +1,27 @@
+{
+  "title": "汇率",
+  "addRate": "添加汇率",
+  "editRate": "编辑汇率",
+  "deleteRate": "删除汇率",
+  "fields": {
+    "fromCurrency": "源货币",
+    "toCurrency": "目标货币",
+    "rate": "汇率",
+    "effectiveDate": "生效日期",
+    "notes": "备注",
+    "isActive": "启用"
+  },
+  "placeholders": {
+    "rate": "例如: 18.5",
+    "notes": "请输入备注 (可选)"
+  },
+  "messages": {
+    "createSuccess": "汇率创建成功",
+    "updateSuccess": "汇率更新成功",
+    "deleteSuccess": "汇率删除成功",
+    "createError": "汇率创建失败",
+    "updateError": "汇率更新失败",
+    "deleteError": "汇率删除失败",
+    "loadError": "加载汇率列表失败"
+  }
+}

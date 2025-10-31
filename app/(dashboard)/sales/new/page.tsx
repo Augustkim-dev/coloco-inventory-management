@@ -2,8 +2,11 @@ import { createClient } from '@/lib/supabase/server'
 import { SaleForm } from '@/components/sales/sale-form'
 import { redirect } from 'next/navigation'
 import { Currency } from '@/types'
+import { getServerTranslations, getCommonTranslations } from '@/lib/i18n/server-translations'
 
 export default async function NewSalePage() {
+  const t = await getServerTranslations('sales')
+  const tCommon = await getCommonTranslations()
   const supabase = await createClient()
 
   // Get current user
@@ -49,7 +52,7 @@ export default async function NewSalePage() {
     return (
       <div className="p-6">
         <div className="text-red-600">
-          Error loading products: {productsError.message}
+          {tCommon.messages.loadError}: {productsError.message}
         </div>
       </div>
     )
@@ -61,7 +64,7 @@ export default async function NewSalePage() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Add Sale</h1>
+        <h1 className="text-3xl font-bold">{t.addSale}</h1>
         <p className="text-gray-600 mt-1">Record a new sale for your location</p>
       </div>
       <SaleForm

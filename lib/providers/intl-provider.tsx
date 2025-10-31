@@ -14,6 +14,10 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
     sales: {},
     pricing: {},
     dashboard: {},
+    inventory: {},
+    suppliers: {},
+    locations: {},
+    exchangeRates: {},
   })
 
   useEffect(() => {
@@ -28,6 +32,10 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
           sales,
           pricing,
           dashboard,
+          inventory,
+          suppliers,
+          locations,
+          exchangeRates,
         ] = await Promise.all([
           import(`@/locales/${language}/common.json`),
           import(`@/locales/${language}/navigation.json`),
@@ -36,6 +44,10 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
           import(`@/locales/${language}/sales.json`),
           import(`@/locales/${language}/pricing.json`),
           import(`@/locales/${language}/dashboard.json`),
+          import(`@/locales/${language}/inventory.json`),
+          import(`@/locales/${language}/suppliers.json`),
+          import(`@/locales/${language}/locations.json`),
+          import(`@/locales/${language}/exchangeRates.json`),
         ])
 
         setMessages({
@@ -46,6 +58,10 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
           sales: sales.default,
           pricing: pricing.default,
           dashboard: dashboard.default,
+          inventory: inventory.default,
+          suppliers: suppliers.default,
+          locations: locations.default,
+          exchangeRates: exchangeRates.default,
         })
       } catch (error) {
         console.error('Error loading messages:', error)

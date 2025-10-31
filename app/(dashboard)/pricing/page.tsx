@@ -3,8 +3,10 @@ import { PricingList } from '@/components/pricing/pricing-list'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
+import { getServerTranslations } from '@/lib/i18n/server-translations'
 
 export default async function PricingPage() {
+  const t = await getServerTranslations('pricing')
   const supabase = await createClient()
 
   const { data: pricingConfigs, error } = await supabase
@@ -23,7 +25,7 @@ export default async function PricingPage() {
     return (
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <h3 className="text-red-800 font-semibold">Error loading pricing configurations</h3>
+          <h3 className="text-red-800 font-semibold">{t.messages.loadError}</h3>
           <p className="text-red-600 text-sm mt-1">{error.message}</p>
         </div>
       </div>
@@ -34,7 +36,7 @@ export default async function PricingPage() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Pricing Configuration</h1>
+          <h1 className="text-3xl font-bold">{t.title}</h1>
           <p className="text-gray-600 mt-1">
             Manage selling prices based on costs, margins, and exchange rates
           </p>
@@ -42,7 +44,7 @@ export default async function PricingPage() {
         <Link href="/pricing/new">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Add Pricing
+            {t.addConfig}
           </Button>
         </Link>
       </div>

@@ -1,0 +1,27 @@
+{
+  "title": "Tỷ giá",
+  "addRate": "Thêm tỷ giá",
+  "editRate": "Sửa tỷ giá",
+  "deleteRate": "Xóa tỷ giá",
+  "fields": {
+    "fromCurrency": "Từ tiền tệ",
+    "toCurrency": "Sang tiền tệ",
+    "rate": "Tỷ giá",
+    "effectiveDate": "Ngày hiệu lực",
+    "notes": "Ghi chú",
+    "isActive": "Hoạt động"
+  },
+  "placeholders": {
+    "rate": "Ví dụ: 18.5",
+    "notes": "Nhập ghi chú (không bắt buộc)"
+  },
+  "messages": {
+    "createSuccess": "Tạo tỷ giá thành công",
+    "updateSuccess": "Cập nhật tỷ giá thành công",
+    "deleteSuccess": "Xóa tỷ giá thành công",
+    "createError": "Tạo tỷ giá thất bại",
+    "updateError": "Cập nhật tỷ giá thất bại",
+    "deleteError": "Xóa tỷ giá thất bại",
+    "loadError": "Không thể tải danh sách tỷ giá"
+  }
+}

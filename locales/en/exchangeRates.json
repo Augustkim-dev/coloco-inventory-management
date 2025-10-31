@@ -1,0 +1,27 @@
+{
+  "title": "Exchange Rates",
+  "addRate": "Add Exchange Rate",
+  "editRate": "Edit Exchange Rate",
+  "deleteRate": "Delete Rate",
+  "fields": {
+    "fromCurrency": "From Currency",
+    "toCurrency": "To Currency",
+    "rate": "Exchange Rate",
+    "effectiveDate": "Effective Date",
+    "notes": "Notes",
+    "isActive": "Active"
+  },
+  "placeholders": {
+    "rate": "e.g., 18.5",
+    "notes": "Enter any notes (optional)"
+  },
+  "messages": {
+    "createSuccess": "Exchange rate created successfully",
+    "updateSuccess": "Exchange rate updated successfully",
+    "deleteSuccess": "Exchange rate deleted successfully",
+    "createError": "Failed to create exchange rate",
+    "updateError": "Failed to update exchange rate",
+    "deleteError": "Failed to delete exchange rate",
+    "loadError": "Failed to load exchange rates"
+  }
+}

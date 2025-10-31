@@ -1,0 +1,36 @@
+{
+  "title": "위치",
+  "addLocation": "위치 추가",
+  "editLocation": "위치 수정",
+  "deleteLocation": "위치 삭제",
+  "reorderLocations": "위치 순서 변경",
+  "fields": {
+    "name": "위치명",
+    "code": "위치 코드",
+    "type": "유형",
+    "country": "국가",
+    "currency": "통화",
+    "address": "주소",
+    "displayOrder": "표시 순서",
+    "isActive": "활성"
+  },
+  "types": {
+    "HQ": "본사",
+    "Branch": "지점"
+  },
+  "placeholders": {
+    "name": "위치명을 입력하세요",
+    "code": "예: HQ-KR",
+    "address": "전체 주소를 입력하세요"
+  },
+  "messages": {
+    "createSuccess": "위치가 성공적으로 생성되었습니다",
+    "updateSuccess": "위치가 성공적으로 수정되었습니다",
+    "deleteSuccess": "위치가 성공적으로 삭제되었습니다",
+    "reorderSuccess": "위치 순서가 성공적으로 변경되었습니다",
+    "createError": "위치 생성에 실패했습니다",
+    "updateError": "위치 수정에 실패했습니다",
+    "deleteError": "위치 삭제에 실패했습니다",
+    "loadError": "위치 불러오기에 실패했습니다"
+  }
+}

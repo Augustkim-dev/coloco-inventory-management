@@ -1,0 +1,36 @@
+{
+  "title": "地点",
+  "addLocation": "添加地点",
+  "editLocation": "编辑地点",
+  "deleteLocation": "删除地点",
+  "reorderLocations": "重新排序地点",
+  "fields": {
+    "name": "地点名称",
+    "code": "地点代码",
+    "type": "类型",
+    "country": "国家",
+    "currency": "货币",
+    "address": "地址",
+    "displayOrder": "显示顺序",
+    "isActive": "启用"
+  },
+  "types": {
+    "HQ": "总部",
+    "Branch": "分支"
+  },
+  "placeholders": {
+    "name": "请输入地点名称",
+    "code": "例如: HQ-KR",
+    "address": "请输入完整地址"
+  },
+  "messages": {
+    "createSuccess": "地点创建成功",
+    "updateSuccess": "地点更新成功",
+    "deleteSuccess": "地点删除成功",
+    "reorderSuccess": "地点顺序更新成功",
+    "createError": "地点创建失败",
+    "updateError": "地点更新失败",
+    "deleteError": "地点删除失败",
+    "loadError": "加载地点列表失败"
+  }
+}

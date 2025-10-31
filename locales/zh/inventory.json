@@ -1,0 +1,38 @@
+{
+  "title": "库存",
+  "transfer": "转移",
+  "transferInventory": "转移库存",
+  "viewMode": {
+    "table": "表格视图",
+    "kanban": "看板视图"
+  },
+  "fields": {
+    "location": "位置",
+    "product": "产品",
+    "batch": "批次",
+    "quantity": "数量",
+    "available": "可用",
+    "reserved": "预留",
+    "expiryDate": "有效期",
+    "manufactureDate": "生产日期",
+    "qualityStatus": "质量状态"
+  },
+  "transfer": {
+    "from": "起始位置",
+    "to": "目标位置",
+    "selectProduct": "选择产品",
+    "quantity": "转移数量",
+    "submit": "转移库存"
+  },
+  "messages": {
+    "transferSuccess": "库存转移成功",
+    "transferError": "库存转移失败",
+    "insufficientStock": "库存不足",
+    "loadError": "加载库存失败"
+  },
+  "status": {
+    "OK": "正常",
+    "Damaged": "损坏",
+    "Quarantine": "隔离"
+  }
+}

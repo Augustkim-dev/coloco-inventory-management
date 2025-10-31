@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { redirect } from 'next/navigation'
+import { getServerTranslations } from '@/lib/i18n/server-translations'
 
 export default async function SalesPage() {
+  const t = await getServerTranslations('sales')
   const supabase = await createClient()
 
   // Get current user
@@ -53,7 +55,7 @@ export default async function SalesPage() {
     return (
       <div className="p-6">
         <div className="text-red-600">
-          Error loading sales: {error.message}
+          {t.messages.loadError}: {error.message}
         </div>
       </div>
     )
@@ -63,7 +65,7 @@ export default async function SalesPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Sales</h1>
+          <h1 className="text-3xl font-bold">{t.title}</h1>
           <p className="text-gray-600 mt-1">
             {profile?.role === 'Branch_Manager'
               ? 'View and manage your location sales'
@@ -74,7 +76,7 @@ export default async function SalesPage() {
           <Link href="/sales/new">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Add Sale
+              {t.addSale}
             </Button>
           </Link>
         )}

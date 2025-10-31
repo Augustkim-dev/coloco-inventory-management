@@ -1,0 +1,36 @@
+{
+  "title": "Nhà cung cấp",
+  "addSupplier": "Thêm nhà cung cấp",
+  "editSupplier": "Sửa nhà cung cấp",
+  "deleteSupplier": "Xóa nhà cung cấp",
+  "supplierDetails": "Chi tiết nhà cung cấp",
+  "fields": {
+    "name": "Tên nhà cung cấp",
+    "code": "Mã nhà cung cấp",
+    "contactPerson": "Người liên hệ",
+    "email": "Email",
+    "phone": "Số điện thoại",
+    "address": "Địa chỉ",
+    "country": "Quốc gia",
+    "isActive": "Hoạt động",
+    "createdAt": "Ngày tạo"
+  },
+  "placeholders": {
+    "name": "Nhập tên nhà cung cấp",
+    "code": "Ví dụ: SUP-001",
+    "contactPerson": "Nhập tên người liên hệ",
+    "email": "supplier@example.com",
+    "phone": "Nhập số điện thoại",
+    "address": "Nhập địa chỉ đầy đủ",
+    "country": "Chọn quốc gia"
+  },
+  "messages": {
+    "createSuccess": "Tạo nhà cung cấp thành công",
+    "updateSuccess": "Cập nhật nhà cung cấp thành công",
+    "deleteSuccess": "Xóa nhà cung cấp thành công",
+    "createError": "Tạo nhà cung cấp thất bại",
+    "updateError": "Cập nhật nhà cung cấp thất bại",
+    "deleteError": "Xóa nhà cung cấp thất bại",
+    "loadError": "Không thể tải danh sách nhà cung cấp"
+  }
+}

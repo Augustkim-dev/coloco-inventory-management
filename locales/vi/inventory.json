@@ -1,0 +1,38 @@
+{
+  "title": "Kho hàng",
+  "transfer": "Chuyển kho",
+  "transferInventory": "Chuyển kho hàng",
+  "viewMode": {
+    "table": "Xem dạng bảng",
+    "kanban": "Xem dạng Kanban"
+  },
+  "fields": {
+    "location": "Vị trí",
+    "product": "Sản phẩm",
+    "batch": "Lô hàng",
+    "quantity": "Số lượng",
+    "available": "Có sẵn",
+    "reserved": "Đã đặt",
+    "expiryDate": "Ngày hết hạn",
+    "manufactureDate": "Ngày sản xuất",
+    "qualityStatus": "Trạng thái chất lượng"
+  },
+  "transfer": {
+    "from": "Từ vị trí",
+    "to": "Đến vị trí",
+    "selectProduct": "Chọn sản phẩm",
+    "quantity": "Số lượng chuyển",
+    "submit": "Chuyển kho"
+  },
+  "messages": {
+    "transferSuccess": "Chuyển kho thành công",
+    "transferError": "Chuyển kho thất bại",
+    "insufficientStock": "Không đủ hàng trong kho",
+    "loadError": "Không thể tải dữ liệu kho hàng"
+  },
+  "status": {
+    "OK": "Tốt",
+    "Damaged": "Hỏng",
+    "Quarantine": "Cách ly"
+  }
+}

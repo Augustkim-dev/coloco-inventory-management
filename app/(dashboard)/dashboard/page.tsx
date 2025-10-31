@@ -2,8 +2,10 @@ import { createClient } from "@/lib/supabase/server"
 import { DashboardStats } from "@/components/dashboard/dashboard-stats"
 import { ExpiryWarnings } from "@/components/dashboard/expiry-warnings"
 import { RecentSales } from "@/components/dashboard/recent-sales"
+import { getServerTranslations } from "@/lib/i18n/server-translations"
 
 export default async function DashboardPage() {
+  const t = await getServerTranslations('dashboard')
   const supabase = await createClient()
 
   // Get current user information
@@ -94,9 +96,9 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t.title}</h1>
         <p className="text-muted-foreground">
-          Welcome to Arno Cosmetics Inventory Management System
+          {t.welcome}
         </p>
       </div>
 

@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LocationsList } from '@/components/locations/locations-list'
+import { getServerTranslations } from '@/lib/i18n/server-translations'
 
 export default async function LocationsPage() {
+  const t = await getServerTranslations('locations')
   const supabase = await createClient()
 
   // Check user authentication and permissions
@@ -32,14 +34,14 @@ export default async function LocationsPage() {
     .order('display_order', { ascending: true })
 
   if (error) {
-    return <div>Error loading locations: {error.message}</div>
+    return <div>{t.messages.loadError}: {error.message}</div>
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Locations</h1>
+          <h1 className="text-3xl font-bold">{t.title}</h1>
           <p className="text-gray-500 mt-2">
             Manage headquarters and branch information
           </p>
@@ -49,7 +51,7 @@ export default async function LocationsPage() {
             href="/locations/reorder"
             className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
           >
-            Reorder Locations
+            {t.reorderLocations}
           </a>
         )}
       </div>

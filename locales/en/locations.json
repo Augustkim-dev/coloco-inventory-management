@@ -1,0 +1,36 @@
+{
+  "title": "Locations",
+  "addLocation": "Add Location",
+  "editLocation": "Edit Location",
+  "deleteLocation": "Delete Location",
+  "reorderLocations": "Reorder Locations",
+  "fields": {
+    "name": "Location Name",
+    "code": "Location Code",
+    "type": "Type",
+    "country": "Country",
+    "currency": "Currency",
+    "address": "Address",
+    "displayOrder": "Display Order",
+    "isActive": "Active"
+  },
+  "types": {
+    "HQ": "Headquarters",
+    "Branch": "Branch"
+  },
+  "placeholders": {
+    "name": "Enter location name",
+    "code": "e.g., HQ-KR",
+    "address": "Enter full address"
+  },
+  "messages": {
+    "createSuccess": "Location created successfully",
+    "updateSuccess": "Location updated successfully",
+    "deleteSuccess": "Location deleted successfully",
+    "reorderSuccess": "Location order updated successfully",
+    "createError": "Failed to create location",
+    "updateError": "Failed to update location",
+    "deleteError": "Failed to delete location",
+    "loadError": "Failed to load locations"
+  }
+}
