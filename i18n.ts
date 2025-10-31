@@ -30,8 +30,47 @@ export default getRequestConfig(async ({ locale }) => {
     notFound()
   }
 
+  // Load all translation files and merge them
+  const [
+    common,
+    navigation,
+    auth,
+    products,
+    sales,
+    pricing,
+    dashboard,
+    inventory,
+    suppliers,
+    locations,
+    exchangeRates,
+  ] = await Promise.all([
+    import(`./locales/${validLocale}/common.json`),
+    import(`./locales/${validLocale}/navigation.json`),
+    import(`./locales/${validLocale}/auth.json`),
+    import(`./locales/${validLocale}/products.json`),
+    import(`./locales/${validLocale}/sales.json`),
+    import(`./locales/${validLocale}/pricing.json`),
+    import(`./locales/${validLocale}/dashboard.json`),
+    import(`./locales/${validLocale}/inventory.json`),
+    import(`./locales/${validLocale}/suppliers.json`),
+    import(`./locales/${validLocale}/locations.json`),
+    import(`./locales/${validLocale}/exchangeRates.json`),
+  ])
+
   return {
     locale: validLocale,
-    messages: (await import(`./locales/${validLocale}/common.json`)).default,
+    messages: {
+      ...common.default,
+      navigation: navigation.default,
+      auth: auth.default,
+      products: products.default,
+      sales: sales.default,
+      pricing: pricing.default,
+      dashboard: dashboard.default,
+      inventory: inventory.default,
+      suppliers: suppliers.default,
+      locations: locations.default,
+      exchangeRates: exchangeRates.default,
+    },
   }
 })
