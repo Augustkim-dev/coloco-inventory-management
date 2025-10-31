@@ -6,7 +6,15 @@ import { useEffect, useState } from 'react'
 
 export function IntlProvider({ children }: { children: React.ReactNode }) {
   const { language, isLoading } = useLanguage()
-  const [messages, setMessages] = useState<any>({})
+  const [messages, setMessages] = useState<any>({
+    common: {},
+    navigation: {},
+    auth: {},
+    products: {},
+    sales: {},
+    pricing: {},
+    dashboard: {},
+  })
 
   useEffect(() => {
     async function loadMessages() {
@@ -49,10 +57,7 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
     }
   }, [language, isLoading])
 
-  if (isLoading || Object.keys(messages).length === 0) {
-    return <>{children}</>
-  }
-
+  // Always provide the context, even with empty messages during loading
   return (
     <NextIntlClientProvider locale={language} messages={messages}>
       {children}
