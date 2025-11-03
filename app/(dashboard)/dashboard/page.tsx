@@ -1,8 +1,18 @@
 import { createClient } from "@/lib/supabase/server"
 import { DashboardStats } from "@/components/dashboard/dashboard-stats"
 import { ExpiryWarnings } from "@/components/dashboard/expiry-warnings"
-import { RecentSales } from "@/components/dashboard/recent-sales"
+import { DashboardChartsClient } from "@/components/dashboard/dashboard-charts-client"
 import { getServerTranslations } from "@/lib/i18n/server-translations"
+import {
+  enrichSalesWithProfits,
+  aggregateBranchSales,
+  generateSalesTrend,
+  aggregateProductSales,
+  aggregateProfitBreakdown,
+  getTopProducts,
+  calculateDashboardStats
+} from "@/lib/dashboard-data"
+import { fetchLatestExchangeRates } from "@/lib/currency-converter"
 
 export default async function DashboardPage() {
   const t = await getServerTranslations('dashboard')
@@ -19,18 +29,48 @@ export default async function DashboardPage() {
     .eq("id", user?.id)
     .single()
 
-  // Get today's sales
-  const today = new Date().toISOString().split('T')[0]
+  // Get latest exchange rates
+  const exchangeRates = await fetchLatestExchangeRates(supabase)
+
+  // Calculate date ranges
+  const today = new Date()
+  const eightWeeksAgo = new Date()
+  eightWeeksAgo.setDate(eightWeeksAgo.getDate() - 56) // 8 weeks
+
+  // Get sales data with pricing configs for profit calculation
   let salesQuery = supabase
     .from('sales')
-    .select('total_amount, currency')
-    .eq('sale_date', today)
+    .select(`
+      *,
+      location:locations(name, currency),
+      product:products(sku, name),
+      pricing_config:pricing_configs!inner(
+        local_cost,
+        hq_margin_pct,
+        branch_margin_pct
+      )
+    `)
+    .gte('sale_date', eightWeeksAgo.toISOString().split('T')[0])
+    .lte('sale_date', today.toISOString().split('T')[0])
 
   if (profile?.role === 'Branch_Manager') {
     salesQuery = salesQuery.eq('location_id', profile.location_id)
   }
 
-  const { data: todaySales } = await salesQuery
+  const { data: rawSalesData } = await salesQuery
+
+  // Get today's sales for stats cards
+  const todayStr = today.toISOString().split('T')[0]
+  let todaySalesQuery = supabase
+    .from('sales')
+    .select('total_amount, currency')
+    .eq('sale_date', todayStr)
+
+  if (profile?.role === 'Branch_Manager') {
+    todaySalesQuery = todaySalesQuery.eq('location_id', profile.location_id)
+  }
+
+  const { data: todaySales } = await todaySalesQuery
 
   // Get stock value
   let stockQuery = supabase
@@ -71,27 +111,22 @@ export default async function DashboardPage() {
 
   const { data: expiringStock } = await expiryQuery
 
-  // Get recent sales (last 7 days)
-  const sevenDaysAgo = new Date()
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+  // Process sales data
+  const salesWithProfits = enrichSalesWithProfits(rawSalesData || [], exchangeRates)
 
-  let recentSalesQuery = supabase
-    .from('sales')
-    .select(`
-      *,
-      product:products(sku, name),
-      location:locations(name)
-    `)
-    .gte('sale_date', sevenDaysAgo.toISOString().split('T')[0])
-    .order('sale_date', { ascending: false })
-    .order('created_at', { ascending: false })
-    .limit(10)
+  // Generate chart data
+  const branchSalesData = aggregateBranchSales(salesWithProfits)
+  const salesTrendData = generateSalesTrend(salesWithProfits, 'weekly')
+  const productSalesData = aggregateProductSales(salesWithProfits)
+  const profitBreakdownData = aggregateProfitBreakdown(salesWithProfits, exchangeRates)
+  const topProductsData = getTopProducts(salesWithProfits, 5)
 
-  if (profile?.role === 'Branch_Manager') {
-    recentSalesQuery = recentSalesQuery.eq('location_id', profile.location_id)
-  }
-
-  const { data: recentSales } = await recentSalesQuery
+  // Calculate dashboard stats
+  const stats = calculateDashboardStats(
+    salesWithProfits,
+    stockBatches || [],
+    exchangeRates
+  )
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -106,11 +141,23 @@ export default async function DashboardPage() {
         todaySales={todaySales || []}
         stockBatches={stockBatches || []}
         userRole={profile?.role || 'HQ_Admin'}
+        totalHQProfit={stats.totalHQProfit}
+        averageMarginRate={stats.averageMarginRate}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+      {/* Charts Section - Pass to Client Component for interactivity */}
+      <DashboardChartsClient
+        branchSalesData={branchSalesData}
+        salesTrendData={salesTrendData}
+        productSalesData={productSalesData}
+        profitBreakdownData={profitBreakdownData}
+        topProductsData={topProductsData}
+        userRole={profile?.role || 'HQ_Admin'}
+      />
+
+      {/* Expiry Warnings */}
+      <div className="grid grid-cols-1 gap-4 md:gap-6">
         <ExpiryWarnings expiringStock={expiringStock || []} />
-        <RecentSales recentSales={recentSales || []} />
       </div>
     </div>
   )
