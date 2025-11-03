@@ -17,7 +17,7 @@
     "manufactureDate": "Ngày sản xuất",
     "qualityStatus": "Trạng thái chất lượng"
   },
-  "transfer": {
+  "transferForm": {
     "from": "Từ vị trí",
     "to": "Đến vị trí",
     "selectProduct": "Chọn sản phẩm",

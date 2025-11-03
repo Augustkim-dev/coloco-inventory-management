@@ -17,7 +17,7 @@
     "manufactureDate": "Manufacture Date",
     "qualityStatus": "Quality Status"
   },
-  "transfer": {
+  "transferForm": {
     "from": "From Location",
     "to": "To Location",
     "selectProduct": "Select Product",

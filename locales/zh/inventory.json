@@ -17,7 +17,7 @@
     "manufactureDate": "生产日期",
     "qualityStatus": "质量状态"
   },
-  "transfer": {
+  "transferForm": {
     "from": "起始位置",
     "to": "目标位置",
     "selectProduct": "选择产品",

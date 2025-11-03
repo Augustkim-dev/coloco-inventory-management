@@ -6,21 +6,12 @@ import { useEffect, useState } from 'react'
 
 export function IntlProvider({ children }: { children: React.ReactNode }) {
   const { language, isLoading } = useLanguage()
-  const [messages, setMessages] = useState<any>({
-    navigation: {},
-    auth: {},
-    products: {},
-    sales: {},
-    pricing: {},
-    dashboard: {},
-    inventory: {},
-    suppliers: {},
-    locations: {},
-    exchangeRates: {},
-  })
+  const [messages, setMessages] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function loadMessages() {
+      setLoading(true)
       try {
         // Load all message files for the selected language
         const [
@@ -51,6 +42,7 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
 
         setMessages({
           ...common.default,
+          common: common.default,
           navigation: navigation.default,
           auth: auth.default,
           products: products.default,
@@ -64,6 +56,8 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
         })
       } catch (error) {
         console.error('Error loading messages:', error)
+      } finally {
+        setLoading(false)
       }
     }
 
@@ -72,7 +66,18 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
     }
   }, [language, isLoading])
 
-  // Always provide the context, even with empty messages during loading
+  // Don't render children until messages are fully loaded
+  if (loading || !messages) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+          <p className="mt-4 text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <NextIntlClientProvider locale={language} messages={messages}>
       {children}

@@ -17,7 +17,7 @@
     "manufactureDate": "제조일자",
     "qualityStatus": "품질 상태"
   },
-  "transfer": {
+  "transferForm": {
     "from": "출발 위치",
     "to": "도착 위치",
     "selectProduct": "제품 선택",
