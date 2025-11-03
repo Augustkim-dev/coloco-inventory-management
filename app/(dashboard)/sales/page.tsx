@@ -62,19 +62,19 @@ export default async function SalesPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{t.title}</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl md:text-3xl font-bold">{t.title}</h1>
+          <p className="text-sm md:text-base text-gray-600 mt-1">
             {profile?.role === 'Branch_Manager'
               ? 'View and manage your location sales'
               : 'View all sales across locations'}
           </p>
         </div>
         {profile?.role === 'Branch_Manager' && (
-          <Link href="/sales/new">
-            <Button>
+          <Link href="/sales/new" className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
               {t.addSale}
             </Button>

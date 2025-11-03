@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { Sidebar } from "@/components/layout/sidebar"
+import { MobileHeader } from "@/components/layout/mobile-header"
+import { SidebarProvider } from "@/hooks/use-sidebar"
 
 export default async function DashboardLayout({
   children,
@@ -36,13 +38,26 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar
-        userRole={userData.role}
-        userName={userData.name}
-        userEmail={userData.email}
-      />
-      <main className="flex-1 overflow-y-auto bg-gray-50 p-8">{children}</main>
-    </div>
+    <SidebarProvider>
+      <div className="flex h-screen overflow-hidden">
+        {/* Mobile Header - visible only on mobile */}
+        <MobileHeader />
+
+        {/* Sidebar - drawer on mobile, fixed on desktop */}
+        <Sidebar
+          userRole={userData.role}
+          userName={userData.name}
+          userEmail={userData.email}
+        />
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto bg-gray-50">
+          {/* Add top padding on mobile for fixed header */}
+          <div className="pt-16 md:pt-0 p-4 md:p-6 lg:p-8">
+            {children}
+          </div>
+        </main>
+      </div>
+    </SidebarProvider>
   )
 }

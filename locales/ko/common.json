@@ -72,5 +72,16 @@
     "selectDate": "날짜 선택",
     "from": "시작일",
     "to": "종료일"
+  },
+  "sidebar": {
+    "toggle": "사이드바 전환",
+    "collapse": "사이드바 접기",
+    "expand": "사이드바 펼치기",
+    "menu": "메뉴"
+  },
+  "mobile": {
+    "menu": "메뉴",
+    "closeMenu": "메뉴 닫기",
+    "openMenu": "메뉴 열기"
   }
 }

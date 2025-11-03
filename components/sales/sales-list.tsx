@@ -73,7 +73,7 @@ export function SalesList({ sales }: SalesListProps) {
                 Daily Total: {formatCurrency(totalAmount, currency)}
               </div>
             </div>
-            <div className="border rounded-lg overflow-hidden">
+            <div className="border rounded-lg overflow-hidden overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>

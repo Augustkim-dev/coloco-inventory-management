@@ -72,5 +72,16 @@
     "selectDate": "选择日期",
     "from": "从",
     "to": "至"
+  },
+  "sidebar": {
+    "toggle": "切换侧边栏",
+    "collapse": "折叠侧边栏",
+    "expand": "展开侧边栏",
+    "menu": "菜单"
+  },
+  "mobile": {
+    "menu": "菜单",
+    "closeMenu": "关闭菜单",
+    "openMenu": "打开菜单"
   }
 }

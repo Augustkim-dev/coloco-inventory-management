@@ -72,5 +72,16 @@
     "selectDate": "Chọn ngày",
     "from": "Từ",
     "to": "Đến"
+  },
+  "sidebar": {
+    "toggle": "Chuyển đổi thanh bên",
+    "collapse": "Thu gọn thanh bên",
+    "expand": "Mở rộng thanh bên",
+    "menu": "Menu"
+  },
+  "mobile": {
+    "menu": "Menu",
+    "closeMenu": "Đóng menu",
+    "openMenu": "Mở menu"
   }
 }

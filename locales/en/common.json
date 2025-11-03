@@ -72,5 +72,16 @@
     "selectDate": "Select date",
     "from": "From",
     "to": "To"
+  },
+  "sidebar": {
+    "toggle": "Toggle sidebar",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
+    "menu": "Menu"
+  },
+  "mobile": {
+    "menu": "Menu",
+    "closeMenu": "Close menu",
+    "openMenu": "Open menu"
   }
 }

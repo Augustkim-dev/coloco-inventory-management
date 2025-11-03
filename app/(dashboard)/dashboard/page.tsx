@@ -94,10 +94,10 @@ export default async function DashboardPage() {
   const { data: recentSales } = await recentSalesQuery
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">{t.title}</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t.title}</h1>
+        <p className="text-sm md:text-base text-muted-foreground">
           {t.welcome}
         </p>
       </div>
@@ -108,7 +108,7 @@ export default async function DashboardPage() {
         userRole={profile?.role || 'HQ_Admin'}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <ExpiryWarnings expiringStock={expiringStock || []} />
         <RecentSales recentSales={recentSales || []} />
       </div>

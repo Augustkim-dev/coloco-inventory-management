@@ -41,14 +41,14 @@ export default async function ProductsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{t.title}</h1>
-          <p className="text-gray-500 mt-2">Manage product catalog and information</p>
+          <h1 className="text-2xl md:text-3xl font-bold">{t.title}</h1>
+          <p className="text-sm md:text-base text-gray-500 mt-1 md:mt-2">Manage product catalog and information</p>
         </div>
-        <Link href="/products/new">
-          <Button>
+        <Link href="/products/new" className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             {t.addProduct}
           </Button>
