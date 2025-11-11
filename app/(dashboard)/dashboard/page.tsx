@@ -14,19 +14,26 @@ import {
 } from "@/lib/dashboard-data"
 import { fetchLatestExchangeRates } from "@/lib/currency-converter"
 
+// Server component - cannot use useUser hook
+// Instead, we get user info from auth and pass it down
 export default async function DashboardPage() {
   const t = await getServerTranslations('dashboard')
   const supabase = await createClient()
 
-  // Get current user information
+  // Get current user information (auth only, not from users table)
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
+  if (!user) {
+    redirect("/login")
+  }
+
+  // Get profile from users table for role and location filtering
   const { data: profile } = await supabase
     .from("users")
     .select("role, location_id")
-    .eq("id", user?.id)
+    .eq("id", user.id)
     .single()
 
   // Get latest exchange rates
@@ -37,11 +44,18 @@ export default async function DashboardPage() {
   const eightWeeksAgo = new Date()
   eightWeeksAgo.setDate(eightWeeksAgo.getDate() - 56) // 8 weeks
 
-  // Get sales data with pricing configs for profit calculation
+  // Get sales data with pricing configs for profit calculation (optimized)
   let salesQuery = supabase
     .from('sales')
     .select(`
-      *,
+      id,
+      location_id,
+      product_id,
+      sale_date,
+      qty,
+      unit_price,
+      total_amount,
+      currency,
       location:locations(name, currency),
       product:products(sku, name),
       pricing_config:pricing_configs!inner(
@@ -96,7 +110,13 @@ export default async function DashboardPage() {
   let expiryQuery = supabase
     .from('stock_batches')
     .select(`
-      *,
+      id,
+      product_id,
+      location_id,
+      batch_no,
+      qty_on_hand,
+      expiry_date,
+      manufactured_date,
       product:products(sku, name, unit),
       location:locations(name)
     `)

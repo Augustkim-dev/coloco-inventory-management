@@ -29,10 +29,10 @@ export default async function ExchangeRatesPage() {
     redirect('/dashboard')
   }
 
-  // 환율 데이터 조회
+  // 환율 데이터 조회 (optimized: select only needed columns)
   const { data: exchangeRates, error } = await supabase
     .from('exchange_rates')
-    .select('*')
+    .select('id, from_currency, to_currency, rate, effective_date, notes, created_at')
     .order('effective_date', { ascending: false })
     .order('from_currency')
 

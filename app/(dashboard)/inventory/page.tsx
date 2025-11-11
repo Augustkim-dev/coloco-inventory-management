@@ -30,12 +30,21 @@ export default async function InventoryPage() {
     redirect('/login')
   }
 
-  // Build query based on user role
+  // Build query based on user role (optimized: select only needed columns)
   let query = supabase
     .from('stock_batches')
     .select(
       `
-      *,
+      id,
+      product_id,
+      location_id,
+      batch_no,
+      qty_on_hand,
+      qty_reserved,
+      unit_cost,
+      manufactured_date,
+      expiry_date,
+      quality_status,
       product:products(sku, name, unit),
       location:locations(name, location_type, currency)
     `
@@ -62,10 +71,10 @@ export default async function InventoryPage() {
     )
   }
 
-  // Get all locations for Kanban view, ordered by display_order
+  // Get all locations for Kanban view, ordered by display_order (optimized)
   const { data: locations } = await supabase
     .from('locations')
-    .select('*')
+    .select('id, name, location_type, country_code, currency, display_order')
     .order('display_order', { ascending: true })
 
   return (

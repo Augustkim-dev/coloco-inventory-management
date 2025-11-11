@@ -28,7 +28,8 @@
       "Bash(timeout 10 bash:*)",
       "Bash(timeout 5 bash:*)",
       "Bash(timeout 3 bash:*)",
-      "Bash(dir /b \"c:\\My_Project\\Service_Project\\coloco_Inventory management\\docs\\plans\")"
+      "Bash(dir /b \"c:\\My_Project\\Service_Project\\coloco_Inventory management\\docs\\plans\")",
+      "Bash(NUL)"
     ],
     "deny": [],
     "ask": []

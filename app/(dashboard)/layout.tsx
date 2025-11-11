@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import { Sidebar } from "@/components/layout/sidebar"
 import { MobileHeader } from "@/components/layout/mobile-header"
 import { SidebarProvider } from "@/hooks/use-sidebar"
+import { UserProvider } from "@/lib/contexts/user-context"
 
 export default async function DashboardLayout({
   children,
@@ -19,10 +20,10 @@ export default async function DashboardLayout({
     redirect("/login")
   }
 
-  // Fetch user data from public.users table
+  // Fetch user data from public.users table (optimized: select only needed columns)
   const { data: userData, error: userError } = await supabase
     .from("users")
-    .select("*")
+    .select("id, email, name, role, location_id, preferred_language")
     .eq("id", user.id)
     .single()
 
@@ -38,26 +39,28 @@ export default async function DashboardLayout({
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen overflow-hidden">
-        {/* Mobile Header - visible only on mobile */}
-        <MobileHeader />
+    <UserProvider userData={userData}>
+      <SidebarProvider>
+        <div className="flex h-screen overflow-hidden">
+          {/* Mobile Header - visible only on mobile */}
+          <MobileHeader />
 
-        {/* Sidebar - drawer on mobile, fixed on desktop */}
-        <Sidebar
-          userRole={userData.role}
-          userName={userData.name}
-          userEmail={userData.email}
-        />
+          {/* Sidebar - drawer on mobile, fixed on desktop */}
+          <Sidebar
+            userRole={userData.role}
+            userName={userData.name}
+            userEmail={userData.email}
+          />
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50">
-          {/* Add top padding on mobile for fixed header */}
-          <div className="pt-16 md:pt-0 p-4 md:p-6 lg:p-8">
-            {children}
-          </div>
-        </main>
-      </div>
-    </SidebarProvider>
+          {/* Main Content */}
+          <main className="flex-1 overflow-y-auto bg-gray-50">
+            {/* Add top padding on mobile for fixed header */}
+            <div className="pt-16 md:pt-0 p-4 md:p-6 lg:p-8">
+              {children}
+            </div>
+          </main>
+        </div>
+      </SidebarProvider>
+    </UserProvider>
   )
 }

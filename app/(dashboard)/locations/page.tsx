@@ -27,10 +27,10 @@ export default async function LocationsPage() {
     redirect('/dashboard')
   }
 
-  // Fetch locations ordered by display_order
+  // Fetch locations ordered by display_order (optimized)
   const { data: locations, error } = await supabase
     .from('locations')
-    .select('*')
+    .select('id, name, location_type, country_code, currency, address, contact_person, phone, display_order, created_at')
     .order('display_order', { ascending: true })
 
   if (error) {

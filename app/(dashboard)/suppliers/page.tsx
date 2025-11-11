@@ -29,10 +29,10 @@ export default async function SuppliersPage() {
     redirect('/dashboard')
   }
 
-  // Fetch suppliers
+  // Fetch suppliers (optimized: select only needed columns)
   const { data: suppliers, error } = await supabase
     .from('suppliers')
-    .select('*')
+    .select('id, name, contact_person, phone, email, created_at')
     .order('created_at', { ascending: false })
 
   if (error) {
