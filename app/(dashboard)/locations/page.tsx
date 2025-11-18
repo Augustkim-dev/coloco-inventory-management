@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LocationsViewClient } from '@/components/locations/locations-view-client'
 import { getServerTranslations } from '@/lib/i18n/server-translations'
+import Link from 'next/link'
+import { Plus } from 'lucide-react'
 
 export default async function LocationsPage() {
   const t = await getServerTranslations('locations')
@@ -47,12 +49,21 @@ export default async function LocationsPage() {
           </p>
         </div>
         {userData?.role === 'HQ_Admin' && (
-          <a
-            href="/locations/reorder"
-            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-          >
-            {t.reorderLocations}
-          </a>
+          <div className="flex gap-2">
+            <Link
+              href="/locations/new"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Location
+            </Link>
+            <Link
+              href="/locations/reorder"
+              className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              {t.reorderLocations}
+            </Link>
+          </div>
         )}
       </div>
 

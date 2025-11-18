@@ -18,11 +18,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { AlertCircle, Building2 } from 'lucide-react'
-
-interface LocationFormProps {
-  location: Location
-}
+import { Building2, AlertCircle } from 'lucide-react'
 
 const LOCATION_TYPES = [
   { value: 'HQ', label: 'Headquarters' },
@@ -36,17 +32,17 @@ const COUNTRY_CODES = [
   { code: 'CN', name: 'China', currency: 'CNY' },
 ]
 
-export function LocationForm({ location }: LocationFormProps) {
+export function LocationCreateForm() {
   const [formData, setFormData] = useState({
-    name: location.name || '',
-    location_type: location.location_type || '',
-    country_code: location.country_code || '',
-    currency: location.currency || '',
-    parent_location_id: location.parent_location_id || '',
-    address: location.address || '',
-    contact_person: (location as any).contact_person || '',
-    phone: (location as any).phone || '',
-    is_active: location.is_active ?? true,
+    name: '',
+    location_type: '',
+    country_code: '',
+    currency: '',
+    parent_location_id: '',
+    address: '',
+    contact_person: '',
+    phone: '',
+    is_active: true,
   })
   const [locations, setLocations] = useState<Location[]>([])
   const [loading, setLoading] = useState(false)
@@ -62,20 +58,24 @@ export function LocationForm({ location }: LocationFormProps) {
         const { data, error } = await supabase
           .from('locations')
           .select('*')
-          .neq('id', location.id) // Exclude current location
           .order('path', { ascending: true })
 
         if (error) throw error
         setLocations(data || [])
       } catch (error: any) {
         console.error('Error fetching locations:', error)
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to load locations',
+        })
       } finally {
         setLoadingLocations(false)
       }
     }
 
     fetchLocations()
-  }, [location.id])
+  }, [])
 
   // Auto-set currency when country is selected
   const handleCountryChange = (countryCode: string) => {
@@ -102,8 +102,8 @@ export function LocationForm({ location }: LocationFormProps) {
         throw new Error('Sub-Branch must have a parent location')
       }
 
-      const response = await fetch(`/api/locations/${location.id}`, {
-        method: 'PATCH',
+      const response = await fetch('/api/locations', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -116,12 +116,12 @@ export function LocationForm({ location }: LocationFormProps) {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to update location')
+        throw new Error(data.error || 'Failed to create location')
       }
 
       toast({
         title: 'Success',
-        description: 'Location updated successfully',
+        description: 'Location created successfully',
       })
 
       router.push('/locations')
@@ -154,8 +154,8 @@ export function LocationForm({ location }: LocationFormProps) {
         <div className="flex items-center gap-2">
           <Building2 className="h-6 w-6" />
           <div>
-            <CardTitle>Edit Location</CardTitle>
-            <CardDescription>Update location information and settings</CardDescription>
+            <CardTitle>Create New Location</CardTitle>
+            <CardDescription>Add a new headquarters, branch, or sub-branch</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -204,9 +204,9 @@ export function LocationForm({ location }: LocationFormProps) {
                     <SelectValue placeholder="Select parent location" />
                   </SelectTrigger>
                   <SelectContent>
-                    {getParentLocations().map((loc) => (
-                      <SelectItem key={loc.id} value={loc.id}>
-                        {loc.name} ({loc.location_type})
+                    {getParentLocations().map((location) => (
+                      <SelectItem key={location.id} value={location.id}>
+                        {location.name} ({location.location_type})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -240,7 +240,10 @@ export function LocationForm({ location }: LocationFormProps) {
               <Label htmlFor="country_code">
                 Country <span className="text-red-500">*</span>
               </Label>
-              <Select value={formData.country_code} onValueChange={handleCountryChange}>
+              <Select
+                value={formData.country_code}
+                onValueChange={handleCountryChange}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select country" />
                 </SelectTrigger>
@@ -270,7 +273,7 @@ export function LocationForm({ location }: LocationFormProps) {
 
           {/* Contact Info */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Contact Information</h3>
+            <h3 className="font-semibold">Contact Information (Optional)</h3>
 
             <div className="space-y-2">
               <Label htmlFor="address">Address</Label>
@@ -308,31 +311,17 @@ export function LocationForm({ location }: LocationFormProps) {
             </div>
           </div>
 
-          {/* Status */}
-          <div className="space-y-2">
-            <Label htmlFor="is_active">Status</Label>
-            <Select
-              value={formData.is_active ? 'active' : 'inactive'}
-              onValueChange={(value) =>
-                setFormData({ ...formData, is_active: value === 'active' })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
           {/* Actions */}
           <div className="flex gap-2 pt-4 border-t">
             <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : 'Save Changes'}
+              {loading ? 'Creating...' : 'Create Location'}
             </Button>
-            <Button type="button" variant="outline" onClick={() => router.back()} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
+              disabled={loading}
+            >
               Cancel
             </Button>
           </div>
