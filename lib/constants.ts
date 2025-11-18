@@ -24,7 +24,7 @@ export const navItems: NavItem[] = [
     title: "Locations",
     href: "/locations",
     icon: MapPin,
-    roles: ["HQ_Admin"],
+    roles: ["HQ_Admin", "Branch_Manager"],
   },
   {
     title: "Suppliers",
