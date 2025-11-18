@@ -33,7 +33,7 @@ export default async function ProductsPage() {
   // Fetch products (optimized: select only needed columns)
   const { data: products, error } = await supabase
     .from('products')
-    .select('id, sku, name, name_ko, name_vn, name_cn, category, unit, shelf_life_days, created_at')
+    .select('id, sku, name, name_ko, name_vn, name_cn, category, unit, shelf_life_days, description, created_at, updated_at')
     .order('created_at', { ascending: false })
 
   if (error) {

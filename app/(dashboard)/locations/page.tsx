@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { LocationsList } from '@/components/locations/locations-list'
+import { LocationsViewClient } from '@/components/locations/locations-view-client'
 import { getServerTranslations } from '@/lib/i18n/server-translations'
 
 export default async function LocationsPage() {
@@ -27,11 +27,11 @@ export default async function LocationsPage() {
     redirect('/dashboard')
   }
 
-  // Fetch locations ordered by display_order (optimized)
+  // Fetch all locations with hierarchy fields, ordered by path
   const { data: locations, error } = await supabase
     .from('locations')
-    .select('id, name, location_type, country_code, currency, address, contact_person, phone, display_order, created_at')
-    .order('display_order', { ascending: true })
+    .select('*')
+    .order('path', { ascending: true })
 
   if (error) {
     return <div>{t.messages.loadError}: {error.message}</div>
@@ -43,7 +43,7 @@ export default async function LocationsPage() {
         <div>
           <h1 className="text-3xl font-bold">{t.title}</h1>
           <p className="text-gray-500 mt-2">
-            Manage headquarters and branch information
+            Manage headquarters, branches, and sub-branches
           </p>
         </div>
         {userData?.role === 'HQ_Admin' && (
@@ -56,7 +56,7 @@ export default async function LocationsPage() {
         )}
       </div>
 
-      <LocationsList locations={locations || []} />
+      <LocationsViewClient locations={locations || []} />
     </div>
   )
 }

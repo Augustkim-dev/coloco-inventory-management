@@ -21,8 +21,13 @@ export type QualityStatus = 'OK' | 'Damaged' | 'Quarantine'
 // Unit types
 export type Unit = 'EA' | 'BOX' | 'PACK'
 
-// Database table type aliases
-export type Location = Database['public']['Tables']['locations']['Row']
+// Database table type aliases with hierarchy fields
+export type Location = Database['public']['Tables']['locations']['Row'] & {
+  parent_id?: string | null
+  level?: number
+  path?: string | null
+  is_active?: boolean
+}
 export type Supplier = Database['public']['Tables']['suppliers']['Row']
 export type Product = Database['public']['Tables']['products']['Row']
 export type PurchaseOrder = Database['public']['Tables']['purchase_orders']['Row']
@@ -31,7 +36,23 @@ export type StockBatch = Database['public']['Tables']['stock_batches']['Row']
 export type PricingConfig = Database['public']['Tables']['pricing_configs']['Row']
 export type Sale = Database['public']['Tables']['sales']['Row']
 export type ExchangeRate = Database['public']['Tables']['exchange_rates']['Row']
-export type StockTransferRequest = Database['public']['Tables']['stock_transfer_requests']['Row']
+
+// Stock Transfer Request type (manually defined until DB types are regenerated)
+export interface StockTransferRequest {
+  id: string
+  from_location_id: string
+  to_location_id: string
+  product_id: string
+  requested_qty: number
+  requested_by: string
+  approved_by?: string | null
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Completed'
+  notes?: string | null
+  rejection_reason?: string | null
+  created_at: string
+  updated_at: string
+  approved_at?: string | null
+}
 
 // Supplier Product type (manually defined)
 export interface SupplierProduct {

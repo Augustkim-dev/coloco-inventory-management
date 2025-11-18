@@ -26,7 +26,7 @@ export function buildLocationTree(locations: Location[]): LocationTreeNode[] {
       name: location.name,
       location_type: location.location_type as any,
       level: location.level || 1,
-      parent_id: location.parent_id,
+      parent_id: location.parent_id ?? null,
       path: location.path || '',
       display_order: location.display_order,
       currency: location.currency as any,

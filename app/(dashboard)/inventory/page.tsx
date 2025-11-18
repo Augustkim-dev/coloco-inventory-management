@@ -41,10 +41,13 @@ export default async function InventoryPage() {
       batch_no,
       qty_on_hand,
       qty_reserved,
+      qty_available,
       unit_cost,
       manufactured_date,
       expiry_date,
       quality_status,
+      created_at,
+      updated_at,
       product:products(sku, name, unit),
       location:locations(name, location_type, currency)
     `
@@ -57,7 +60,7 @@ export default async function InventoryPage() {
     query = query.eq('location_id', profile.location_id)
   }
 
-  const { data: inventory, error } = await query
+  const { data: rawInventory, error } = await query
 
   if (error) {
     console.error('Error loading inventory:', error)
@@ -71,10 +74,17 @@ export default async function InventoryPage() {
     )
   }
 
+  // Transform data to match expected type (Supabase returns arrays for joins)
+  const inventory = rawInventory?.map((item: any) => ({
+    ...item,
+    product: Array.isArray(item.product) ? item.product[0] : item.product,
+    location: Array.isArray(item.location) ? item.location[0] : item.location,
+  }))
+
   // Get all locations for Kanban view, ordered by display_order (optimized)
   const { data: locations } = await supabase
     .from('locations')
-    .select('id, name, location_type, country_code, currency, display_order')
+    .select('id, name, location_type, country_code, address, currency, timezone, display_order, created_at, updated_at')
     .order('display_order', { ascending: true })
 
   return (
