@@ -22,12 +22,7 @@ export type QualityStatus = 'OK' | 'Damaged' | 'Quarantine'
 export type Unit = 'EA' | 'BOX' | 'PACK'
 
 // Database table type aliases with hierarchy fields
-export type Location = Database['public']['Tables']['locations']['Row'] & {
-  parent_id?: string | null
-  level?: number
-  path?: string | null
-  is_active?: boolean
-}
+export type Location = Database['public']['Tables']['locations']['Row']
 export type Supplier = Database['public']['Tables']['suppliers']['Row']
 export type Product = Database['public']['Tables']['products']['Row']
 export type PurchaseOrder = Database['public']['Tables']['purchase_orders']['Row']
@@ -122,7 +117,7 @@ export interface LocationTreeNode {
   name: string
   location_type: LocationType
   level: number
-  parent_id: string | null
+  parent_location_id: string | null
   path: string
   display_order: number
   currency: Currency

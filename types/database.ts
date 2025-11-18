@@ -27,12 +27,20 @@ export interface Database {
           address: string | null
           currency: string
           timezone: string
+          parent_location_id: string | null
+          level: number
+          path: string | null
           display_order: number
+          is_active: boolean
+          contact_person: string | null
+          phone: string | null
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['locations']['Row'], 'id' | 'created_at' | 'updated_at'> & {
+        Insert: Omit<Database['public']['Tables']['locations']['Row'], 'id' | 'created_at' | 'updated_at' | 'level' | 'path' | 'display_order'> & {
+          parent_location_id?: string | null
           display_order?: number
+          is_active?: boolean
         }
         Update: Partial<Database['public']['Tables']['locations']['Insert']>
       }
