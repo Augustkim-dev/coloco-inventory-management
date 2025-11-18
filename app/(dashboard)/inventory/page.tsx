@@ -84,7 +84,7 @@ export default async function InventoryPage() {
   // Get all locations for Kanban view, ordered by display_order (optimized)
   const { data: locations } = await supabase
     .from('locations')
-    .select('id, name, location_type, country_code, address, currency, timezone, display_order, created_at, updated_at')
+    .select('*')
     .order('display_order', { ascending: true })
 
   return (

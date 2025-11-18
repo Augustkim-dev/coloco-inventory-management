@@ -28,7 +28,7 @@ export default async function LocationsReorderPage() {
   // Fetch locations ordered by current display_order
   const { data: locations, error } = await supabase
     .from('locations')
-    .select('id, name, location_type, country_code, address, currency, timezone, display_order, created_at, updated_at')
+    .select('*')
     .order('display_order', { ascending: true })
 
   if (error) {
