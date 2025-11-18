@@ -9,9 +9,15 @@ import { List, Network } from 'lucide-react'
 
 interface LocationsViewClientProps {
   locations: Location[]
+  userRole?: string
+  userLocationId?: string | null
 }
 
-export function LocationsViewClient({ locations }: LocationsViewClientProps) {
+export function LocationsViewClient({
+  locations,
+  userRole = 'Branch_Manager',
+  userLocationId = null,
+}: LocationsViewClientProps) {
   return (
     <Tabs defaultValue="tree" className="space-y-4">
       <TabsList>
@@ -26,11 +32,15 @@ export function LocationsViewClient({ locations }: LocationsViewClientProps) {
       </TabsList>
 
       <TabsContent value="tree" className="space-y-4">
-        <LocationsTreeView locations={locations} />
+        <LocationsTreeView
+          locations={locations}
+          userRole={userRole}
+          userLocationId={userLocationId}
+        />
       </TabsContent>
 
       <TabsContent value="list" className="space-y-4">
-        <LocationsList locations={locations} />
+        <LocationsList locations={locations} userRole={userRole} userLocationId={userLocationId} />
       </TabsContent>
     </Tabs>
   )

@@ -32,13 +32,21 @@ const COUNTRY_CODES = [
   { code: 'CN', name: 'China', currency: 'CNY' },
 ]
 
-export function LocationCreateForm() {
+interface LocationCreateFormProps {
+  userRole?: string
+  userLocationId?: string | null
+}
+
+export function LocationCreateForm({ userRole, userLocationId }: LocationCreateFormProps) {
+  // For Branch Manager, default to SubBranch and their branch as parent
+  const isBranchManager = userRole === 'Branch_Manager'
+
   const [formData, setFormData] = useState({
     name: '',
-    location_type: '',
+    location_type: isBranchManager ? 'SubBranch' : '',
     country_code: '',
     currency: '',
-    parent_location_id: '',
+    parent_location_id: isBranchManager && userLocationId ? userLocationId : '',
     address: '',
     contact_person: '',
     phone: '',
@@ -62,6 +70,18 @@ export function LocationCreateForm() {
 
         if (error) throw error
         setLocations(data || [])
+
+        // Auto-fill country and currency from parent branch for Branch Managers
+        if (isBranchManager && userLocationId) {
+          const parentBranch = data?.find((loc) => loc.id === userLocationId)
+          if (parentBranch) {
+            setFormData((prev) => ({
+              ...prev,
+              country_code: parentBranch.country_code,
+              currency: parentBranch.currency,
+            }))
+          }
+        }
       } catch (error: any) {
         console.error('Error fetching locations:', error)
         toast({
@@ -75,7 +95,7 @@ export function LocationCreateForm() {
     }
 
     fetchLocations()
-  }, [])
+  }, [isBranchManager, userLocationId])
 
   // Auto-set currency when country is selected
   const handleCountryChange = (countryCode: string) => {
@@ -154,36 +174,44 @@ export function LocationCreateForm() {
         <div className="flex items-center gap-2">
           <Building2 className="h-6 w-6" />
           <div>
-            <CardTitle>Create New Location</CardTitle>
-            <CardDescription>Add a new headquarters, branch, or sub-branch</CardDescription>
+            <CardTitle>
+              {isBranchManager ? 'Create New Sub-Branch' : 'Create New Location'}
+            </CardTitle>
+            <CardDescription>
+              {isBranchManager
+                ? 'Add a new sub-branch under your branch'
+                : 'Add a new headquarters, branch, or sub-branch'}
+            </CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Location Type */}
-          <div className="space-y-2">
-            <Label htmlFor="location_type">
-              Location Type <span className="text-red-500">*</span>
-            </Label>
-            <Select
-              value={formData.location_type}
-              onValueChange={(value) =>
-                setFormData({ ...formData, location_type: value, parent_location_id: '' })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select location type" />
-              </SelectTrigger>
-              <SelectContent>
-                {LOCATION_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Location Type - Hidden for Branch Manager (always SubBranch) */}
+          {!isBranchManager && (
+            <div className="space-y-2">
+              <Label htmlFor="location_type">
+                Location Type <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={formData.location_type}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, location_type: value, parent_location_id: '' })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select location type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LOCATION_TYPES.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Parent Location (for SubBranch) */}
           {showParentSelector && (
@@ -193,7 +221,15 @@ export function LocationCreateForm() {
               </Label>
               {loadingLocations ? (
                 <div className="text-sm text-muted-foreground">Loading locations...</div>
+              ) : isBranchManager ? (
+                // Branch Manager: Show their branch name (read-only)
+                <Input
+                  value={locations.find((loc) => loc.id === userLocationId)?.name || 'Your Branch'}
+                  disabled
+                  className="bg-gray-50"
+                />
               ) : (
+                // HQ Admin: Show dropdown
                 <Select
                   value={formData.parent_location_id}
                   onValueChange={(value) =>
@@ -212,12 +248,14 @@ export function LocationCreateForm() {
                   </SelectContent>
                 </Select>
               )}
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Sub-branches must be assigned to a parent location (HQ or Branch)
-                </AlertDescription>
-              </Alert>
+              {!isBranchManager && (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Sub-branches must be assigned to a parent location (HQ or Branch)
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
           )}
 

@@ -8,11 +8,48 @@ import Link from 'next/link'
 import { ChevronRight, ChevronDown, Edit, Building2, MapPin } from 'lucide-react'
 import { buildLocationTree } from '@/lib/hierarchy-utils'
 
-interface LocationsTreeViewProps {
-  locations: Location[]
+// Helper function to check if user can edit a location
+function canEditLocation(
+  node: LocationTreeNode,
+  userRole?: string,
+  userLocationId?: string | null
+): boolean {
+  // HQ Admin can edit all locations
+  if (userRole === 'HQ_Admin') {
+    return true
+  }
+
+  // Branch Manager can edit:
+  // 1. Their own branch (if location_id matches)
+  // 2. Sub-branches under their branch (parent_location_id matches their branch)
+  if (userRole === 'Branch_Manager' && userLocationId) {
+    // Can edit their own branch
+    if (node.id === userLocationId) {
+      return true
+    }
+    // Can edit sub-branches under their branch
+    if (node.parent_location_id === userLocationId && node.location_type === 'SubBranch') {
+      return true
+    }
+  }
+
+  return false
 }
 
-function TreeNode({ node, depth = 0 }: { node: LocationTreeNode; depth?: number }) {
+interface LocationsTreeViewProps {
+  locations: Location[]
+  userRole?: string
+  userLocationId?: string | null
+}
+
+interface TreeNodeProps {
+  node: LocationTreeNode
+  depth?: number
+  userRole?: string
+  userLocationId?: string | null
+}
+
+function TreeNode({ node, depth = 0, userRole, userLocationId }: TreeNodeProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const hasChildren = node.children && node.children.length > 0
 
@@ -99,11 +136,13 @@ function TreeNode({ node, depth = 0 }: { node: LocationTreeNode; depth?: number 
         )}
 
         {/* Edit Button */}
-        <Link href={`/locations/${node.id}/edit`}>
-          <Button variant="ghost" size="sm">
-            <Edit className="h-4 w-4" />
-          </Button>
-        </Link>
+        {canEditLocation(node, userRole, userLocationId) && (
+          <Link href={`/locations/${node.id}/edit`}>
+            <Button variant="ghost" size="sm">
+              <Edit className="h-4 w-4" />
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Children Nodes */}
@@ -112,7 +151,13 @@ function TreeNode({ node, depth = 0 }: { node: LocationTreeNode; depth?: number 
           {node.children
             .sort((a, b) => a.display_order - b.display_order)
             .map((child) => (
-              <TreeNode key={child.id} node={child} depth={depth + 1} />
+              <TreeNode
+                key={child.id}
+                node={child}
+                depth={depth + 1}
+                userRole={userRole}
+                userLocationId={userLocationId}
+              />
             ))}
         </div>
       )}
@@ -120,7 +165,11 @@ function TreeNode({ node, depth = 0 }: { node: LocationTreeNode; depth?: number 
   )
 }
 
-export function LocationsTreeView({ locations }: LocationsTreeViewProps) {
+export function LocationsTreeView({
+  locations,
+  userRole,
+  userLocationId,
+}: LocationsTreeViewProps) {
   // Build tree structure
   const tree = buildLocationTree(locations)
 
@@ -136,7 +185,13 @@ export function LocationsTreeView({ locations }: LocationsTreeViewProps) {
   return (
     <div className="border rounded-lg p-4 space-y-2">
       {tree.map((rootNode) => (
-        <TreeNode key={rootNode.id} node={rootNode} depth={0} />
+        <TreeNode
+          key={rootNode.id}
+          node={rootNode}
+          depth={0}
+          userRole={userRole}
+          userLocationId={userLocationId}
+        />
       ))}
     </div>
   )

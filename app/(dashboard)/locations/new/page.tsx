@@ -16,25 +16,29 @@ export default async function NewLocationPage() {
 
   const { data: userData } = await supabase
     .from('users')
-    .select('role')
+    .select('role, location_id')
     .eq('id', user.id)
     .single()
 
-  // Only HQ Admin can create locations
-  if (userData?.role !== 'HQ_Admin') {
+  // HQ Admin and Branch Manager can create locations
+  if (userData?.role !== 'HQ_Admin' && userData?.role !== 'Branch_Manager') {
     redirect('/dashboard')
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Add New Location</h1>
+        <h1 className="text-3xl font-bold">
+          {userData?.role === 'Branch_Manager' ? 'Add New Sub-Branch' : 'Add New Location'}
+        </h1>
         <p className="text-gray-500 mt-2">
-          Create a new headquarters, branch, or sub-branch location
+          {userData?.role === 'Branch_Manager'
+            ? 'Create a new sub-branch under your branch'
+            : 'Create a new headquarters, branch, or sub-branch location'}
         </p>
       </div>
 
-      <LocationCreateForm />
+      <LocationCreateForm userRole={userData?.role} userLocationId={userData?.location_id} />
     </div>
   )
 }

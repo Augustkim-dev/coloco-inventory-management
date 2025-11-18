@@ -18,15 +18,42 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if user is HQ_Admin
+    // Check if user is HQ_Admin or Branch_Manager
     const { data: userData } = await supabase
       .from('users')
-      .select('role')
+      .select('role, location_id')
       .eq('id', user.id)
       .single()
 
-    if (userData?.role !== 'HQ_Admin') {
+    if (userData?.role !== 'HQ_Admin' && userData?.role !== 'Branch_Manager') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    // Branch Manager can only edit their own branch or sub-branches under it
+    if (userData?.role === 'Branch_Manager') {
+      // Get the location being edited
+      const { data: location } = await supabase
+        .from('locations')
+        .select('*')
+        .eq('id', params.id)
+        .single()
+
+      if (!location) {
+        return NextResponse.json({ error: 'Location not found' }, { status: 404 })
+      }
+
+      // Check if it's their own branch or a sub-branch under their branch
+      const isOwnBranch = location.id === userData.location_id
+      const isSubBranch =
+        location.parent_location_id === userData.location_id &&
+        location.location_type === 'SubBranch'
+
+      if (!isOwnBranch && !isSubBranch) {
+        return NextResponse.json(
+          { error: 'Branch Manager can only edit their own branch or sub-branches under it' },
+          { status: 403 }
+        )
+      }
     }
 
     const body = await request.json()
@@ -103,15 +130,47 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if user is HQ_Admin
+    // Check if user is HQ_Admin or Branch_Manager
     const { data: userData } = await supabase
       .from('users')
-      .select('role')
+      .select('role, location_id')
       .eq('id', user.id)
       .single()
 
-    if (userData?.role !== 'HQ_Admin') {
+    if (userData?.role !== 'HQ_Admin' && userData?.role !== 'Branch_Manager') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    // Branch Manager can only delete sub-branches under their branch
+    if (userData?.role === 'Branch_Manager') {
+      const { data: location } = await supabase
+        .from('locations')
+        .select('*')
+        .eq('id', params.id)
+        .single()
+
+      if (!location) {
+        return NextResponse.json({ error: 'Location not found' }, { status: 404 })
+      }
+
+      // Branch Manager cannot delete their own branch, only sub-branches
+      if (location.id === userData.location_id) {
+        return NextResponse.json(
+          { error: 'Branch Manager cannot delete their own branch' },
+          { status: 403 }
+        )
+      }
+
+      // Can only delete sub-branches under their branch
+      if (
+        location.parent_location_id !== userData.location_id ||
+        location.location_type !== 'SubBranch'
+      ) {
+        return NextResponse.json(
+          { error: 'Branch Manager can only delete sub-branches under their own branch' },
+          { status: 403 }
+        )
+      }
     }
 
     // Check if location has children

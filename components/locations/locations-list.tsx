@@ -16,9 +16,39 @@ import { Edit } from 'lucide-react'
 
 interface LocationsListProps {
   locations: Location[]
+  userRole?: string
+  userLocationId?: string | null
 }
 
-export function LocationsList({ locations }: LocationsListProps) {
+// Helper function to check if user can edit a location
+function canEditLocation(
+  location: Location,
+  userRole?: string,
+  userLocationId?: string | null
+): boolean {
+  // HQ Admin can edit all locations
+  if (userRole === 'HQ_Admin') {
+    return true
+  }
+
+  // Branch Manager can edit:
+  // 1. Their own branch (if location_id matches)
+  // 2. Sub-branches under their branch (parent_location_id matches their branch)
+  if (userRole === 'Branch_Manager' && userLocationId) {
+    // Can edit their own branch
+    if (location.id === userLocationId) {
+      return true
+    }
+    // Can edit sub-branches under their branch
+    if (location.parent_location_id === userLocationId && location.location_type === 'SubBranch') {
+      return true
+    }
+  }
+
+  return false
+}
+
+export function LocationsList({ locations, userRole, userLocationId }: LocationsListProps) {
   return (
     <div className="border rounded-lg">
       <Table>
@@ -48,11 +78,13 @@ export function LocationsList({ locations }: LocationsListProps) {
                 {(location as any).phone && ` (${(location as any).phone})`}
               </TableCell>
               <TableCell className="text-right">
-                <Link href={`/locations/${location.id}/edit`}>
-                  <Button variant="ghost" size="sm">
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                </Link>
+                {canEditLocation(location, userRole, userLocationId) && (
+                  <Link href={`/locations/${location.id}/edit`}>
+                    <Button variant="ghost" size="sm">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                )}
               </TableCell>
             </TableRow>
           ))}

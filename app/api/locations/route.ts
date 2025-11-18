@@ -15,14 +15,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if user is HQ_Admin
+    // Check if user is HQ_Admin or Branch_Manager
     const { data: userData } = await supabase
       .from('users')
-      .select('role')
+      .select('role, location_id')
       .eq('id', user.id)
       .single()
 
-    if (userData?.role !== 'HQ_Admin') {
+    if (userData?.role !== 'HQ_Admin' && userData?.role !== 'Branch_Manager') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -38,6 +38,22 @@ export async function POST(request: NextRequest) {
       phone,
       is_active = true,
     } = body
+
+    // Branch Manager can only create SubBranch under their own branch
+    if (userData?.role === 'Branch_Manager') {
+      if (location_type !== 'SubBranch') {
+        return NextResponse.json(
+          { error: 'Branch Manager can only create Sub-Branches' },
+          { status: 403 }
+        )
+      }
+      if (parent_location_id !== userData.location_id) {
+        return NextResponse.json(
+          { error: 'Branch Manager can only create Sub-Branches under their own branch' },
+          { status: 403 }
+        )
+      }
+    }
 
     // Validate required fields
     if (!name || !location_type || !country_code || !currency) {
