@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { canTransferBetween, getAccessibleLocations } from '@/lib/hierarchy-utils'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -13,15 +14,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Check user role - only HQ Admin can transfer
+  // Get user profile with location
   const { data: profile } = await supabase
     .from('users')
-    .select('role')
+    .select('role, location_id')
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'HQ_Admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!profile) {
+    return NextResponse.json({ error: 'User profile not found' }, { status: 404 })
+  }
+
+  // Only HQ Admin and Branch Manager can transfer
+  if (!['HQ_Admin', 'Branch_Manager'].includes(profile.role)) {
+    return NextResponse.json({
+      error: 'Only HQ Admin and Branch Managers can transfer inventory'
+    }, { status: 403 })
   }
 
   try {
@@ -42,34 +50,44 @@ export async function POST(request: Request) {
       )
     }
 
-    // Validate location types - only allow HQ ↔ Branch transfers
-    const { data: fromLocation } = await supabase
+    // Fetch all locations for hierarchy validation
+    const { data: allLocations, error: locError } = await supabase
       .from('locations')
-      .select('location_type')
-      .eq('id', from_location_id)
-      .single()
+      .select('*')
 
-    const { data: toLocation } = await supabase
-      .from('locations')
-      .select('location_type')
-      .eq('id', to_location_id)
-      .single()
-
-    if (!fromLocation || !toLocation) {
+    if (locError || !allLocations) {
       return NextResponse.json(
-        { error: 'Invalid location' },
-        { status: 400 }
+        { error: 'Failed to fetch locations' },
+        { status: 500 }
       )
     }
 
-    // Check if transfer is valid (HQ ↔ Branch only)
-    const isValidTransfer =
-      (fromLocation.location_type === 'HQ' && toLocation.location_type === 'Branch') ||
-      (fromLocation.location_type === 'Branch' && toLocation.location_type === 'HQ')
+    // Validate source location access
+    const accessibleLocations = getAccessibleLocations(
+      profile.location_id,
+      profile.role,
+      allLocations
+    )
 
-    if (!isValidTransfer) {
+    const canAccessSource = accessibleLocations.some(loc => loc.id === from_location_id)
+
+    if (!canAccessSource) {
       return NextResponse.json(
-        { error: 'Can only transfer between HQ and Branches (bidirectional)' },
+        { error: 'You do not have access to the source location' },
+        { status: 403 }
+      )
+    }
+
+    // Validate transfer between locations (must be direct parent-child)
+    const transferValidation = canTransferBetween(
+      from_location_id,
+      to_location_id,
+      allLocations
+    )
+
+    if (!transferValidation.valid) {
+      return NextResponse.json(
+        { error: transferValidation.reason || 'Invalid transfer' },
         { status: 400 }
       )
     }

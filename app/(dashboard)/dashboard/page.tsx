@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
 import { DashboardStats } from "@/components/dashboard/dashboard-stats"
 import { ExpiryWarnings } from "@/components/dashboard/expiry-warnings"
 import { DashboardChartsClient } from "@/components/dashboard/dashboard-charts-client"

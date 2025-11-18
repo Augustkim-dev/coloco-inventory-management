@@ -1,10 +1,10 @@
 import { Database } from './database'
 
 // User roles
-export type UserRole = 'HQ_Admin' | 'Branch_Manager'
+export type UserRole = 'HQ_Admin' | 'Branch_Manager' | 'SubBranch_Manager'
 
 // Location types
-export type LocationType = 'HQ' | 'Branch'
+export type LocationType = 'HQ' | 'Branch' | 'SubBranch'
 
 // Currency types
 export type Currency = 'KRW' | 'VND' | 'CNY'
@@ -31,6 +31,7 @@ export type StockBatch = Database['public']['Tables']['stock_batches']['Row']
 export type PricingConfig = Database['public']['Tables']['pricing_configs']['Row']
 export type Sale = Database['public']['Tables']['sales']['Row']
 export type ExchangeRate = Database['public']['Tables']['exchange_rates']['Row']
+export type StockTransferRequest = Database['public']['Tables']['stock_transfer_requests']['Row']
 
 // Supplier Product type (manually defined)
 export interface SupplierProduct {
@@ -82,4 +83,100 @@ export interface NavItem {
   href: string
   icon?: any
   roles: UserRole[]
+}
+
+// ============================================
+// Hierarchical Location Types
+// ============================================
+
+// Location with hierarchy information
+export interface LocationWithHierarchy extends Location {
+  children?: LocationWithHierarchy[]
+  parent?: Location | null
+}
+
+// Location tree node for UI rendering
+export interface LocationTreeNode {
+  id: string
+  name: string
+  location_type: LocationType
+  level: number
+  parent_id: string | null
+  path: string
+  display_order: number
+  currency: Currency
+  country_code: string
+  is_active: boolean
+  children: LocationTreeNode[]
+}
+
+// Location breadcrumb for navigation
+export interface LocationBreadcrumb {
+  id: string
+  name: string
+  level: number
+}
+
+// ============================================
+// Stock Transfer Request Types
+// ============================================
+
+// Transfer request status
+export type TransferRequestStatus = 'Pending' | 'Approved' | 'Rejected' | 'Completed'
+
+// Transfer request with related data
+export interface TransferRequestWithDetails extends StockTransferRequest {
+  from_location?: Location
+  to_location?: Location
+  product?: Product
+  requested_by_user?: User
+  approved_by_user?: User | null
+}
+
+// Transfer request insert type
+export interface TransferRequestInsert {
+  from_location_id: string
+  to_location_id: string
+  product_id: string
+  requested_qty: number
+  notes?: string
+}
+
+// ============================================
+// Pricing Chain Types
+// ============================================
+
+// Single node in pricing chain
+export interface PriceNode {
+  location_id: string
+  location_name: string
+  location_level: number
+  final_price: number | null
+  currency: Currency
+  hq_margin_percent: number | null
+  branch_margin_percent: number | null
+}
+
+// Complete pricing chain from HQ to target location
+export interface PricingChain {
+  product_id: string
+  target_location_id: string
+  chain: PriceNode[]
+}
+
+// Price calculation parameters
+export interface PriceCalculationParams {
+  parent_price: number
+  transfer_cost: number
+  exchange_rate: number
+  hq_margin: number
+  branch_margin: number
+}
+
+// Price calculation result
+export interface PriceCalculationResult {
+  local_cost: number
+  calculated_price: number
+  suggested_final_price: number
+  total_margin_percent: number
 }
