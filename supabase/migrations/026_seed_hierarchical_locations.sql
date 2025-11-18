@@ -109,6 +109,7 @@ DECLARE
   hq_count INTEGER;
   branch_count INTEGER;
   subbranch_count INTEGER;
+  rec RECORD;
 BEGIN
   SELECT COUNT(*) INTO location_count FROM public.locations;
   SELECT COUNT(*) INTO hq_count FROM public.locations WHERE level = 1;
