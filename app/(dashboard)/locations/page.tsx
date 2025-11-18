@@ -37,18 +37,27 @@ export default async function LocationsPage() {
 
   // Branch Manager can only see their branch and its sub-branches
   if (userData?.role === 'Branch_Manager' && userData?.location_id) {
-    // Get the branch location and all its descendants
+    // Get the branch location to find its parent (HQ)
     const { data: branchLocation } = await supabase
       .from('locations')
-      .select('id')
+      .select('id, parent_id')
       .eq('id', userData.location_id)
       .single()
 
     if (branchLocation) {
-      // Fetch: 1) their branch, 2) all sub-branches under their branch
-      locationsQuery = locationsQuery.or(
-        `id.eq.${userData.location_id},parent_id.eq.${userData.location_id}`
-      )
+      // Fetch: 1) HQ (for tree structure), 2) their branch, 3) all sub-branches under their branch
+      // HQ is needed as root node for buildLocationTree() to work properly
+      const conditions = [
+        `id.eq.${userData.location_id}`,
+        `parent_id.eq.${userData.location_id}`
+      ]
+
+      // Include HQ (parent of their branch) for tree view to work
+      if (branchLocation.parent_id) {
+        conditions.push(`id.eq.${branchLocation.parent_id}`)
+      }
+
+      locationsQuery = locationsQuery.or(conditions.join(','))
     }
   }
 

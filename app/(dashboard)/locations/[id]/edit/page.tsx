@@ -20,11 +20,12 @@ export default async function EditLocationPage({
 
   const { data: userData } = await supabase
     .from('users')
-    .select('role')
+    .select('role, location_id')
     .eq('id', user.id)
     .single()
 
-  if (userData?.role !== 'HQ_Admin') {
+  // Only HQ Admin and Branch Manager can access
+  if (userData?.role !== 'HQ_Admin' && userData?.role !== 'Branch_Manager') {
     redirect('/dashboard')
   }
 
@@ -37,6 +38,16 @@ export default async function EditLocationPage({
 
   if (error || !location) {
     notFound()
+  }
+
+  // Branch Manager can only edit their own branch or sub-branches under it
+  if (userData?.role === 'Branch_Manager') {
+    const isOwnBranch = location.id === userData.location_id
+    const isSubBranch = location.parent_id === userData.location_id && location.location_type === 'SubBranch'
+
+    if (!isOwnBranch && !isSubBranch) {
+      redirect('/dashboard')
+    }
   }
 
   return (
