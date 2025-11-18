@@ -45,7 +45,7 @@ export async function PATCH(
       // Check if it's their own branch or a sub-branch under their branch
       const isOwnBranch = location.id === userData.location_id
       const isSubBranch =
-        location.parent_location_id === userData.location_id &&
+        location.parent_id === userData.location_id &&
         location.location_type === 'SubBranch'
 
       if (!isOwnBranch && !isSubBranch) {
@@ -62,7 +62,7 @@ export async function PATCH(
       location_type,
       country_code,
       currency,
-      parent_location_id,
+      parent_id,
       address,
       contact_person,
       phone,
@@ -83,7 +83,7 @@ export async function PATCH(
     if (location_type !== undefined) updateData.location_type = location_type
     if (country_code !== undefined) updateData.country_code = country_code
     if (currency !== undefined) updateData.currency = currency
-    if (parent_location_id !== undefined) updateData.parent_location_id = parent_location_id
+    if (parent_id !== undefined) updateData.parent_id = parent_id
     if (address !== undefined) updateData.address = address
     if (contact_person !== undefined) updateData.contact_person = contact_person
     if (phone !== undefined) updateData.phone = phone
@@ -163,7 +163,7 @@ export async function DELETE(
 
       // Can only delete sub-branches under their branch
       if (
-        location.parent_location_id !== userData.location_id ||
+        location.parent_id !== userData.location_id ||
         location.location_type !== 'SubBranch'
       ) {
         return NextResponse.json(
@@ -177,7 +177,7 @@ export async function DELETE(
     const { data: children } = await supabase
       .from('locations')
       .select('id')
-      .eq('parent_location_id', params.id)
+      .eq('parent_id', params.id)
       .limit(1)
 
     if (children && children.length > 0) {

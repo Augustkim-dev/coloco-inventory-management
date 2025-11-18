@@ -46,7 +46,7 @@ export function LocationCreateForm({ userRole, userLocationId }: LocationCreateF
     location_type: isBranchManager ? 'SubBranch' : '',
     country_code: '',
     currency: '',
-    parent_location_id: isBranchManager && userLocationId ? userLocationId : '',
+    parent_id: isBranchManager && userLocationId ? userLocationId : '',
     address: '',
     contact_person: '',
     phone: '',
@@ -118,7 +118,7 @@ export function LocationCreateForm({ userRole, userLocationId }: LocationCreateF
       }
 
       // Validate SubBranch has parent
-      if (formData.location_type === 'SubBranch' && !formData.parent_location_id) {
+      if (formData.location_type === 'SubBranch' && !formData.parent_id) {
         throw new Error('Sub-Branch must have a parent location')
       }
 
@@ -129,7 +129,7 @@ export function LocationCreateForm({ userRole, userLocationId }: LocationCreateF
         },
         body: JSON.stringify({
           ...formData,
-          parent_location_id: formData.parent_location_id || null,
+          parent_id: formData.parent_id || null,
         }),
       })
 
@@ -196,7 +196,7 @@ export function LocationCreateForm({ userRole, userLocationId }: LocationCreateF
               <Select
                 value={formData.location_type}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, location_type: value, parent_location_id: '' })
+                  setFormData({ ...formData, location_type: value, parent_id: '' })
                 }
               >
                 <SelectTrigger>
@@ -216,7 +216,7 @@ export function LocationCreateForm({ userRole, userLocationId }: LocationCreateF
           {/* Parent Location (for SubBranch) */}
           {showParentSelector && (
             <div className="space-y-2">
-              <Label htmlFor="parent_location_id">
+              <Label htmlFor="parent_id">
                 Parent Location <span className="text-red-500">*</span>
               </Label>
               {loadingLocations ? (
@@ -231,9 +231,9 @@ export function LocationCreateForm({ userRole, userLocationId }: LocationCreateF
               ) : (
                 // HQ Admin: Show dropdown
                 <Select
-                  value={formData.parent_location_id}
+                  value={formData.parent_id}
                   onValueChange={(value) =>
-                    setFormData({ ...formData, parent_location_id: value })
+                    setFormData({ ...formData, parent_id: value })
                   }
                 >
                   <SelectTrigger>

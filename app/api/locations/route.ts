@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       location_type,
       country_code,
       currency,
-      parent_location_id,
+      parent_id,
       address,
       contact_person,
       phone,
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
           { status: 403 }
         )
       }
-      if (parent_location_id !== userData.location_id) {
+      if (parent_id !== userData.location_id) {
         return NextResponse.json(
           { error: 'Branch Manager can only create Sub-Branches under their own branch' },
           { status: 403 }
@@ -72,9 +72,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate SubBranch must have parent
-    if (location_type === 'SubBranch' && !parent_location_id) {
+    if (location_type === 'SubBranch' && !parent_id) {
       return NextResponse.json(
-        { error: 'SubBranch must have a parent_location_id' },
+        { error: 'SubBranch must have a parent_id' },
         { status: 400 }
       )
     }
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
         location_type,
         country_code,
         currency,
-        parent_location_id: parent_location_id || null,
+        parent_id: parent_id || null,
         address: address || null,
         contact_person: contact_person || null,
         phone: phone || null,

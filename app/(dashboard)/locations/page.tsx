@@ -47,7 +47,7 @@ export default async function LocationsPage() {
     if (branchLocation) {
       // Fetch: 1) their branch, 2) all sub-branches under their branch
       locationsQuery = locationsQuery.or(
-        `id.eq.${userData.location_id},parent_location_id.eq.${userData.location_id}`
+        `id.eq.${userData.location_id},parent_id.eq.${userData.location_id}`
       )
     }
   }

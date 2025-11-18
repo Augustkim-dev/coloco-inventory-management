@@ -117,7 +117,7 @@ export interface LocationTreeNode {
   name: string
   location_type: LocationType
   level: number
-  parent_location_id: string | null
+  parent_id: string | null
   path: string
   display_order: number
   currency: Currency

@@ -27,7 +27,7 @@ export interface Database {
           address: string | null
           currency: string
           timezone: string
-          parent_location_id: string | null
+          parent_id: string | null
           level: number
           path: string | null
           display_order: number
@@ -38,7 +38,7 @@ export interface Database {
           updated_at: string
         }
         Insert: Omit<Database['public']['Tables']['locations']['Row'], 'id' | 'created_at' | 'updated_at' | 'level' | 'path' | 'display_order'> & {
-          parent_location_id?: string | null
+          parent_id?: string | null
           display_order?: number
           is_active?: boolean
         }

@@ -29,7 +29,7 @@ export async function GET(
     const { data: children, error } = await supabase
       .from('locations')
       .select('*')
-      .eq('parent_location_id', locationId)
+      .eq('parent_id', locationId)
       .eq('is_active', true)
       .order('display_order', { ascending: true })
 

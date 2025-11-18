@@ -40,7 +40,7 @@ function canEditLocation(
       return true
     }
     // Can edit sub-branches under their branch
-    if (location.parent_location_id === userLocationId && location.location_type === 'SubBranch') {
+    if (location.parent_id === userLocationId && location.location_type === 'SubBranch') {
       return true
     }
   }

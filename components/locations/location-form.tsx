@@ -42,7 +42,7 @@ export function LocationForm({ location }: LocationFormProps) {
     location_type: location.location_type || '',
     country_code: location.country_code || '',
     currency: location.currency || '',
-    parent_location_id: location.parent_location_id || '',
+    parent_id: location.parent_id || '',
     address: location.address || '',
     contact_person: (location as any).contact_person || '',
     phone: (location as any).phone || '',
@@ -98,7 +98,7 @@ export function LocationForm({ location }: LocationFormProps) {
       }
 
       // Validate SubBranch has parent
-      if (formData.location_type === 'SubBranch' && !formData.parent_location_id) {
+      if (formData.location_type === 'SubBranch' && !formData.parent_id) {
         throw new Error('Sub-Branch must have a parent location')
       }
 
@@ -109,7 +109,7 @@ export function LocationForm({ location }: LocationFormProps) {
         },
         body: JSON.stringify({
           ...formData,
-          parent_location_id: formData.parent_location_id || null,
+          parent_id: formData.parent_id || null,
         }),
       })
 
@@ -169,7 +169,7 @@ export function LocationForm({ location }: LocationFormProps) {
             <Select
               value={formData.location_type}
               onValueChange={(value) =>
-                setFormData({ ...formData, location_type: value, parent_location_id: '' })
+                setFormData({ ...formData, location_type: value, parent_id: '' })
               }
             >
               <SelectTrigger>
@@ -188,16 +188,16 @@ export function LocationForm({ location }: LocationFormProps) {
           {/* Parent Location (for SubBranch) */}
           {showParentSelector && (
             <div className="space-y-2">
-              <Label htmlFor="parent_location_id">
+              <Label htmlFor="parent_id">
                 Parent Location <span className="text-red-500">*</span>
               </Label>
               {loadingLocations ? (
                 <div className="text-sm text-muted-foreground">Loading locations...</div>
               ) : (
                 <Select
-                  value={formData.parent_location_id}
+                  value={formData.parent_id}
                   onValueChange={(value) =>
-                    setFormData({ ...formData, parent_location_id: value })
+                    setFormData({ ...formData, parent_id: value })
                   }
                 >
                   <SelectTrigger>

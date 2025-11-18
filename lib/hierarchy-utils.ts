@@ -26,7 +26,7 @@ export function buildLocationTree(locations: Location[]): LocationTreeNode[] {
       name: location.name,
       location_type: location.location_type as any,
       level: location.level || 1,
-      parent_location_id: location.parent_location_id ?? null,
+      parent_id: location.parent_id ?? null,
       path: location.path || '',
       display_order: location.display_order,
       currency: location.currency as any,
@@ -40,12 +40,12 @@ export function buildLocationTree(locations: Location[]): LocationTreeNode[] {
   const roots: LocationTreeNode[] = []
 
   locationMap.forEach(node => {
-    if (node.parent_location_id === null) {
+    if (node.parent_id === null) {
       // This is a root node (HQ)
       roots.push(node)
     } else {
       // Find parent and add as child
-      const parent = locationMap.get(node.parent_location_id)
+      const parent = locationMap.get(node.parent_id)
       if (parent) {
         parent.children.push(node)
       }
@@ -101,8 +101,8 @@ export function getAncestors(locationId: string, locations: Location[]): Locatio
 
   let current = locationMap.get(locationId)
 
-  while (current?.parent_location_id) {
-    const parent = locationMap.get(current.parent_location_id)
+  while (current?.parent_id) {
+    const parent = locationMap.get(current.parent_id)
     if (parent) {
       ancestors.push(parent)
       current = parent
@@ -155,7 +155,7 @@ export function getDescendants(locationId: string, locations: Location[]): Locat
 
   const traverse = (parentId: string) => {
     locations.forEach(loc => {
-      if (loc.parent_location_id === parentId) {
+      if (loc.parent_id === parentId) {
         descendants.push(loc)
         traverse(loc.id)
       }
@@ -173,7 +173,7 @@ export function getDescendants(locationId: string, locations: Location[]): Locat
  * @returns Array of direct child locations
  */
 export function getDirectChildren(locationId: string, locations: Location[]): Location[] {
-  return locations.filter(loc => loc.parent_location_id === locationId)
+  return locations.filter(loc => loc.parent_id === locationId)
 }
 
 // ============================================
@@ -224,7 +224,7 @@ export function isDirectParentChild(
   locations: Location[]
 ): boolean {
   const child = locations.find(loc => loc.id === childId)
-  return child?.parent_location_id === parentId
+  return child?.parent_id === parentId
 }
 
 /**
@@ -253,12 +253,12 @@ export function canTransferBetween(
   }
 
   // Check if from is parent of to (forward transfer)
-  if (toLocation.parent_location_id === fromId) {
+  if (toLocation.parent_id === fromId) {
     return { valid: true }
   }
 
   // Check if to is parent of from (reverse transfer)
-  if (fromLocation.parent_location_id === toId) {
+  if (fromLocation.parent_id === toId) {
     return { valid: true }
   }
 
