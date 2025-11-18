@@ -149,11 +149,15 @@ DO UPDATE SET
   rate = EXCLUDED.rate,
   updated_at = NOW();
 
-RAISE NOTICE '';
-RAISE NOTICE '✓ Hierarchical location structure created successfully!';
-RAISE NOTICE '✓ 1 HQ, 2 Branches, 6 Sub-Branches';
-RAISE NOTICE '';
-RAISE NOTICE 'Next steps:';
-RAISE NOTICE '1. Create users in Supabase Auth UI';
-RAISE NOTICE '2. Uncomment and run the user assignment section above';
-RAISE NOTICE '3. Start creating products, suppliers, and inventory';
+-- Step 8: Final success message
+DO $$
+BEGIN
+  RAISE NOTICE '';
+  RAISE NOTICE '✓ Hierarchical location structure created successfully!';
+  RAISE NOTICE '✓ 1 HQ, 2 Branches, 6 Sub-Branches';
+  RAISE NOTICE '';
+  RAISE NOTICE 'Next steps:';
+  RAISE NOTICE '1. Create users in Supabase Auth UI';
+  RAISE NOTICE '2. Uncomment and run the user assignment section above';
+  RAISE NOTICE '3. Start creating products, suppliers, and inventory';
+END $$;
