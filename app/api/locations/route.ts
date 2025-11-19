@@ -79,6 +79,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Get the max display_order to set the new location at the end
+    const { data: maxOrderResult } = await supabase
+      .from('locations')
+      .select('display_order')
+      .order('display_order', { ascending: false })
+      .limit(1)
+      .single()
+
+    const nextDisplayOrder = (maxOrderResult?.display_order || 0) + 1
+
     // Insert new location
     const { data: newLocation, error } = await supabase
       .from('locations')
@@ -92,6 +102,7 @@ export async function POST(request: NextRequest) {
         contact_person: contact_person || null,
         phone: phone || null,
         is_active,
+        display_order: nextDisplayOrder,
       })
       .select()
       .single()
