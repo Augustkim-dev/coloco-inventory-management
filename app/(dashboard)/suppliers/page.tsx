@@ -32,7 +32,7 @@ export default async function SuppliersPage() {
   // Fetch suppliers (optimized: select only needed columns)
   const { data: suppliers, error } = await supabase
     .from('suppliers')
-    .select('id, name, contact_person, phone, email, address, business_registration_no, notes, is_active, created_at, updated_at')
+    .select('id, name, contact_person, phone, email, address, notes, created_at, updated_at')
     .order('created_at', { ascending: false })
 
   if (error) {
