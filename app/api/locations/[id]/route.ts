@@ -113,7 +113,7 @@ export async function PATCH(
   }
 }
 
-// DELETE - Delete location
+// DELETE - Delete or deactivate location
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -130,72 +130,130 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if user is HQ_Admin or Branch_Manager
+    // Only HQ_Admin can delete/deactivate locations
     const { data: userData } = await supabase
       .from('users')
       .select('role, location_id')
       .eq('id', user.id)
       .single()
 
-    if (userData?.role !== 'HQ_Admin' && userData?.role !== 'Branch_Manager') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (userData?.role !== 'HQ_Admin') {
+      return NextResponse.json(
+        { error: 'Only HQ Admin can delete or deactivate locations' },
+        { status: 403 }
+      )
     }
 
-    // Branch Manager can only delete sub-branches under their branch
-    if (userData?.role === 'Branch_Manager') {
-      const { data: location } = await supabase
-        .from('locations')
-        .select('*')
-        .eq('id', params.id)
-        .single()
+    // Check if location exists
+    const { data: location } = await supabase
+      .from('locations')
+      .select('*')
+      .eq('id', params.id)
+      .single()
 
-      if (!location) {
-        return NextResponse.json({ error: 'Location not found' }, { status: 404 })
-      }
-
-      // Branch Manager cannot delete their own branch, only sub-branches
-      if (location.id === userData.location_id) {
-        return NextResponse.json(
-          { error: 'Branch Manager cannot delete their own branch' },
-          { status: 403 }
-        )
-      }
-
-      // Can only delete sub-branches under their branch
-      if (
-        location.parent_id !== userData.location_id ||
-        location.location_type !== 'SubBranch'
-      ) {
-        return NextResponse.json(
-          { error: 'Branch Manager can only delete sub-branches under their own branch' },
-          { status: 403 }
-        )
-      }
+    if (!location) {
+      return NextResponse.json({ error: 'Location not found' }, { status: 404 })
     }
 
     // Check if location has children
-    const { data: children } = await supabase
+    const { data: children, count: childCount } = await supabase
       .from('locations')
-      .select('id')
+      .select('id', { count: 'exact' })
       .eq('parent_id', params.id)
-      .limit(1)
 
-    if (children && children.length > 0) {
+    if (childCount && childCount > 0) {
       return NextResponse.json(
-        { error: 'Cannot delete location with children. Delete children first.' },
+        { error: 'Cannot delete location with children. Delete or deactivate children first.' },
         { status: 400 }
       )
     }
 
-    // Delete location
-    const { error } = await supabase.from('locations').delete().eq('id', params.id)
+    // Check for related data
+    const dependencies: Record<string, number> = {}
 
-    if (error) {
-      console.error('Error deleting location:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    // Check stock_batches
+    const { count: stockCount } = await supabase
+      .from('stock_batches')
+      .select('id', { count: 'exact', head: true })
+      .eq('location_id', params.id)
+    if (stockCount && stockCount > 0) dependencies.stock_batches = stockCount
+
+    // Check sales
+    const { count: salesCount } = await supabase
+      .from('sales')
+      .select('id', { count: 'exact', head: true })
+      .eq('location_id', params.id)
+    if (salesCount && salesCount > 0) dependencies.sales = salesCount
+
+    // Check pricing_configs (both directions)
+    const { count: pricingFromCount } = await supabase
+      .from('pricing_configs')
+      .select('id', { count: 'exact', head: true })
+      .eq('from_location_id', params.id)
+    const { count: pricingToCount } = await supabase
+      .from('pricing_configs')
+      .select('id', { count: 'exact', head: true })
+      .eq('to_location_id', params.id)
+    const totalPricing = (pricingFromCount || 0) + (pricingToCount || 0)
+    if (totalPricing > 0) dependencies.pricing_configs = totalPricing
+
+    // Check stock_transfer_requests (both directions)
+    const { count: transferFromCount } = await supabase
+      .from('stock_transfer_requests')
+      .select('id', { count: 'exact', head: true })
+      .eq('from_location_id', params.id)
+    const { count: transferToCount } = await supabase
+      .from('stock_transfer_requests')
+      .select('id', { count: 'exact', head: true })
+      .eq('to_location_id', params.id)
+    const totalTransfers = (transferFromCount || 0) + (transferToCount || 0)
+    if (totalTransfers > 0) dependencies.transfer_requests = totalTransfers
+
+    // Check users assigned to this location
+    const { count: usersCount } = await supabase
+      .from('users')
+      .select('id', { count: 'exact', head: true })
+      .eq('location_id', params.id)
+    if (usersCount && usersCount > 0) dependencies.users = usersCount
+
+    const hasRelatedData = Object.keys(dependencies).length > 0
+
+    if (hasRelatedData) {
+      // Deactivate instead of delete
+      const { error } = await supabase
+        .from('locations')
+        .update({ is_active: false })
+        .eq('id', params.id)
+
+      if (error) {
+        console.error('Error deactivating location:', error)
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+
+      return NextResponse.json({
+        success: true,
+        action: 'deactivated',
+        message: 'Location has related data and was deactivated instead of deleted.',
+        dependencies,
+      }, { status: 200 })
+    } else {
+      // No related data, perform hard delete
+      const { error } = await supabase
+        .from('locations')
+        .delete()
+        .eq('id', params.id)
+
+      if (error) {
+        console.error('Error deleting location:', error)
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+
+      return NextResponse.json({
+        success: true,
+        action: 'deleted',
+        message: 'Location permanently deleted.',
+      }, { status: 200 })
     }
-
-    return NextResponse.json({ success: true }, { status: 200 })
   } catch (error: any) {
     console.error('Error in DELETE /api/locations/[id]:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })

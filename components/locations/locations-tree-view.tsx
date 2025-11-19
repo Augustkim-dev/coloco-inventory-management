@@ -5,8 +5,9 @@ import { Location, LocationTreeNode } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
-import { ChevronRight, ChevronDown, Edit, Building2, MapPin } from 'lucide-react'
+import { ChevronRight, ChevronDown, Edit, Building2, MapPin, Trash2 } from 'lucide-react'
 import { buildLocationTree } from '@/lib/hierarchy-utils'
+import { DeleteLocationDialog } from './delete-location-dialog'
 
 // Helper function to check if user can edit a location
 function canEditLocation(
@@ -51,7 +52,9 @@ interface TreeNodeProps {
 
 function TreeNode({ node, depth = 0, userRole, userLocationId }: TreeNodeProps) {
   const [isExpanded, setIsExpanded] = useState(true)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const hasChildren = node.children && node.children.length > 0
+  const canDelete = userRole === 'HQ_Admin'
 
   const getLocationIcon = (type: string) => {
     switch (type) {
@@ -143,7 +146,27 @@ function TreeNode({ node, depth = 0, userRole, userLocationId }: TreeNodeProps) 
             </Button>
           </Link>
         )}
+
+        {/* Delete Button - HQ Admin only */}
+        {canDelete && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setDeleteDialogOpen(true)}
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteLocationDialog
+        locationId={node.id}
+        locationName={node.name}
+        isOpen={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      />
 
       {/* Children Nodes */}
       {hasChildren && isExpanded && (
