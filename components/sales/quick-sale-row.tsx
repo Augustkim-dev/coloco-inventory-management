@@ -28,47 +28,97 @@ interface QuickSaleRowProps {
   onSaleComplete: () => void
 }
 
+interface PriceInfo {
+  price: number
+  inherited: boolean
+  parentLocationName?: string
+}
+
 export function QuickSaleRow({
   stock,
   location,
   onSaleComplete,
 }: QuickSaleRowProps) {
   const [qty, setQty] = useState<number>(0)
-  const [unitPrice, setUnitPrice] = useState<number | null>(null)
+  const [priceInfo, setPriceInfo] = useState<PriceInfo | null>(null)
   const [loading, setLoading] = useState(false)
   const [loadingPrice, setLoadingPrice] = useState(true)
 
   const supabase = createClient()
 
-  // Fetch unit price from pricing_configs on mount
+  // Fetch unit price from pricing_configs with parent fallback
   useEffect(() => {
-    const fetchPrice = async () => {
+    const fetchPriceWithInheritance = async () => {
       setLoadingPrice(true)
       try {
-        const { data, error } = await supabase
+        // 1. Try to get direct price for this location
+        const { data: directPrice, error: directError } = await supabase
           .from('pricing_configs')
           .select('final_price')
           .eq('product_id', stock.product_id)
           .eq('to_location_id', location.id)
           .maybeSingle()
 
-        if (error) {
-          console.error('Error fetching price:', error)
-          setUnitPrice(null)
-        } else if (data) {
-          setUnitPrice(data.final_price)
+        if (directError) {
+          console.error('Error fetching direct price:', directError)
+        }
+
+        if (directPrice) {
+          setPriceInfo({ price: directPrice.final_price, inherited: false })
+          setLoadingPrice(false)
+          return
+        }
+
+        // 2. No direct price - try to get parent location's price
+        const { data: locationData, error: locationError } = await supabase
+          .from('locations')
+          .select('parent_id')
+          .eq('id', location.id)
+          .single()
+
+        if (locationError || !locationData?.parent_id) {
+          // No parent, no price
+          setPriceInfo(null)
+          setLoadingPrice(false)
+          return
+        }
+
+        // 3. Get parent location info and price
+        const { data: parentLocation } = await supabase
+          .from('locations')
+          .select('id, name')
+          .eq('id', locationData.parent_id)
+          .single()
+
+        const { data: parentPrice, error: parentPriceError } = await supabase
+          .from('pricing_configs')
+          .select('final_price')
+          .eq('product_id', stock.product_id)
+          .eq('to_location_id', locationData.parent_id)
+          .maybeSingle()
+
+        if (parentPriceError) {
+          console.error('Error fetching parent price:', parentPriceError)
+        }
+
+        if (parentPrice) {
+          setPriceInfo({
+            price: parentPrice.final_price,
+            inherited: true,
+            parentLocationName: parentLocation?.name || 'Parent'
+          })
         } else {
-          setUnitPrice(null)
+          setPriceInfo(null)
         }
       } catch (err) {
-        console.error('Error:', err)
-        setUnitPrice(null)
+        console.error('Error fetching price:', err)
+        setPriceInfo(null)
       } finally {
         setLoadingPrice(false)
       }
     }
 
-    fetchPrice()
+    fetchPriceWithInheritance()
   }, [stock.product_id, location.id, supabase])
 
   const handleSell = async () => {
@@ -82,7 +132,7 @@ export function QuickSaleRow({
       return
     }
 
-    if (!unitPrice) {
+    if (!priceInfo) {
       toast.error('No pricing configuration. Contact HQ Admin.')
       return
     }
@@ -97,7 +147,7 @@ export function QuickSaleRow({
           location_id: location.id,
           product_id: stock.product_id,
           qty: qty,
-          unit_price: unitPrice,
+          unit_price: priceInfo.price,
           currency: location.currency,
           sale_date: new Date().toISOString().split('T')[0],
         }),
@@ -112,7 +162,7 @@ export function QuickSaleRow({
       toast.success(
         `Sold ${qty} ${stock.product.unit} of ${stock.product.name}`,
         {
-          description: `Total: ${formatCurrency(qty * unitPrice, location.currency as Currency)}`,
+          description: `Total: ${formatCurrency(qty * priceInfo.price, location.currency as Currency)}`,
         }
       )
 
@@ -127,7 +177,7 @@ export function QuickSaleRow({
     }
   }
 
-  const totalAmount = unitPrice && qty > 0 ? qty * unitPrice : 0
+  const totalAmount = priceInfo && qty > 0 ? qty * priceInfo.price : 0
 
   return (
     <TableRow>
@@ -153,8 +203,20 @@ export function QuickSaleRow({
       <TableCell className="text-right">
         {loadingPrice ? (
           <Loader2 className="h-4 w-4 animate-spin ml-auto" />
-        ) : unitPrice ? (
-          formatCurrency(unitPrice, location.currency as Currency)
+        ) : priceInfo ? (
+          <div>
+            <div className="flex items-center justify-end gap-1">
+              {formatCurrency(priceInfo.price, location.currency as Currency)}
+              {priceInfo.inherited && (
+                <span className="text-xs text-orange-600 font-medium">(상속)</span>
+              )}
+            </div>
+            {priceInfo.inherited && priceInfo.parentLocationName && (
+              <div className="text-xs text-muted-foreground">
+                ↳ {priceInfo.parentLocationName}
+              </div>
+            )}
+          </div>
         ) : (
           <span className="text-muted-foreground text-sm">No price</span>
         )}
@@ -170,7 +232,7 @@ export function QuickSaleRow({
           onChange={(e) => setQty(parseInt(e.target.value) || 0)}
           placeholder="0"
           className="w-20 text-center mx-auto"
-          disabled={loading || !unitPrice}
+          disabled={loading || !priceInfo}
         />
       </TableCell>
 
@@ -179,7 +241,7 @@ export function QuickSaleRow({
         <Button
           size="sm"
           onClick={handleSell}
-          disabled={loading || qty <= 0 || !unitPrice || qty > stock.qty_on_hand}
+          disabled={loading || qty <= 0 || !priceInfo || qty > stock.qty_on_hand}
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />

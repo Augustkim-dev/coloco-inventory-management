@@ -33,6 +33,8 @@ interface SaleFormProps {
 interface PricingInfo {
   unit_price: number
   available_stock: number
+  inherited: boolean
+  parentLocationName?: string
 }
 
 export function SaleForm({ locations, defaultLocationId, products, stockByLocationProduct }: SaleFormProps) {
@@ -63,7 +65,7 @@ export function SaleForm({ locations, defaultLocationId, products, stockByLocati
     setPricing(null)
   }
 
-  // Fetch price and available stock when product is selected
+  // Fetch price and available stock when product is selected (with parent fallback)
   const handleProductChange = async (productId: string) => {
     setFormData({ ...formData, product_id: productId, qty: 0 })
     setPricing(null)
@@ -73,7 +75,7 @@ export function SaleForm({ locations, defaultLocationId, products, stockByLocati
       // Get stock from pre-fetched data
       const availableStock = getStockForProduct(productId)
 
-      // Fetch pricing configuration for selected location
+      // 1. Try to fetch pricing configuration for selected location
       const { data: priceData, error: priceError } = await supabase
         .from('pricing_configs')
         .select('final_price')
@@ -92,11 +94,69 @@ export function SaleForm({ locations, defaultLocationId, products, stockByLocati
         return
       }
 
-      if (!priceData) {
+      // If direct price found
+      if (priceData) {
+        if (availableStock === 0) {
+          toast({
+            variant: 'destructive',
+            title: 'No stock available',
+            description: 'This product is currently out of stock at the selected location.',
+          })
+          setLoadingPrice(false)
+          return
+        }
+
+        setPricing({
+          unit_price: priceData.final_price,
+          available_stock: availableStock,
+          inherited: false,
+        })
+        setLoadingPrice(false)
+        return
+      }
+
+      // 2. No direct price - try to get parent location's price
+      const { data: locationData, error: locationError } = await supabase
+        .from('locations')
+        .select('parent_id')
+        .eq('id', selectedLocationId)
+        .single()
+
+      if (locationError || !locationData?.parent_id) {
+        // No parent, no price
         toast({
           variant: 'destructive',
           title: 'No pricing configuration',
           description: 'Please contact HQ Admin to set up pricing for this product at this location.',
+        })
+        setLoadingPrice(false)
+        return
+      }
+
+      // 3. Get parent location info
+      const { data: parentLocation } = await supabase
+        .from('locations')
+        .select('id, name')
+        .eq('id', locationData.parent_id)
+        .single()
+
+      // 4. Get parent price
+      const { data: parentPriceData, error: parentPriceError } = await supabase
+        .from('pricing_configs')
+        .select('final_price')
+        .eq('product_id', productId)
+        .eq('to_location_id', locationData.parent_id)
+        .maybeSingle()
+
+      if (parentPriceError) {
+        console.error('Error fetching parent price:', parentPriceError)
+      }
+
+      if (!parentPriceData) {
+        toast({
+          variant: 'destructive',
+          title: 'No pricing configuration',
+          description: 'No pricing found for this product. Please contact HQ Admin.',
         })
         setLoadingPrice(false)
         return
@@ -113,8 +173,10 @@ export function SaleForm({ locations, defaultLocationId, products, stockByLocati
       }
 
       setPricing({
-        unit_price: priceData.final_price,
+        unit_price: parentPriceData.final_price,
         available_stock: availableStock,
+        inherited: true,
+        parentLocationName: parentLocation?.name || 'Parent',
       })
     } catch (error: any) {
       console.error('Unexpected error in handleProductChange:', error)
@@ -297,9 +359,19 @@ export function SaleForm({ locations, defaultLocationId, products, stockByLocati
 
           {pricing && !loadingPrice && (
             <div className="p-4 bg-green-50 rounded-lg border border-green-200 space-y-2">
-              <div className="flex justify-between">
+              <div className="flex justify-between items-start">
                 <span className="text-sm text-gray-600">Unit Price:</span>
-                <span className="font-semibold">{formatCurrency(pricing.unit_price, selectedLocation.currency)}</span>
+                <div className="text-right">
+                  <span className="font-semibold">{formatCurrency(pricing.unit_price, selectedLocation.currency)}</span>
+                  {pricing.inherited && (
+                    <span className="text-xs text-orange-600 font-medium ml-1">(상속)</span>
+                  )}
+                  {pricing.inherited && pricing.parentLocationName && (
+                    <div className="text-xs text-muted-foreground">
+                      ↳ {pricing.parentLocationName}
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Quantity:</span>
