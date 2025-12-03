@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { TemplateApplyRequest, TemplateApplyPreviewItem, Currency } from '@/types'
 
 // Helper function to round price based on currency
@@ -347,6 +348,10 @@ export async function POST(request: Request) {
       })
       .select('id')
       .single()
+
+    // Revalidate pricing pages to reflect new configs
+    revalidatePath('/pricing', 'page')
+    revalidatePath('/pricing/templates', 'page')
 
     return NextResponse.json({
       success: true,

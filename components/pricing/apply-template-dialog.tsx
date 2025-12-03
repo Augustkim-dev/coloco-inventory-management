@@ -217,8 +217,9 @@ export function ApplyTemplateDialog({
         description: `Created: ${result.created_configs}, Updated: ${result.updated_configs}`,
       })
 
-      onOpenChange(false)
+      // Refresh first to ensure cache is invalidated, then close dialog
       router.refresh()
+      onOpenChange(false)
     } catch (error: any) {
       toast({
         variant: 'destructive',
