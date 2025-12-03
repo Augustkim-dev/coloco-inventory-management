@@ -8,6 +8,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A multi-location inventory and sales management system for a Korean cosmetics distributor operating branches in Vietnam and China. The system tracks the complete flow: Factory → Korean HQ → Branches (VN/CN) → End Customers.
 
+## 필수 작업 순서 (반드시 준수)
+1. [ ] 핵심 구성 요소 점검 및 기대하는 기능 목록 구성
+2. [ ] 해당 기능을 구현하기 위한 기술 문서 리서치 및 검색
+3. [ ] 엣지 케이스 도출
+4. [ ] 엣지 케이스 해결을 위한 기술 문서 리서치 및 검색
+5. [ ] 새 브랜치 생성 및 스펙 문서 작성
+6. [ ] 스펙에 따른 구현 방향 리서치 및 검색
+7. [ ] 세션 메모리에 진행상태 저장
+8. [ ] 스펙 및 세션메모리 기반으로 Draft PR 생성
+9. [ ] 구현 시작
+10. [ ] 구현 완료 후 세션 메모리 업데이트 및 커밋, 푸시
+11. [ ] 새 세션 발생 시 이전 세션의 메모리 확인 및 커밋 로그 확인
+12. [ ] 모든 구현 완료 및 스펙 완성 시 PR 업데이트 및 리뷰
+13. [ ] 리뷰에서 나온 개선사항 모두 수정 및 커밋, 푸시
+14. [ ] 수정사항으로 인한 사이드 이펙트 추가리뷰 및 이전에 놓친 리뷰 확인
+15. [ ] 수정 사항이 없을 때까지 반복적으로 수정 및 리뷰 반복
+16. [ ] 최종 PR 업데이트 및 리뷰 대기 상태로 전환
+17. [ ] 관련 이슈 코멘트 및 상태 업데이트
+18. [ ] 사용자 승인 후 머지
+
 ### Core Business Flow
 
 ```

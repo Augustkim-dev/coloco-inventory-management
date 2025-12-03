@@ -196,3 +196,106 @@ export interface PriceCalculationResult {
   suggested_final_price: number
   total_margin_percent: number
 }
+
+// ============================================
+// Pricing Template Types
+// ============================================
+
+// Pricing template
+export interface PricingTemplate {
+  id: string
+  name: string
+  description: string | null
+  category: string | null
+  target_currency: Currency
+  hq_margin_percent: number
+  branch_margin_percent: number
+  default_transfer_cost: number
+  is_active: boolean
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+// Pricing template insert type
+export interface PricingTemplateInsert {
+  name: string
+  description?: string | null
+  category?: string | null
+  target_currency: Currency
+  hq_margin_percent: number
+  branch_margin_percent: number
+  default_transfer_cost?: number
+}
+
+// Pricing template update type
+export interface PricingTemplateUpdate {
+  name?: string
+  description?: string | null
+  category?: string | null
+  target_currency?: Currency
+  hq_margin_percent?: number
+  branch_margin_percent?: number
+  default_transfer_cost?: number
+  is_active?: boolean
+}
+
+// Template application record
+export interface PricingTemplateApplication {
+  id: string
+  template_id: string | null
+  applied_by: string | null
+  applied_at: string
+  target_location_ids: string[]
+  product_filter: {
+    category?: string
+    product_ids?: string[]
+  } | null
+  exchange_rate: number
+  exchange_rate_id: string | null
+  products_affected: number
+  configs_created: number
+  configs_updated: number
+}
+
+// Template apply request
+export interface TemplateApplyRequest {
+  template_id: string
+  target_location_ids: string[]
+  product_filter?: {
+    category?: string
+    product_ids?: string[]
+  }
+  exchange_rate_id?: string
+  action: 'preview' | 'apply'
+}
+
+// Template apply preview item
+export interface TemplateApplyPreviewItem {
+  product_id: string
+  product_sku: string
+  product_name: string
+  product_category: string | null
+  location_id: string
+  location_name: string
+  purchase_price: number
+  transfer_cost: number
+  exchange_rate: number
+  calculated_price: number
+  final_price: number
+  current_price: number | null
+  status: 'new' | 'update' | 'skip'
+  skip_reason?: string
+}
+
+// Template apply response
+export interface TemplateApplyResponse {
+  success: boolean
+  message?: string
+  affected_products: number
+  created_configs: number
+  updated_configs: number
+  skipped_products: number
+  preview?: TemplateApplyPreviewItem[]
+  application_id?: string
+}

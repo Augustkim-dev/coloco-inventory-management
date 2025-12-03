@@ -5,7 +5,7 @@ import { PricingChainView } from '@/components/pricing/pricing-chain-view'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Link from 'next/link'
-import { Plus, List, TrendingUp } from 'lucide-react'
+import { Plus, List, TrendingUp, FileStack } from 'lucide-react'
 import { getServerTranslations } from '@/lib/i18n/server-translations'
 
 export default async function PricingPage() {
@@ -59,19 +59,27 @@ export default async function PricingPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold">{t.title}</h1>
           <p className="text-gray-600 mt-1">
             Manage selling prices and view cascading price chains
           </p>
         </div>
-        <Link href="/pricing/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            {t.addConfig}
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/pricing/templates">
+            <Button variant="outline">
+              <FileStack className="mr-2 h-4 w-4" />
+              Templates
+            </Button>
+          </Link>
+          <Link href="/pricing/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              {t.addConfig}
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Tabs defaultValue="list" className="space-y-6">
