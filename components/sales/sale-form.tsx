@@ -23,6 +23,7 @@ interface SaleFormProps {
     sku: string
     name: string
     unit: string
+    available_stock: number
   }>
 }
 
@@ -227,8 +228,13 @@ export function SaleForm({ location, products }: SaleFormProps) {
               </SelectTrigger>
               <SelectContent>
                 {products.map((product) => (
-                  <SelectItem key={product.id} value={product.id}>
-                    {product.sku} - {product.name}
+                  <SelectItem
+                    key={product.id}
+                    value={product.id}
+                    disabled={product.available_stock === 0}
+                    className={product.available_stock === 0 ? 'text-gray-400' : ''}
+                  >
+                    {product.sku} - {product.name} (재고: {product.available_stock})
                   </SelectItem>
                 ))}
               </SelectContent>

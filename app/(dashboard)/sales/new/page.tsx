@@ -42,6 +42,9 @@ export default async function NewSalePage() {
     )
   }
 
+  // Type assertion for location
+  const location = profile.location as { id: string; name: string; currency: Currency }
+
   // Fetch products
   const { data: products, error: productsError } = await supabase
     .from('products')
@@ -58,8 +61,21 @@ export default async function NewSalePage() {
     )
   }
 
-  // Type assertion for location
-  const location = profile.location as { id: string; name: string; currency: Currency }
+  // Fetch stock data for current location
+  const { data: stockData } = await supabase
+    .from('stock_batches')
+    .select('product_id, qty_on_hand')
+    .eq('location_id', location.id)
+    .eq('quality_status', 'OK')
+    .gt('qty_on_hand', 0)
+
+  // Combine products with stock information
+  const productsWithStock = (products || []).map(product => ({
+    ...product,
+    available_stock: stockData
+      ?.filter(s => s.product_id === product.id)
+      .reduce((sum, s) => sum + s.qty_on_hand, 0) || 0
+  }))
 
   return (
     <div className="p-6">
@@ -69,7 +85,7 @@ export default async function NewSalePage() {
       </div>
       <SaleForm
         location={location}
-        products={products || []}
+        products={productsWithStock}
       />
     </div>
   )
