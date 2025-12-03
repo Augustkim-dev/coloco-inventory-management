@@ -22,6 +22,7 @@ interface InventoryViewProps {
   })[]
   locations: Location[]
   userRole: string
+  userLocationId?: string | null
 }
 
 const STORAGE_KEY = 'inventory-view-mode'
@@ -30,6 +31,7 @@ export function InventoryView({
   inventory,
   locations,
   userRole,
+  userLocationId,
 }: InventoryViewProps) {
   // 초기값은 항상 'table'로 시작 (서버/클라이언트 일치)
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table')
@@ -82,6 +84,7 @@ export function InventoryView({
           stockBatches={inventory}
           locations={locations}
           userRole={userRole}
+          userLocationId={userLocationId}
         />
       )}
     </>

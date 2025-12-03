@@ -98,7 +98,7 @@ export default async function InventoryPage() {
               : 'View inventory for your location'}
           </p>
         </div>
-        {profile.role === 'HQ_Admin' && (
+        {(profile.role === 'HQ_Admin' || profile.role === 'Branch_Manager') && (
           <Link href="/inventory/transfer">
             <Button>
               <ArrowRightLeft className="mr-2 h-4 w-4" />
@@ -112,6 +112,7 @@ export default async function InventoryPage() {
         inventory={inventory || []}
         locations={locations || []}
         userRole={profile.role}
+        userLocationId={profile.location_id}
       />
     </div>
   )

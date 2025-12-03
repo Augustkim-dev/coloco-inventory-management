@@ -47,11 +47,10 @@ export default async function TransferPage() {
     )
   }
 
-  // Get all active products
+  // Get all products
   const { data: products, error: productsError } = await supabase
     .from('products')
     .select('*')
-    .eq('is_active', true)
     .order('sku', { ascending: true })
 
   if (productsError) {

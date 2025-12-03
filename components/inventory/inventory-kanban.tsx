@@ -12,6 +12,7 @@ import { LocationAccordion } from './location-accordion'
 import { BatchCard } from './batch-card'
 import { TransferDialog } from './transfer-dialog'
 import { groupBatchesByLocation } from '@/lib/inventory-utils'
+import { canTransferBetween } from '@/lib/hierarchy-utils'
 import { toast } from 'sonner'
 import { StockBatch, Location } from '@/types'
 
@@ -28,12 +29,14 @@ interface InventoryKanbanProps {
   })[]
   locations: Location[]
   userRole: string
+  userLocationId?: string | null
 }
 
 export function InventoryKanban({
   stockBatches,
   locations,
   userRole,
+  userLocationId,
 }: InventoryKanbanProps) {
   const [activeBatch, setActiveBatch] = useState<StockBatch | null>(null)
   const [showTransferDialog, setShowTransferDialog] = useState(false)
@@ -85,22 +88,29 @@ export function InventoryKanban({
       return
     }
 
-    // 권한 체크 - HQ Admin만 이동 가능
-    if (userRole !== 'HQ_Admin') {
-      toast.error('Only HQ Admin can transfer stock')
+    // 권한 체크 - HQ Admin과 Branch Manager만 이동 가능
+    if (userRole !== 'HQ_Admin' && userRole !== 'Branch_Manager') {
+      toast.error('Only HQ Admin and Branch Manager can transfer stock')
       setActiveBatch(null)
       return
     }
 
-    // HQ ↔ Branch 이동만 허용 (양방향)
-    const isValidTransfer =
-      (sourceLocation.location_type === 'HQ' &&
-        targetLocation.location_type === 'Branch') ||
-      (sourceLocation.location_type === 'Branch' &&
-        targetLocation.location_type === 'HQ')
+    // Branch Manager는 자신의 Location에서만 이동 가능
+    if (userRole === 'Branch_Manager' && sourceLocationId !== userLocationId) {
+      toast.error('You can only transfer from your own location')
+      setActiveBatch(null)
+      return
+    }
 
-    if (!isValidTransfer) {
-      toast.error('Can only transfer between HQ and Branches')
+    // 계층적 이동 규칙 검증 (직접 부모-자식 관계만 허용)
+    const transferValidation = canTransferBetween(
+      sourceLocationId,
+      targetLocationId,
+      locations
+    )
+
+    if (!transferValidation.valid) {
+      toast.error(transferValidation.reason || 'Invalid transfer')
       setActiveBatch(null)
       return
     }
