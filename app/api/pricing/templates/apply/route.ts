@@ -133,7 +133,7 @@ export async function POST(request: Request) {
     // Build product query
     let productQuery = supabase
       .from('products')
-      .select('id, sku, name, category')
+      .select('id, sku, name, category, default_purchase_price')
 
     // Apply category filter from template or request
     const categoryFilter = body.product_filter?.category || template.category
@@ -178,6 +178,13 @@ export async function POST(request: Request) {
       // Keep the highest price (most recent or most relevant)
       if (!purchasePriceMap[item.product_id] || item.unit_price > purchasePriceMap[item.product_id]) {
         purchasePriceMap[item.product_id] = item.unit_price
+      }
+    })
+
+    // Fallback to default_purchase_price when PO price is not available
+    products.forEach(product => {
+      if (!purchasePriceMap[product.id] && product.default_purchase_price) {
+        purchasePriceMap[product.id] = product.default_purchase_price
       }
     })
 

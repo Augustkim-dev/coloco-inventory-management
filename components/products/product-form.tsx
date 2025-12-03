@@ -36,6 +36,7 @@ export function ProductForm({ product, mode }: ProductFormProps) {
     unit: product?.unit || 'EA',
     shelf_life_days: product?.shelf_life_days || 730,
     description: product?.description || '',
+    default_purchase_price: (product as any)?.default_purchase_price || null,
   })
   const [loading, setLoading] = useState(false)
   const [skuError, setSkuError] = useState('')
@@ -278,6 +279,32 @@ export function ProductForm({ product, mode }: ProductFormProps) {
                 required
                 min="1"
               />
+            </div>
+          </div>
+
+          {/* Default Purchase Price */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="default_purchase_price">
+                Default Purchase Price (KRW)
+              </Label>
+              <Input
+                id="default_purchase_price"
+                type="number"
+                min="0"
+                step="100"
+                value={formData.default_purchase_price || ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    default_purchase_price: e.target.value ? parseFloat(e.target.value) : null,
+                  })
+                }
+                placeholder="e.g., 5000"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Used for pricing template when no PO exists
+              </p>
             </div>
           </div>
 

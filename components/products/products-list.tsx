@@ -78,13 +78,14 @@ export function ProductsList({ products }: ProductsListProps) {
               <TableHead>Category</TableHead>
               <TableHead>Unit</TableHead>
               <TableHead>Shelf Life</TableHead>
+              <TableHead className="text-right">Purchase Price</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {products.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-gray-500 py-8">
+                <TableCell colSpan={7} className="text-center text-gray-500 py-8">
                   No products found. Add your first product to get started.
                 </TableCell>
               </TableRow>
@@ -96,6 +97,11 @@ export function ProductsList({ products }: ProductsListProps) {
                   <TableCell className="capitalize">{product.category || '-'}</TableCell>
                   <TableCell>{product.unit}</TableCell>
                   <TableCell>{product.shelf_life_days} days</TableCell>
+                  <TableCell className="text-right">
+                    {(product as any).default_purchase_price
+                      ? `${(product as any).default_purchase_price.toLocaleString()} KRW`
+                      : '-'}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Link href={`/products/${product.id}/edit`}>

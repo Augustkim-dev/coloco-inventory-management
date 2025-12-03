@@ -49,6 +49,11 @@ export interface StockTransferRequest {
   approved_at?: string | null
 }
 
+// Extended Product type with default_purchase_price (manually defined until DB types are regenerated)
+export interface ProductWithPurchasePrice extends Product {
+  default_purchase_price: number | null
+}
+
 // Supplier Product type (manually defined)
 export interface SupplierProduct {
   id: string
