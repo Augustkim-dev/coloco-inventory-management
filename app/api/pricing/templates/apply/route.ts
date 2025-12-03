@@ -315,13 +315,16 @@ export async function POST(request: Request) {
               exchange_rate: exchangeRate,
               hq_margin_percent: template.hq_margin_percent,
               branch_margin_percent: template.branch_margin_percent,
-              local_cost: (item.purchase_price + item.transfer_cost) * exchangeRate,
               calculated_price: item.final_price,
               final_price: item.final_price,
             })
             .eq('id', existingConfig.id)
 
-          if (!error) updatedCount++
+          if (error) {
+            console.error('Failed to update pricing config:', error.message, { productId: item.product_id, locationId: item.location_id })
+          } else {
+            updatedCount++
+          }
         } else {
           // Create new - find location currency
           const targetLocation = locations.find(loc => loc.id === item.location_id)
@@ -336,13 +339,16 @@ export async function POST(request: Request) {
               exchange_rate: exchangeRate,
               hq_margin_percent: template.hq_margin_percent,
               branch_margin_percent: template.branch_margin_percent,
-              local_cost: (item.purchase_price + item.transfer_cost) * exchangeRate,
               calculated_price: item.final_price,
               final_price: item.final_price,
               currency: targetLocation?.currency || template.target_currency,
             })
 
-          if (!error) createdCount++
+          if (error) {
+            console.error('Failed to insert pricing config:', error.message, { productId: item.product_id, locationId: item.location_id })
+          } else {
+            createdCount++
+          }
         }
       }
     }
