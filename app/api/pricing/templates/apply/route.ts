@@ -120,6 +120,18 @@ export async function POST(request: Request) {
       exchangeRateId = latestRate.id
     }
 
+    // Get HQ location (from_location_id for pricing configs)
+    const { data: hqLocation } = await supabase
+      .from('locations')
+      .select('id')
+      .eq('location_type', 'HQ')
+      .eq('is_active', true)
+      .single()
+
+    if (!hqLocation) {
+      return NextResponse.json({ error: 'HQ location not found' }, { status: 400 })
+    }
+
     // Get target locations
     const { data: locations } = await supabase
       .from('locations')
@@ -311,11 +323,13 @@ export async function POST(request: Request) {
 
           if (!error) updatedCount++
         } else {
-          // Create new
+          // Create new - find location currency
+          const targetLocation = locations.find(loc => loc.id === item.location_id)
           const { error } = await supabase
             .from('pricing_configs')
             .insert({
               product_id: item.product_id,
+              from_location_id: hqLocation.id,
               to_location_id: item.location_id,
               purchase_price: item.purchase_price,
               transfer_cost: item.transfer_cost,
@@ -325,6 +339,7 @@ export async function POST(request: Request) {
               local_cost: (item.purchase_price + item.transfer_cost) * exchangeRate,
               calculated_price: item.final_price,
               final_price: item.final_price,
+              currency: targetLocation?.currency || template.target_currency,
             })
 
           if (!error) createdCount++
