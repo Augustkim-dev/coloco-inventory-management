@@ -88,7 +88,7 @@ export function LocationAccordion({
                 key={batch.id}
                 batch={batch}
                 locationId={location.id}
-                isDraggable={userRole === 'HQ_Admin'}
+                isDraggable={userRole === 'HQ_Admin' || userRole === 'Branch_Manager'}
               />
             ))}
           </div>

@@ -12,7 +12,7 @@ import { LocationAccordion } from './location-accordion'
 import { BatchCard } from './batch-card'
 import { TransferDialog } from './transfer-dialog'
 import { groupBatchesByLocation } from '@/lib/inventory-utils'
-import { canTransferBetween } from '@/lib/hierarchy-utils'
+import { canTransferBetween, getDescendants } from '@/lib/hierarchy-utils'
 import { toast } from 'sonner'
 import { StockBatch, Location } from '@/types'
 
@@ -45,8 +45,23 @@ export function InventoryKanban({
   // 데이터 그룹화 (Location별)
   const groupedBatches = groupBatchesByLocation(stockBatches)
 
-  // HQ Location 찾기
+  // Branch Manager인 경우 자신의 Branch + Sub-Branch만 필터링
+  const filteredLocations = userRole === 'Branch_Manager' && userLocationId
+    ? locations.filter(loc => {
+        // 자신의 location이거나 하위 location인 경우만 표시
+        if (loc.id === userLocationId) return true
+        const descendants = getDescendants(userLocationId, locations)
+        return descendants.some(d => d.id === loc.id)
+      })
+    : locations
+
+  // HQ Location 찾기 (HQ Admin용)
   const hqLocation = locations.find((l) => l.location_type === 'HQ')
+
+  // Branch Manager인 경우 자신의 Branch를 기본 펼침
+  const defaultOpenLocations = userRole === 'Branch_Manager' && userLocationId
+    ? [userLocationId]
+    : hqLocation ? [hqLocation.id] : []
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event
@@ -139,10 +154,10 @@ export function InventoryKanban({
         {/* Accordion 컨테이너 */}
         <Accordion
           type="multiple"
-          defaultValue={hqLocation ? [hqLocation.id] : []} // Korea HQ만 기본 펼침
+          defaultValue={defaultOpenLocations}
           className="space-y-4"
         >
-          {locations.map((location) => (
+          {filteredLocations.map((location) => (
             <LocationAccordion
               key={location.id}
               location={location}
