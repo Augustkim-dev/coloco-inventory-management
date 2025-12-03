@@ -1,6 +1,60 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { canTransferBetween, getAccessibleLocations } from '@/lib/hierarchy-utils'
+import { SupabaseClient } from '@supabase/supabase-js'
+
+// Helper function to rollback source deductions
+async function rollbackDeductions(
+  supabase: SupabaseClient,
+  originalQuantities: Array<{ batch_id: string; original_qty: number }>
+) {
+  for (const item of originalQuantities) {
+    try {
+      await supabase
+        .from('stock_batches')
+        .update({
+          qty_on_hand: item.original_qty,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', item.batch_id)
+    } catch (e) {
+      console.error('Rollback failed for batch:', item.batch_id, e)
+    }
+  }
+}
+
+// Helper function to rollback target changes
+async function rollbackTargetChanges(
+  supabase: SupabaseClient,
+  targetChanges: Array<{
+    type: 'insert' | 'update'
+    batch_id: string
+    original_qty?: number
+  }>
+) {
+  for (const change of targetChanges) {
+    try {
+      if (change.type === 'insert') {
+        // Delete the newly inserted batch
+        await supabase
+          .from('stock_batches')
+          .delete()
+          .eq('id', change.batch_id)
+      } else if (change.type === 'update' && change.original_qty !== undefined) {
+        // Restore original quantity
+        await supabase
+          .from('stock_batches')
+          .update({
+            qty_on_hand: change.original_qty,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', change.batch_id)
+      }
+    } catch (e) {
+      console.error('Rollback failed for target batch:', change.batch_id, e)
+    }
+  }
+}
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -157,6 +211,9 @@ export async function POST(request: Request) {
       )
     }
 
+    // Track original quantities for potential rollback
+    const originalQuantities: Array<{ batch_id: string; original_qty: number }> = []
+
     // Step 4: Deduct from source location batches
     for (const deduction of deductions) {
       // Get current quantity first
@@ -167,11 +224,19 @@ export async function POST(request: Request) {
         .single()
 
       if (!currentBatch) {
+        // Rollback any previous deductions
+        await rollbackDeductions(supabase, originalQuantities)
         return NextResponse.json(
           { error: 'Batch not found during deduction' },
           { status: 500 }
         )
       }
+
+      // Save original quantity for potential rollback
+      originalQuantities.push({
+        batch_id: deduction.batch_id,
+        original_qty: currentBatch.qty_on_hand,
+      })
 
       // Update with new quantity
       const newQty = currentBatch.qty_on_hand - deduction.deduct_qty
@@ -186,7 +251,8 @@ export async function POST(request: Request) {
 
       if (updateError) {
         console.error('Error updating source batch:', updateError)
-        // In production, this should trigger a rollback
+        // Rollback any previous deductions
+        await rollbackDeductions(supabase, originalQuantities)
         return NextResponse.json(
           { error: 'Failed to deduct from source inventory' },
           { status: 500 }
@@ -195,6 +261,13 @@ export async function POST(request: Request) {
     }
 
     // Step 5: Add to target location batches (create or update)
+    // Track created/updated target batches for potential rollback
+    const targetChanges: Array<{
+      type: 'insert' | 'update'
+      batch_id: string
+      original_qty?: number
+    }> = []
+
     for (const deduction of deductions) {
       // Check if this batch already exists at the target location
       const { data: existingBatch } = await supabase
@@ -217,31 +290,54 @@ export async function POST(request: Request) {
 
         if (updateError) {
           console.error('Error updating target batch:', updateError)
+          // Rollback source deductions and target changes
+          await rollbackDeductions(supabase, originalQuantities)
+          await rollbackTargetChanges(supabase, targetChanges)
           return NextResponse.json(
             { error: 'Failed to update target inventory' },
             { status: 500 }
           )
         }
+
+        targetChanges.push({
+          type: 'update',
+          batch_id: existingBatch.id,
+          original_qty: existingBatch.qty_on_hand,
+        })
       } else {
         // Create new batch at target location
-        const { error: insertError } = await supabase.from('stock_batches').insert({
-          product_id,
-          location_id: to_location_id,
-          batch_no: deduction.batch_no,
-          qty_on_hand: deduction.deduct_qty,
-          qty_reserved: 0,
-          unit_cost: deduction.unit_cost,
-          manufactured_date: deduction.manufactured_date,
-          expiry_date: deduction.expiry_date,
-          quality_status: 'OK',
-        })
+        const { data: insertedBatch, error: insertError } = await supabase
+          .from('stock_batches')
+          .insert({
+            product_id,
+            location_id: to_location_id,
+            batch_no: deduction.batch_no,
+            qty_on_hand: deduction.deduct_qty,
+            qty_reserved: 0,
+            unit_cost: deduction.unit_cost,
+            manufactured_date: deduction.manufactured_date,
+            expiry_date: deduction.expiry_date,
+            quality_status: 'OK',
+          })
+          .select('id')
+          .single()
 
         if (insertError) {
           console.error('Error inserting target batch:', insertError)
+          // Rollback source deductions and target changes
+          await rollbackDeductions(supabase, originalQuantities)
+          await rollbackTargetChanges(supabase, targetChanges)
           return NextResponse.json(
-            { error: 'Failed to create target inventory' },
+            { error: 'Failed to create target inventory. Please check RLS policies.' },
             { status: 500 }
           )
+        }
+
+        if (insertedBatch) {
+          targetChanges.push({
+            type: 'insert',
+            batch_id: insertedBatch.id,
+          })
         }
       }
     }

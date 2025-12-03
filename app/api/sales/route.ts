@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getDescendants } from '@/lib/hierarchy-utils'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -30,8 +31,20 @@ export async function POST(request: Request) {
       .eq('id', user.id)
       .single()
 
-    if (profile?.role === 'Branch_Manager' && profile.location_id !== location_id) {
-      return NextResponse.json({ error: 'Access denied to this location' }, { status: 403 })
+    // Branch Manager can sell at their location + sub-branches
+    if (profile?.role === 'Branch_Manager') {
+      const { data: locations } = await supabase.from('locations').select('*')
+
+      if (locations && profile.location_id) {
+        const descendants = getDescendants(profile.location_id, locations)
+        const allowedIds = [profile.location_id, ...descendants.map(d => d.id)]
+
+        if (!allowedIds.includes(location_id)) {
+          return NextResponse.json({ error: 'Access denied to this location' }, { status: 403 })
+        }
+      } else if (profile.location_id !== location_id) {
+        return NextResponse.json({ error: 'Access denied to this location' }, { status: 403 })
+      }
     }
 
     // 1. FIFO: Get stock batches ordered by expiry date (earliest first)
@@ -166,9 +179,17 @@ export async function GET(request: Request) {
       .order('sale_date', { ascending: false })
       .order('created_at', { ascending: false })
 
-    // Branch Manager can only see their location
+    // Branch Manager can see their location + sub-branches
     if (profile?.role === 'Branch_Manager' && profile.location_id) {
-      query = query.eq('location_id', profile.location_id)
+      const { data: locations } = await supabase.from('locations').select('*')
+
+      if (locations) {
+        const descendants = getDescendants(profile.location_id, locations)
+        const allLocationIds = [profile.location_id, ...descendants.map(d => d.id)]
+        query = query.in('location_id', allLocationIds)
+      } else {
+        query = query.eq('location_id', profile.location_id)
+      }
     }
 
     const { data: sales, error } = await query
