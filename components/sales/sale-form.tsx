@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -12,19 +12,22 @@ import { useToast } from '@/hooks/use-toast'
 import { formatCurrency } from '@/lib/utils'
 import { Currency } from '@/types'
 
+interface LocationInfo {
+  id: string
+  name: string
+  currency: Currency
+}
+
 interface SaleFormProps {
-  location: {
-    id: string
-    name: string
-    currency: Currency
-  }
+  locations: LocationInfo[]
+  defaultLocationId: string
   products: Array<{
     id: string
     sku: string
     name: string
     unit: string
-    available_stock: number
   }>
+  stockByLocationProduct: Record<string, Record<string, number>>
 }
 
 interface PricingInfo {
@@ -32,7 +35,8 @@ interface PricingInfo {
   available_stock: number
 }
 
-export function SaleForm({ location, products }: SaleFormProps) {
+export function SaleForm({ locations, defaultLocationId, products, stockByLocationProduct }: SaleFormProps) {
+  const [selectedLocationId, setSelectedLocationId] = useState(defaultLocationId)
   const [formData, setFormData] = useState({
     product_id: '',
     qty: 0,
@@ -45,43 +49,36 @@ export function SaleForm({ location, products }: SaleFormProps) {
   const { toast } = useToast()
   const supabase = createClient()
 
+  const selectedLocation = locations.find(loc => loc.id === selectedLocationId) || locations[0]
+
+  // Get stock for selected location
+  const getStockForProduct = (productId: string) => {
+    return stockByLocationProduct[selectedLocationId]?.[productId] || 0
+  }
+
+  // Reset product selection when location changes
+  const handleLocationChange = (locationId: string) => {
+    setSelectedLocationId(locationId)
+    setFormData({ ...formData, product_id: '', qty: 0 })
+    setPricing(null)
+  }
+
   // Fetch price and available stock when product is selected
   const handleProductChange = async (productId: string) => {
-    setFormData({ ...formData, product_id: productId })
+    setFormData({ ...formData, product_id: productId, qty: 0 })
     setPricing(null)
     setLoadingPrice(true)
 
     try {
-      // Fetch available stock first (always needed)
-      const { data: stockData, error: stockError } = await supabase
-        .from('stock_batches')
-        .select('qty_on_hand')
-        .eq('location_id', location.id)
-        .eq('product_id', productId)
-        .eq('quality_status', 'OK')
-        .gt('qty_on_hand', 0)
+      // Get stock from pre-fetched data
+      const availableStock = getStockForProduct(productId)
 
-      if (stockError) {
-        console.error('Error fetching stock:', stockError)
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: 'Failed to fetch stock information',
-        })
-        setLoadingPrice(false)
-        return
-      }
-
-      const availableStock = stockData?.reduce((sum, batch) => sum + batch.qty_on_hand, 0) || 0
-
-      console.log('Available stock for product:', productId, '=', availableStock)
-
-      // Fetch pricing configuration
+      // Fetch pricing configuration for selected location
       const { data: priceData, error: priceError } = await supabase
         .from('pricing_configs')
         .select('final_price')
         .eq('product_id', productId)
-        .eq('to_location_id', location.id)
+        .eq('to_location_id', selectedLocationId)
         .maybeSingle()
 
       if (priceError) {
@@ -95,13 +92,11 @@ export function SaleForm({ location, products }: SaleFormProps) {
         return
       }
 
-      console.log('Price data:', priceData)
-
       if (!priceData) {
         toast({
           variant: 'destructive',
           title: 'No pricing configuration',
-          description: 'Please contact HQ Admin to set up pricing for this product.',
+          description: 'Please contact HQ Admin to set up pricing for this product at this location.',
         })
         setLoadingPrice(false)
         return
@@ -111,7 +106,7 @@ export function SaleForm({ location, products }: SaleFormProps) {
         toast({
           variant: 'destructive',
           title: 'No stock available',
-          description: 'This product is currently out of stock.',
+          description: 'This product is currently out of stock at the selected location.',
         })
         setLoadingPrice(false)
         return
@@ -162,11 +157,11 @@ export function SaleForm({ location, products }: SaleFormProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          location_id: location.id,
+          location_id: selectedLocationId,
           product_id: formData.product_id,
           qty: formData.qty,
           unit_price: pricing.unit_price,
-          currency: location.currency,
+          currency: selectedLocation.currency,
           sale_date: formData.sale_date,
         }),
       })
@@ -197,13 +192,43 @@ export function SaleForm({ location, products }: SaleFormProps) {
   const totalAmount = pricing ? formData.qty * pricing.unit_price : 0
   const selectedProduct = products.find(p => p.id === formData.product_id)
 
+  // Show location selector only if there are multiple locations
+  const showLocationSelector = locations.length > 1
+
   return (
     <Card className="max-w-2xl">
       <CardHeader>
-        <CardTitle>Add Sale - {location.name}</CardTitle>
+        <CardTitle>
+          Add Sale {showLocationSelector ? '' : `- ${selectedLocation.name}`}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Location Selector - only shown if multiple locations available */}
+          {showLocationSelector && (
+            <div>
+              <Label htmlFor="location_id">Location *</Label>
+              <Select
+                value={selectedLocationId}
+                onValueChange={handleLocationChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {locations.map((location) => (
+                    <SelectItem key={location.id} value={location.id}>
+                      {location.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Currency: {selectedLocation.currency}
+              </p>
+            </div>
+          )}
+
           <div>
             <Label htmlFor="sale_date">Sale Date *</Label>
             <Input
@@ -227,20 +252,23 @@ export function SaleForm({ location, products }: SaleFormProps) {
                 <SelectValue placeholder="Select product" />
               </SelectTrigger>
               <SelectContent>
-                {products.map((product) => (
-                  <SelectItem
-                    key={product.id}
-                    value={product.id}
-                    disabled={product.available_stock === 0}
-                    className={product.available_stock === 0 ? 'text-gray-400' : ''}
-                  >
-                    {product.sku} - {product.name} (재고: {product.available_stock})
-                  </SelectItem>
-                ))}
+                {products.map((product) => {
+                  const stock = getStockForProduct(product.id)
+                  return (
+                    <SelectItem
+                      key={product.id}
+                      value={product.id}
+                      disabled={stock === 0}
+                      className={stock === 0 ? 'text-gray-400' : ''}
+                    >
+                      {product.sku} - {product.name} (재고: {stock})
+                    </SelectItem>
+                  )
+                })}
               </SelectContent>
             </Select>
             {loadingPrice && (
-              <p className="text-sm text-gray-500 mt-1">Loading pricing and stock...</p>
+              <p className="text-sm text-gray-500 mt-1">Loading pricing...</p>
             )}
             {pricing && !loadingPrice && (
               <p className="text-sm text-green-600 mt-1">
@@ -271,7 +299,7 @@ export function SaleForm({ location, products }: SaleFormProps) {
             <div className="p-4 bg-green-50 rounded-lg border border-green-200 space-y-2">
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Unit Price:</span>
-                <span className="font-semibold">{formatCurrency(pricing.unit_price, location.currency)}</span>
+                <span className="font-semibold">{formatCurrency(pricing.unit_price, selectedLocation.currency)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Quantity:</span>
@@ -280,7 +308,7 @@ export function SaleForm({ location, products }: SaleFormProps) {
               <div className="h-px bg-green-300 my-2"></div>
               <div className="flex justify-between text-lg">
                 <span className="font-medium">Total Amount:</span>
-                <span className="font-bold text-green-700">{formatCurrency(totalAmount, location.currency)}</span>
+                <span className="font-bold text-green-700">{formatCurrency(totalAmount, selectedLocation.currency)}</span>
               </div>
             </div>
           )}
