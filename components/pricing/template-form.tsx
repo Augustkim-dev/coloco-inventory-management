@@ -154,14 +154,14 @@ export function TemplateForm({ template, mode }: TemplateFormProps) {
             <div>
               <Label htmlFor="category">Category</Label>
               <Select
-                value={formData.category}
-                onValueChange={(value) => setFormData({ ...formData, category: value })}
+                value={formData.category || 'all'}
+                onValueChange={(value) => setFormData({ ...formData, category: value === 'all' ? '' : value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All categories</SelectItem>
+                  <SelectItem value="all">All categories</SelectItem>
                   {PRODUCT_CATEGORIES.map((cat) => (
                     <SelectItem key={cat.value} value={cat.value}>
                       {cat.label}
