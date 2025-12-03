@@ -43,6 +43,8 @@ export function HierarchicalTransferForm({
   const [loading, setLoading] = useState(false)
   const [checkingStock, setCheckingStock] = useState(false)
   const [validDestinations, setValidDestinations] = useState<Location[]>([])
+  const [productStocks, setProductStocks] = useState<Record<string, number>>({})
+  const [loadingProductStocks, setLoadingProductStocks] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
   const supabase = createClient()
@@ -78,6 +80,37 @@ export function HierarchicalTransferForm({
     }
   }, [formData.from_location_id, allLocations, userLocationId, userRole])
 
+  // Fetch all product stocks for a location (called when source location changes)
+  const fetchAllProductStocks = async (locationId: string) => {
+    if (!locationId) {
+      setProductStocks({})
+      return
+    }
+
+    setLoadingProductStocks(true)
+    try {
+      const { data, error } = await supabase
+        .from('stock_batches')
+        .select('product_id, qty_on_hand')
+        .eq('location_id', locationId)
+        .gt('qty_on_hand', 0)
+
+      if (error) throw error
+
+      // Aggregate by product_id
+      const stocks: Record<string, number> = {}
+      data?.forEach(batch => {
+        stocks[batch.product_id] = (stocks[batch.product_id] || 0) + batch.qty_on_hand
+      })
+      setProductStocks(stocks)
+    } catch (error: any) {
+      console.error('Error fetching product stocks:', error)
+      setProductStocks({})
+    } finally {
+      setLoadingProductStocks(false)
+    }
+  }
+
   // Check available stock at source location for selected product
   const checkAvailableStock = async (sourceLocationId: string, productId: string) => {
     if (!sourceLocationId || !productId) return
@@ -106,11 +139,10 @@ export function HierarchicalTransferForm({
   }
 
   const handleSourceChange = (locationId: string) => {
-    setFormData({ ...formData, from_location_id: locationId, to_location_id: '' })
+    setFormData({ ...formData, from_location_id: locationId, to_location_id: '', product_id: '' })
     setAvailableStock(null)
-    if (formData.product_id) {
-      checkAvailableStock(locationId, formData.product_id)
-    }
+    // Fetch all product stocks for the new source location
+    fetchAllProductStocks(locationId)
   }
 
   const handleProductChange = (productId: string) => {
@@ -282,11 +314,26 @@ export function HierarchicalTransferForm({
                 } />
               </SelectTrigger>
               <SelectContent>
-                {products.map((product) => (
-                  <SelectItem key={product.id} value={product.id}>
-                    {product.sku} - {product.name}
-                  </SelectItem>
-                ))}
+                {loadingProductStocks ? (
+                  <div className="p-2 text-sm text-muted-foreground flex items-center gap-2">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Loading stock info...
+                  </div>
+                ) : (
+                  products.map((product) => {
+                    const stock = productStocks[product.id]
+                    return (
+                      <SelectItem key={product.id} value={product.id}>
+                        {product.sku} - {product.name}
+                        {formData.from_location_id && (
+                          <span className={`ml-2 ${stock && stock > 0 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                            (Stock: {stock?.toLocaleString() || 0} {product.unit})
+                          </span>
+                        )}
+                      </SelectItem>
+                    )
+                  })
+                )}
               </SelectContent>
             </Select>
             {checkingStock && (

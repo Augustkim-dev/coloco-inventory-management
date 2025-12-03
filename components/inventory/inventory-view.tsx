@@ -54,8 +54,8 @@ export function InventoryView({
 
   return (
     <>
-      {/* 뷰 전환 버튼 - HQ Admin만 표시 */}
-      {userRole === 'HQ_Admin' && (
+      {/* 뷰 전환 버튼 - HQ Admin과 Branch Manager 표시 */}
+      {(userRole === 'HQ_Admin' || userRole === 'Branch_Manager') && (
         <div className="flex gap-2 mb-4">
           <Button
             variant={viewMode === 'table' ? 'default' : 'outline'}

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowRightLeft } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { getServerTranslations } from '@/lib/i18n/server-translations'
+import { getDescendants } from '@/lib/hierarchy-utils'
 
 export default async function InventoryPage() {
   const t = await getServerTranslations('inventory')
@@ -29,6 +30,12 @@ export default async function InventoryPage() {
   if (!profile) {
     redirect('/login')
   }
+
+  // Get all locations first (needed for hierarchy calculation and Kanban view)
+  const { data: locations } = await supabase
+    .from('locations')
+    .select('*')
+    .order('display_order', { ascending: true })
 
   // Build query based on user role (optimized: select only needed columns)
   let query = supabase
@@ -55,9 +62,13 @@ export default async function InventoryPage() {
     .gt('qty_on_hand', 0)
     .order('expiry_date', { ascending: true })
 
-  // Branch Manager can only see their own location's inventory
-  if (profile.role === 'Branch_Manager') {
-    query = query.eq('location_id', profile.location_id)
+  // Branch Manager can see their location + all sub-branches
+  if (profile.role === 'Branch_Manager' && profile.location_id && locations) {
+    // Get all descendant location IDs (sub-branches)
+    const descendants = getDescendants(profile.location_id, locations)
+    const descendantIds = descendants.map(loc => loc.id)
+    const allLocationIds = [profile.location_id, ...descendantIds]
+    query = query.in('location_id', allLocationIds)
   }
 
   const { data: rawInventory, error } = await query
@@ -80,12 +91,6 @@ export default async function InventoryPage() {
     product: Array.isArray(item.product) ? item.product[0] : item.product,
     location: Array.isArray(item.location) ? item.location[0] : item.location,
   }))
-
-  // Get all locations for Kanban view, ordered by display_order (optimized)
-  const { data: locations } = await supabase
-    .from('locations')
-    .select('*')
-    .order('display_order', { ascending: true })
 
   return (
     <div className="space-y-6">
