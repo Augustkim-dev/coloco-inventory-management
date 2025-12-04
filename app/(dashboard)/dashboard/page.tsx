@@ -1,27 +1,38 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { DashboardStats } from "@/components/dashboard/dashboard-stats"
+import { DashboardPeriodSelector } from "@/components/dashboard/dashboard-period-selector"
+import { DashboardComparisonCards } from "@/components/dashboard/dashboard-comparison-cards"
+import { LocationSalesTable } from "@/components/dashboard/location-sales-table"
 import { ExpiryWarnings } from "@/components/dashboard/expiry-warnings"
-import { DashboardChartsClient } from "@/components/dashboard/dashboard-charts-client"
 import { getServerTranslations } from "@/lib/i18n/server-translations"
 import {
-  enrichSalesWithProfits,
-  aggregateBranchSales,
-  generateSalesTrend,
-  aggregateProductSales,
-  aggregateProfitBreakdown,
-  getTopProducts,
-  calculateDashboardStats
+  enrichSalesForDashboard,
+  calculatePeriodComparison,
+  aggregateSalesByLocation,
 } from "@/lib/dashboard-data"
 import { fetchLatestExchangeRates } from "@/lib/currency-converter"
+import { getDescendants } from "@/lib/hierarchy-utils"
+import {
+  parsePeriodFromParams,
+  calculatePeriodRanges,
+  formatDateForAPI,
+} from "@/lib/date-utils"
+import { Location, UserRole } from "@/types"
 
-// Server component - cannot use useUser hook
-// Instead, we get user info from auth and pass it down
-export default async function DashboardPage() {
+interface DashboardPageProps {
+  searchParams: Promise<{
+    period?: string
+    from?: string
+    to?: string
+  }>
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const t = await getServerTranslations('dashboard')
   const supabase = await createClient()
+  const params = await searchParams
 
-  // Get current user information (auth only, not from users table)
+  // Get current user information
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -37,72 +48,83 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single()
 
+  const userRole = (profile?.role || 'HQ_Admin') as UserRole
+
+  // Get all locations for hierarchy operations
+  const { data: allLocations } = await supabase
+    .from('locations')
+    .select('*')
+    .eq('is_active', true)
+    .order('display_order')
+
+  const locations = (allLocations || []) as Location[]
+
   // Get latest exchange rates
   const exchangeRates = await fetchLatestExchangeRates(supabase)
 
-  // Calculate date ranges
-  const today = new Date()
-  const eightWeeksAgo = new Date()
-  eightWeeksAgo.setDate(eightWeeksAgo.getDate() - 56) // 8 weeks
+  // Parse period from URL params
+  const { period, from, to } = parsePeriodFromParams(params)
 
-  // Get sales data with pricing configs for profit calculation (optimized)
-  let salesQuery = supabase
-    .from('sales')
-    .select(`
-      id,
-      location_id,
-      product_id,
-      sale_date,
-      qty,
-      unit_price,
-      total_amount,
-      currency,
-      location:locations(name, currency),
-      product:products(sku, name),
-      pricing_config:pricing_configs!inner(
-        local_cost,
-        hq_margin_pct,
-        branch_margin_pct
-      )
-    `)
-    .gte('sale_date', eightWeeksAgo.toISOString().split('T')[0])
-    .lte('sale_date', today.toISOString().split('T')[0])
+  // Calculate date ranges for current and previous periods
+  const periodRanges = calculatePeriodRanges(period, from, to)
 
-  if (profile?.role === 'Branch_Manager') {
-    salesQuery = salesQuery.eq('location_id', profile.location_id)
+  // Determine location filter for Branch_Manager
+  let allowedLocationIds: string[] | null = null
+  if (userRole === 'Branch_Manager' && profile?.location_id) {
+    const descendants = getDescendants(profile.location_id, locations)
+    allowedLocationIds = [profile.location_id, ...descendants.map(loc => loc.id)]
   }
 
-  const { data: rawSalesData } = await salesQuery
+  // Build the base query
+  const buildSalesQuery = (fromDate: Date, toDate: Date) => {
+    let query = supabase
+      .from('sales')
+      .select(`
+        id,
+        location_id,
+        product_id,
+        sale_date,
+        qty,
+        unit_price,
+        total_amount,
+        currency,
+        location:locations(id, name, location_type, parent_id, currency, level),
+        product:products(sku, name),
+        pricing_config:pricing_configs!inner(
+          local_cost,
+          hq_margin_pct,
+          branch_margin_pct
+        )
+      `)
+      .gte('sale_date', formatDateForAPI(fromDate))
+      .lte('sale_date', formatDateForAPI(toDate))
 
-  // Get today's sales for stats cards
-  const todayStr = today.toISOString().split('T')[0]
-  let todaySalesQuery = supabase
-    .from('sales')
-    .select('total_amount, currency')
-    .eq('sale_date', todayStr)
+    // Apply location filter for Branch_Manager
+    if (allowedLocationIds) {
+      query = query.in('location_id', allowedLocationIds)
+    }
 
-  if (profile?.role === 'Branch_Manager') {
-    todaySalesQuery = todaySalesQuery.eq('location_id', profile.location_id)
+    return query
   }
 
-  const { data: todaySales } = await todaySalesQuery
+  // Fetch current and previous period data in parallel
+  const [currentResult, previousResult] = await Promise.all([
+    buildSalesQuery(periodRanges.current.from, periodRanges.current.to),
+    buildSalesQuery(periodRanges.previous.from, periodRanges.previous.to),
+  ])
 
-  // Get stock value
-  let stockQuery = supabase
-    .from('stock_batches')
-    .select(`
-      qty_on_hand,
-      unit_cost,
-      location:locations(name, currency)
-    `)
-    .eq('quality_status', 'OK')
-    .gt('qty_on_hand', 0)
+  const currentSalesRaw = currentResult.data || []
+  const previousSalesRaw = previousResult.data || []
 
-  if (profile?.role === 'Branch_Manager') {
-    stockQuery = stockQuery.eq('location_id', profile.location_id)
-  }
+  // Enrich sales data with profit calculations
+  const currentSales = enrichSalesForDashboard(currentSalesRaw, locations, exchangeRates)
+  const previousSales = enrichSalesForDashboard(previousSalesRaw, locations, exchangeRates)
 
-  const { data: stockBatches } = await stockQuery
+  // Calculate comparison stats
+  const comparisonStats = calculatePeriodComparison(currentSales, previousSales)
+
+  // Aggregate sales by location
+  const salesByLocation = aggregateSalesByLocation(currentSales, locations, exchangeRates)
 
   // Get expiry warnings (within 3 months)
   const threeMonthsLater = new Date()
@@ -126,54 +148,58 @@ export default async function DashboardPage() {
     .lte('expiry_date', threeMonthsLater.toISOString().split('T')[0])
     .order('expiry_date', { ascending: true })
 
-  if (profile?.role === 'Branch_Manager') {
-    expiryQuery = expiryQuery.eq('location_id', profile.location_id)
+  if (allowedLocationIds) {
+    expiryQuery = expiryQuery.in('location_id', allowedLocationIds)
   }
 
   const { data: expiringStock } = await expiryQuery
 
-  // Process sales data
-  const salesWithProfits = enrichSalesWithProfits(rawSalesData || [], exchangeRates)
-
-  // Generate chart data
-  const branchSalesData = aggregateBranchSales(salesWithProfits)
-  const salesTrendData = generateSalesTrend(salesWithProfits, 'weekly')
-  const productSalesData = aggregateProductSales(salesWithProfits)
-  const profitBreakdownData = aggregateProfitBreakdown(salesWithProfits, exchangeRates)
-  const topProductsData = getTopProducts(salesWithProfits, 5)
-
-  // Calculate dashboard stats
-  const stats = calculateDashboardStats(
-    salesWithProfits,
-    stockBatches || [],
-    exchangeRates
-  )
+  // Get user's location name for Branch_Manager title
+  let userLocationName = ''
+  if (userRole === 'Branch_Manager' && profile?.location_id) {
+    const userLocation = locations.find(loc => loc.id === profile.location_id)
+    userLocationName = userLocation?.name || ''
+  }
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t.title}</h1>
-        <p className="text-sm md:text-base text-muted-foreground">
-          {t.welcome}
-        </p>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+            {t.title}
+            {userLocationName && (
+              <span className="text-muted-foreground ml-2">- {userLocationName}</span>
+            )}
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground">
+            {t.welcome}
+          </p>
+        </div>
       </div>
 
-      <DashboardStats
-        todaySales={todaySales || []}
-        stockBatches={stockBatches || []}
-        userRole={profile?.role || 'HQ_Admin'}
-        totalHQProfit={stats.totalHQProfit}
-        averageMarginRate={stats.averageMarginRate}
+      {/* Period Selector */}
+      <DashboardPeriodSelector
+        currentPeriod={period}
+        dateRange={{
+          from: periodRanges.current.from,
+          to: periodRanges.current.to,
+        }}
       />
 
-      {/* Charts Section - Pass to Client Component for interactivity */}
-      <DashboardChartsClient
-        branchSalesData={branchSalesData}
-        salesTrendData={salesTrendData}
-        productSalesData={productSalesData}
-        profitBreakdownData={profitBreakdownData}
-        topProductsData={topProductsData}
-        userRole={profile?.role || 'HQ_Admin'}
+      {/* Comparison Stats Cards */}
+      <DashboardComparisonCards
+        stats={comparisonStats}
+        comparisonLabel={periodRanges.comparisonLabel}
+        userRole={userRole}
+      />
+
+      {/* Location Sales Table */}
+      <LocationSalesTable
+        salesByLocation={salesByLocation}
+        sales={currentSales}
+        exchangeRates={exchangeRates}
+        userRole={userRole}
       />
 
       {/* Expiry Warnings */}

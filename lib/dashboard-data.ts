@@ -4,7 +4,16 @@
  * Supabase에서 가져온 원시 데이터를 차트 및 통계에 사용할 수 있는 형태로 변환
  */
 
-import { Currency } from '@/types'
+import {
+  Currency,
+  Location,
+  LocationType,
+  PeriodComparisonStats,
+  LocationSalesDetail,
+  ProductSalesInLocation,
+  DashboardSale
+} from '@/types'
+import { calculatePercentageChange } from './date-utils'
 import { calculateProfits } from './calculations'
 import { convertToKRW, ExchangeRateMap } from './currency-converter'
 
@@ -422,4 +431,289 @@ export function generateDateRange(
   }
 
   return dates
+}
+
+// ===== 신규 대시보드 함수 (Enhanced) =====
+
+/**
+ * 원시 판매 데이터를 DashboardSale 형태로 변환 (location 계층 정보 포함)
+ */
+export function enrichSalesForDashboard(
+  salesData: any[],
+  locations: Location[],
+  exchangeRates: ExchangeRateMap
+): DashboardSale[] {
+  const locationMap = new Map(locations.map(loc => [loc.id, loc]))
+
+  return salesData.map((sale) => {
+    const location = locationMap.get(sale.location_id)
+
+    // 수익 계산
+    const profits = calculateProfits(
+      sale.qty,
+      sale.unit_price,
+      sale.pricing_config?.local_cost || 0,
+      sale.pricing_config?.hq_margin_pct || 0,
+      sale.pricing_config?.branch_margin_pct || 0
+    )
+
+    // KRW로 환산
+    const hqProfitKRW = convertToKRW(profits.hqProfit, sale.currency, exchangeRates)
+    const branchProfitKRW = convertToKRW(profits.branchProfit, sale.currency, exchangeRates)
+    const totalAmountKRW = convertToKRW(sale.total_amount, sale.currency, exchangeRates)
+
+    return {
+      id: sale.id,
+      sale_date: sale.sale_date,
+      location_id: sale.location_id,
+      location_name: location?.name || sale.location?.name || 'Unknown',
+      location_type: (location?.location_type || 'Branch') as LocationType,
+      location_currency: sale.currency,
+      parent_id: location?.parent_id || null,
+      product_id: sale.product_id,
+      product_sku: sale.product?.sku || 'Unknown',
+      product_name: sale.product?.name || 'Unknown',
+      qty: sale.qty,
+      unit_price: parseFloat(sale.unit_price),
+      total_amount: parseFloat(sale.total_amount),
+      branch_cost: sale.pricing_config?.local_cost || 0,
+      hq_margin_pct: sale.pricing_config?.hq_margin_pct || 0,
+      branch_margin_pct: sale.pricing_config?.branch_margin_pct || 0,
+      hq_profit: profits.hqProfit,
+      branch_profit: profits.branchProfit,
+      total_margin: profits.totalMargin,
+      hq_profit_krw: hqProfitKRW,
+      branch_profit_krw: branchProfitKRW,
+      total_amount_krw: totalAmountKRW,
+    }
+  })
+}
+
+/**
+ * 기간 비교 통계 계산
+ */
+export function calculatePeriodComparison(
+  currentSales: DashboardSale[],
+  previousSales: DashboardSale[]
+): PeriodComparisonStats {
+  const current = {
+    totalSales: currentSales.reduce((sum, s) => sum + s.total_amount_krw, 0),
+    hqProfit: currentSales.reduce((sum, s) => sum + s.hq_profit_krw, 0),
+    branchProfit: currentSales.reduce((sum, s) => sum + s.branch_profit_krw, 0),
+    qty: currentSales.reduce((sum, s) => sum + s.qty, 0),
+    transactions: currentSales.length,
+  }
+
+  const previous = {
+    totalSales: previousSales.reduce((sum, s) => sum + s.total_amount_krw, 0),
+    hqProfit: previousSales.reduce((sum, s) => sum + s.hq_profit_krw, 0),
+    branchProfit: previousSales.reduce((sum, s) => sum + s.branch_profit_krw, 0),
+    qty: previousSales.reduce((sum, s) => sum + s.qty, 0),
+    transactions: previousSales.length,
+  }
+
+  return {
+    current,
+    previous,
+    change: {
+      salesPct: calculatePercentageChange(current.totalSales, previous.totalSales),
+      hqProfitPct: calculatePercentageChange(current.hqProfit, previous.hqProfit),
+      branchProfitPct: calculatePercentageChange(current.branchProfit, previous.branchProfit),
+      qtyPct: calculatePercentageChange(current.qty, previous.qty),
+      transactionsPct: calculatePercentageChange(current.transactions, previous.transactions),
+    },
+  }
+}
+
+/**
+ * Location별 판매 집계 (계층 구조 포함)
+ * Returns flat list with parent_id for client-side tree building
+ */
+export function aggregateSalesByLocation(
+  sales: DashboardSale[],
+  locations: Location[],
+  exchangeRates: ExchangeRateMap
+): LocationSalesDetail[] {
+  const locationMap = new Map(locations.map(loc => [loc.id, loc]))
+  const aggregateMap = new Map<string, LocationSalesDetail>()
+
+  // Aggregate sales by location
+  sales.forEach((sale) => {
+    const location = locationMap.get(sale.location_id)
+    if (!location) return
+
+    const existing = aggregateMap.get(sale.location_id)
+    const branchProfitKRW = convertToKRW(sale.branch_profit, sale.location_currency, exchangeRates)
+
+    if (existing) {
+      existing.sales_local += sale.total_amount
+      existing.sales_krw += sale.total_amount_krw
+      existing.hq_profit_krw += sale.hq_profit_krw
+      existing.branch_profit_krw += branchProfitKRW
+      existing.qty += sale.qty
+      existing.transactions += 1
+    } else {
+      const parentLocation = location.parent_id ? locationMap.get(location.parent_id) : null
+      aggregateMap.set(sale.location_id, {
+        location_id: sale.location_id,
+        location_name: location.name,
+        location_type: location.location_type as LocationType,
+        parent_id: location.parent_id || null,
+        parent_name: parentLocation?.name || null,
+        currency: location.currency as Currency,
+        level: location.level || 1,
+        sales_local: sale.total_amount,
+        sales_krw: sale.total_amount_krw,
+        hq_profit_krw: sale.hq_profit_krw,
+        branch_profit_krw: branchProfitKRW,
+        qty: sale.qty,
+        transactions: 1,
+        margin_rate: 0, // Will calculate after
+      })
+    }
+  })
+
+  // Calculate margin rates and sort
+  const result = Array.from(aggregateMap.values())
+  result.forEach((loc) => {
+    loc.margin_rate = loc.sales_krw > 0
+      ? (loc.hq_profit_krw + loc.branch_profit_krw) / loc.sales_krw
+      : 0
+  })
+
+  // Sort by level then by sales
+  return result.sort((a, b) => {
+    if (a.level !== b.level) return a.level - b.level
+    return b.sales_krw - a.sales_krw
+  })
+}
+
+/**
+ * Build hierarchical location sales data for tree view
+ */
+export function buildLocationSalesTree(
+  salesByLocation: LocationSalesDetail[]
+): LocationSalesDetail[] {
+  const locationMap = new Map(salesByLocation.map(loc => [loc.location_id, { ...loc, children: [] as LocationSalesDetail[] }]))
+  const roots: LocationSalesDetail[] = []
+
+  // Build tree
+  salesByLocation.forEach((loc) => {
+    const node = locationMap.get(loc.location_id)!
+    if (loc.parent_id && locationMap.has(loc.parent_id)) {
+      const parent = locationMap.get(loc.parent_id)!
+      if (!parent.children) parent.children = []
+      parent.children.push(node)
+    } else if (loc.location_type === 'Branch') {
+      roots.push(node)
+    }
+  })
+
+  // Sort children by sales
+  const sortChildren = (node: LocationSalesDetail) => {
+    if (node.children && node.children.length > 0) {
+      node.children.sort((a, b) => b.sales_krw - a.sales_krw)
+      node.children.forEach(sortChildren)
+    }
+  }
+
+  roots.sort((a, b) => b.sales_krw - a.sales_krw)
+  roots.forEach(sortChildren)
+
+  return roots
+}
+
+/**
+ * Location 내 제품별 판매 상세
+ */
+export function getProductsInLocation(
+  sales: DashboardSale[],
+  locationId: string,
+  exchangeRates: ExchangeRateMap
+): ProductSalesInLocation[] {
+  const productMap = new Map<string, ProductSalesInLocation>()
+
+  const locationSales = sales.filter(s => s.location_id === locationId)
+
+  locationSales.forEach((sale) => {
+    const existing = productMap.get(sale.product_id)
+    const branchProfitKRW = convertToKRW(sale.branch_profit, sale.location_currency, exchangeRates)
+
+    if (existing) {
+      existing.qty += sale.qty
+      existing.revenue_local += sale.total_amount
+      existing.revenue_krw += sale.total_amount_krw
+      existing.hq_profit_krw += sale.hq_profit_krw
+      existing.branch_profit_krw += branchProfitKRW
+    } else {
+      productMap.set(sale.product_id, {
+        product_id: sale.product_id,
+        product_sku: sale.product_sku,
+        product_name: sale.product_name,
+        qty: sale.qty,
+        revenue_local: sale.total_amount,
+        revenue_krw: sale.total_amount_krw,
+        hq_profit_krw: sale.hq_profit_krw,
+        branch_profit_krw: branchProfitKRW,
+        unit_price: sale.unit_price,
+        margin_rate: 0, // Will calculate after
+      })
+    }
+  })
+
+  // Calculate margin rates and sort by revenue
+  const result = Array.from(productMap.values())
+  result.forEach((p) => {
+    p.margin_rate = p.revenue_krw > 0
+      ? (p.hq_profit_krw + p.branch_profit_krw) / p.revenue_krw
+      : 0
+  })
+
+  return result.sort((a, b) => b.revenue_krw - a.revenue_krw)
+}
+
+/**
+ * 전체 제품별 판매 상세 (모든 location 합산)
+ */
+export function aggregateProductSalesEnhanced(
+  sales: DashboardSale[],
+  exchangeRates: ExchangeRateMap
+): ProductSalesInLocation[] {
+  const productMap = new Map<string, ProductSalesInLocation>()
+
+  sales.forEach((sale) => {
+    const existing = productMap.get(sale.product_id)
+    const branchProfitKRW = convertToKRW(sale.branch_profit, sale.location_currency, exchangeRates)
+
+    if (existing) {
+      existing.qty += sale.qty
+      existing.revenue_local += sale.total_amount
+      existing.revenue_krw += sale.total_amount_krw
+      existing.hq_profit_krw += sale.hq_profit_krw
+      existing.branch_profit_krw += branchProfitKRW
+    } else {
+      productMap.set(sale.product_id, {
+        product_id: sale.product_id,
+        product_sku: sale.product_sku,
+        product_name: sale.product_name,
+        qty: sale.qty,
+        revenue_local: sale.total_amount,
+        revenue_krw: sale.total_amount_krw,
+        hq_profit_krw: sale.hq_profit_krw,
+        branch_profit_krw: branchProfitKRW,
+        unit_price: sale.unit_price,
+        margin_rate: 0,
+      })
+    }
+  })
+
+  // Calculate margin rates and sort by revenue
+  const result = Array.from(productMap.values())
+  result.forEach((p) => {
+    p.margin_rate = p.revenue_krw > 0
+      ? (p.hq_profit_krw + p.branch_profit_krw) / p.revenue_krw
+      : 0
+  })
+
+  return result.sort((a, b) => b.revenue_krw - a.revenue_krw)
 }

@@ -304,3 +304,91 @@ export interface TemplateApplyResponse {
   preview?: TemplateApplyPreviewItem[]
   application_id?: string
 }
+
+// ============================================
+// Dashboard Types
+// ============================================
+
+// Period comparison statistics
+export interface PeriodComparisonStats {
+  current: {
+    totalSales: number      // KRW normalized
+    hqProfit: number        // KRW
+    branchProfit: number    // KRW
+    qty: number
+    transactions: number
+  }
+  previous: {
+    totalSales: number
+    hqProfit: number
+    branchProfit: number
+    qty: number
+    transactions: number
+  }
+  change: {
+    salesPct: number        // percentage change
+    hqProfitPct: number
+    branchProfitPct: number
+    qtyPct: number
+    transactionsPct: number
+  }
+}
+
+// Location sales detail with hierarchy
+export interface LocationSalesDetail {
+  location_id: string
+  location_name: string
+  location_type: LocationType
+  parent_id: string | null
+  parent_name: string | null
+  currency: Currency
+  level: number
+  sales_local: number        // in local currency
+  sales_krw: number          // normalized to KRW
+  hq_profit_krw: number
+  branch_profit_krw: number
+  qty: number
+  transactions: number
+  margin_rate: number        // total margin rate (0-1)
+  children?: LocationSalesDetail[]
+}
+
+// Product sales within a location
+export interface ProductSalesInLocation {
+  product_id: string
+  product_sku: string
+  product_name: string
+  qty: number
+  revenue_local: number
+  revenue_krw: number
+  hq_profit_krw: number
+  branch_profit_krw: number
+  unit_price: number
+  margin_rate: number
+}
+
+// Dashboard sale with profit info (enhanced version of SaleWithProfit)
+export interface DashboardSale {
+  id: string
+  sale_date: string
+  location_id: string
+  location_name: string
+  location_type: LocationType
+  location_currency: Currency
+  parent_id: string | null
+  product_id: string
+  product_sku: string
+  product_name: string
+  qty: number
+  unit_price: number
+  total_amount: number
+  branch_cost: number
+  hq_margin_pct: number
+  branch_margin_pct: number
+  hq_profit: number
+  branch_profit: number
+  total_margin: number
+  hq_profit_krw: number
+  branch_profit_krw: number
+  total_amount_krw: number
+}

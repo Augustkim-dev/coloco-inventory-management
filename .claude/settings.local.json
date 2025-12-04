@@ -31,7 +31,8 @@
       "Bash(dir /b \"c:\\My_Project\\Service_Project\\coloco_Inventory management\\docs\\plans\")",
       "Bash(NUL)",
       "Bash(dir /b \"c:\\My_Project\\Service_Project\\coloco_Inventory management\\app\")",
-      "Bash(dir /b \"c:\\My_Project\\Service_Project\\coloco_Inventory management\\docs\\worklogs\")"
+      "Bash(dir /b \"c:\\My_Project\\Service_Project\\coloco_Inventory management\\docs\\worklogs\")",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
