@@ -75,7 +75,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     allowedLocationIds = [profile.location_id, ...descendants.map(loc => loc.id)]
   }
 
-  // Build the base query
+  // Build the base query for sales (without pricing_configs - will join manually)
   const buildSalesQuery = (fromDate: Date, toDate: Date) => {
     let query = supabase
       .from('sales')
@@ -89,12 +89,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         total_amount,
         currency,
         location:locations(id, name, location_type, parent_id, currency, level),
-        product:products(sku, name),
-        pricing_config:pricing_configs!inner(
-          local_cost,
-          hq_margin_pct,
-          branch_margin_pct
-        )
+        product:products(sku, name)
       `)
       .gte('sale_date', formatDateForAPI(fromDate))
       .lte('sale_date', formatDateForAPI(toDate))
@@ -107,14 +102,50 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     return query
   }
 
+  // Fetch pricing configs separately (product_id + to_location_id is unique key)
+  const { data: pricingConfigs } = await supabase
+    .from('pricing_configs')
+    .select('product_id, to_location_id, local_cost, hq_margin_pct, branch_margin_pct')
+
+  // Build pricing config lookup map: "product_id:location_id" -> config
+  const pricingConfigMap = new Map<string, { local_cost: number; hq_margin_pct: number; branch_margin_pct: number }>()
+  pricingConfigs?.forEach(config => {
+    const key = `${config.product_id}:${config.to_location_id}`
+    pricingConfigMap.set(key, {
+      local_cost: config.local_cost,
+      hq_margin_pct: config.hq_margin_pct,
+      branch_margin_pct: config.branch_margin_pct,
+    })
+  })
+
   // Fetch current and previous period data in parallel
   const [currentResult, previousResult] = await Promise.all([
     buildSalesQuery(periodRanges.current.from, periodRanges.current.to),
     buildSalesQuery(periodRanges.previous.from, periodRanges.previous.to),
   ])
 
-  const currentSalesRaw = currentResult.data || []
-  const previousSalesRaw = previousResult.data || []
+  // Attach pricing_config to each sale based on product_id + location_id
+  const attachPricingConfig = (sales: any[]) => {
+    return sales.map(sale => {
+      // For SubBranch, try to find config for parent branch first
+      const location = locations.find(l => l.id === sale.location_id)
+      const parentLocationId = location?.parent_id || sale.location_id
+
+      // Try direct location first, then parent location
+      let config = pricingConfigMap.get(`${sale.product_id}:${sale.location_id}`)
+      if (!config && parentLocationId !== sale.location_id) {
+        config = pricingConfigMap.get(`${sale.product_id}:${parentLocationId}`)
+      }
+
+      return {
+        ...sale,
+        pricing_config: config || null
+      }
+    })
+  }
+
+  const currentSalesRaw = attachPricingConfig(currentResult.data || [])
+  const previousSalesRaw = attachPricingConfig(previousResult.data || [])
 
   // Enrich sales data with profit calculations
   const currentSales = enrichSalesForDashboard(currentSalesRaw, locations, exchangeRates)
