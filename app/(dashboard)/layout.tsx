@@ -1,40 +1,27 @@
 import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
 import { Sidebar } from "@/components/layout/sidebar"
 import { MobileHeader } from "@/components/layout/mobile-header"
 import { SidebarProvider } from "@/hooks/use-sidebar"
 import { UserProvider } from "@/lib/contexts/user-context"
+import { getAuthUser, getUserProfile } from "@/lib/auth"
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Use cached auth helpers - these are deduplicated across the request
+  const user = await getAuthUser()
 
   if (!user) {
     redirect("/login")
   }
 
-  // Fetch user data from public.users table (optimized: select only needed columns)
-  const { data: userData, error: userError } = await supabase
-    .from("users")
-    .select("id, email, name, role, location_id, preferred_language")
-    .eq("id", user.id)
-    .single()
-
-  console.log('[DASHBOARD LAYOUT] User ID:', user.id)
-  console.log('[DASHBOARD LAYOUT] User data:', userData)
-  console.log('[DASHBOARD LAYOUT] Error:', userError)
+  // Use cached profile helper - reuses the auth check from above
+  const userData = await getUserProfile()
 
   if (!userData) {
     // User exists in auth but not in public.users table
-    // For now, redirect to login. In production, you might want to handle this differently
-    console.log('[DASHBOARD LAYOUT] No user data found, redirecting to /login')
     redirect("/login")
   }
 

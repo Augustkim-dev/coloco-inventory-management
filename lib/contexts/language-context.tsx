@@ -15,16 +15,45 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(defaultLocale)
-  const [isLoading, setIsLoading] = useState(true)
+interface LanguageProviderProps {
+  children: React.ReactNode
+  /**
+   * Initial language from server (e.g., from user profile).
+   * If provided, skips the expensive client-side DB lookup.
+   */
+  initialLanguage?: Language
+}
+
+export function LanguageProvider({ children, initialLanguage }: LanguageProviderProps) {
+  const [language, setLanguageState] = useState<Language>(initialLanguage || defaultLocale)
+  // If initialLanguage provided, we don't need to load from DB
+  const [isLoading, setIsLoading] = useState(!initialLanguage)
   const supabase = createClient()
 
   // Initialize language from localStorage, DB, or browser
+  // Skip entirely if initialLanguage was provided from server
   useEffect(() => {
+    // If server already provided the language, just sync to storage and skip DB call
+    if (initialLanguage) {
+      localStorage.setItem(STORAGE_KEY, initialLanguage)
+      document.cookie = `preferred-language=${initialLanguage}; path=/; max-age=31536000; SameSite=Lax`
+      setIsLoading(false)
+      return
+    }
+
     const initializeLanguage = async () => {
       try {
-        // Priority 1: Check if user is logged in and has a preference in DB
+        // Priority 1: Check localStorage first (fastest, no network call)
+        const stored = localStorage.getItem(STORAGE_KEY)
+        if (stored && locales.includes(stored as Language)) {
+          setLanguageState(stored as Language)
+          document.cookie = `preferred-language=${stored}; path=/; max-age=31536000; SameSite=Lax`
+          setIsLoading(false)
+          return
+        }
+
+        // Priority 2: Check if user is logged in and has a preference in DB
+        // Only for non-authenticated routes (login page) where initialLanguage wasn't passed
         const { data: { user } } = await supabase.auth.getUser()
 
         if (user) {
@@ -41,15 +70,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
             setIsLoading(false)
             return
           }
-        }
-
-        // Priority 2: Check localStorage
-        const stored = localStorage.getItem(STORAGE_KEY)
-        if (stored && locales.includes(stored as Language)) {
-          setLanguageState(stored as Language)
-          document.cookie = `preferred-language=${stored}; path=/; max-age=31536000; SameSite=Lax`
-          setIsLoading(false)
-          return
         }
 
         // Priority 3: Use browser language
@@ -75,7 +95,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
 
     initializeLanguage()
-  }, [supabase])
+  }, [supabase, initialLanguage])
 
   // Function to change language
   const setLanguage = useCallback(async (newLanguage: Language) => {

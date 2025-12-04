@@ -18,6 +18,7 @@ import {
   formatDateForAPI,
 } from "@/lib/date-utils"
 import { Location, UserRole } from "@/types"
+import { getUserProfile } from "@/lib/auth"
 
 interface DashboardPageProps {
   searchParams: Promise<{
@@ -32,23 +33,14 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const supabase = await createClient()
   const params = await searchParams
 
-  // Get current user information
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Use cached profile - already fetched in layout, will be reused via React cache()
+  const profile = await getUserProfile()
 
-  if (!user) {
+  if (!profile) {
     redirect("/login")
   }
 
-  // Get profile from users table for role and location filtering
-  const { data: profile } = await supabase
-    .from("users")
-    .select("role, location_id")
-    .eq("id", user.id)
-    .single()
-
-  const userRole = (profile?.role || 'HQ_Admin') as UserRole
+  const userRole = profile.role as UserRole
 
   // Get all locations for hierarchy operations
   const { data: allLocations } = await supabase
@@ -70,43 +62,26 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   // Determine location filter for Branch_Manager
   let allowedLocationIds: string[] | null = null
-  if (userRole === 'Branch_Manager' && profile?.location_id) {
+  if (userRole === 'Branch_Manager' && profile.location_id) {
     const descendants = getDescendants(profile.location_id, locations)
     allowedLocationIds = [profile.location_id, ...descendants.map(loc => loc.id)]
   }
 
-  // Build the base query for sales (without pricing_configs - will join manually)
-  const buildSalesQuery = (fromDate: Date, toDate: Date) => {
-    let query = supabase
-      .from('sales')
-      .select(`
-        id,
-        location_id,
-        product_id,
-        sale_date,
-        qty,
-        unit_price,
-        total_amount,
-        currency,
-        location:locations(id, name, location_type, parent_id, currency, level),
-        product:products(sku, name)
-      `)
-      .gte('sale_date', formatDateForAPI(fromDate))
-      .lte('sale_date', formatDateForAPI(toDate))
-
-    // Apply location filter for Branch_Manager
-    if (allowedLocationIds) {
-      query = query.in('location_id', allowedLocationIds)
-    }
-
-    return query
-  }
-
   // Fetch pricing configs separately (product_id + to_location_id is unique key)
+  // Optimized: Filter by allowed locations to reduce data transfer
   // Note: DB uses hq_margin_percent/branch_margin_percent, code expects hq_margin_pct/branch_margin_pct
-  const { data: pricingConfigs } = await supabase
+  let pricingQuery = supabase
     .from('pricing_configs')
     .select('product_id, to_location_id, purchase_price, transfer_cost, hq_margin_percent, branch_margin_percent')
+
+  // For Branch_Manager, only fetch pricing configs for their locations
+  // For HQ_Admin, we need all configs but can still limit to active locations
+  const locationIdsForPricing = allowedLocationIds || locations.map(l => l.id)
+  if (locationIdsForPricing.length > 0) {
+    pricingQuery = pricingQuery.in('to_location_id', locationIdsForPricing)
+  }
+
+  const { data: pricingConfigs } = await pricingQuery
 
   // Build pricing config lookup map: "product_id:location_id" -> config
   const pricingConfigMap = new Map<string, { local_cost: number; hq_margin_pct: number; branch_margin_pct: number }>()
@@ -121,11 +96,43 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     })
   })
 
-  // Fetch current and previous period data in parallel
-  const [currentResult, previousResult] = await Promise.all([
-    buildSalesQuery(periodRanges.current.from, periodRanges.current.to),
-    buildSalesQuery(periodRanges.previous.from, periodRanges.previous.to),
-  ])
+  // Optimized: Fetch both periods in a single query instead of two separate queries
+  // This reduces network round-trips from 2 to 1
+  let combinedSalesQuery = supabase
+    .from('sales')
+    .select(`
+      id,
+      location_id,
+      product_id,
+      sale_date,
+      qty,
+      unit_price,
+      total_amount,
+      currency,
+      location:locations(id, name, location_type, parent_id, currency, level),
+      product:products(sku, name)
+    `)
+    .gte('sale_date', formatDateForAPI(periodRanges.previous.from))
+    .lte('sale_date', formatDateForAPI(periodRanges.current.to))
+
+  if (allowedLocationIds) {
+    combinedSalesQuery = combinedSalesQuery.in('location_id', allowedLocationIds)
+  }
+
+  const { data: allSalesData } = await combinedSalesQuery
+
+  // Split sales data into current and previous periods in memory (faster than extra DB call)
+  const currentFromStr = formatDateForAPI(periodRanges.current.from)
+  const currentToStr = formatDateForAPI(periodRanges.current.to)
+  const previousFromStr = formatDateForAPI(periodRanges.previous.from)
+  const previousToStr = formatDateForAPI(periodRanges.previous.to)
+
+  const currentPeriodData = (allSalesData || []).filter(sale =>
+    sale.sale_date >= currentFromStr && sale.sale_date <= currentToStr
+  )
+  const previousPeriodData = (allSalesData || []).filter(sale =>
+    sale.sale_date >= previousFromStr && sale.sale_date <= previousToStr
+  )
 
   // Attach pricing_config to each sale based on product_id + location_id
   const attachPricingConfig = (sales: any[]) => {
@@ -147,8 +154,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     })
   }
 
-  const currentSalesRaw = attachPricingConfig(currentResult.data || [])
-  const previousSalesRaw = attachPricingConfig(previousResult.data || [])
+  const currentSalesRaw = attachPricingConfig(currentPeriodData)
+  const previousSalesRaw = attachPricingConfig(previousPeriodData)
 
   // Enrich sales data with profit calculations
   const currentSales = enrichSalesForDashboard(currentSalesRaw, locations, exchangeRates)
@@ -190,7 +197,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   // Get user's location name for Branch_Manager title
   let userLocationName = ''
-  if (userRole === 'Branch_Manager' && profile?.location_id) {
+  if (userRole === 'Branch_Manager' && profile.location_id) {
     const userLocation = locations.find(loc => loc.id === profile.location_id)
     userLocationName = userLocation?.name || ''
   }

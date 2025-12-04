@@ -2,14 +2,35 @@
 
 import { NextIntlClientProvider } from 'next-intl'
 import { useLanguage } from '@/lib/contexts/language-context'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
-export function IntlProvider({ children }: { children: React.ReactNode }) {
+interface IntlProviderProps {
+  children: React.ReactNode
+  /**
+   * Pre-loaded messages from server.
+   * If provided, skips the expensive client-side loading and removes the loading spinner.
+   */
+  initialMessages?: Record<string, any>
+}
+
+export function IntlProvider({ children, initialMessages }: IntlProviderProps) {
   const { language, isLoading } = useLanguage()
-  const [messages, setMessages] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const [messages, setMessages] = useState<any>(initialMessages || null)
+  // Only show loading if we don't have initialMessages
+  const [loading, setLoading] = useState(!initialMessages)
+  // Track the language that initialMessages was loaded for
+  const initialLanguageRef = useRef<string | null>(initialMessages ? language : null)
 
   useEffect(() => {
+    // If we have initialMessages and language hasn't changed, skip loading
+    if (initialMessages && initialLanguageRef.current === language) {
+      setMessages(initialMessages)
+      setLoading(false)
+      return
+    }
+
+    // If language changed from initial, we need to reload
+    // Or if we never had initialMessages
     async function loadMessages() {
       setLoading(true)
       try {
@@ -61,12 +82,16 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    if (!isLoading) {
+    // Only load if:
+    // 1. We don't have initialMessages, or
+    // 2. Language changed from the initial language
+    if (!isLoading && (!initialMessages || initialLanguageRef.current !== language)) {
       loadMessages()
     }
-  }, [language, isLoading])
+  }, [language, isLoading, initialMessages])
 
   // Don't render children until messages are fully loaded
+  // But if we have initialMessages, we can skip the spinner
   if (loading || !messages) {
     return (
       <div className="flex h-screen items-center justify-center">
