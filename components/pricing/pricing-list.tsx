@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import {
   Table,
   TableBody,
@@ -17,10 +18,11 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
-import { Edit } from 'lucide-react'
+import { Edit, Trash2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import type { Currency } from '@/types'
 import { useMemo } from 'react'
+import { DeletePricingDialog } from './delete-pricing-dialog'
 
 interface PricingConfig {
   id: string
@@ -58,6 +60,11 @@ export function PricingList({
 }: {
   pricingConfigs: PricingConfig[]
 }) {
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean
+    config: PricingConfig | null
+  }>({ isOpen: false, config: null })
+
   // Branch별로 데이터 그룹화
   const groupedByBranch = useMemo(() => {
     const groups: { [key: string]: GroupedPricing } = {}
@@ -189,11 +196,21 @@ export function PricingList({
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Link href={`/pricing/${config.id}/edit`}>
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
+                        <div className="flex justify-end gap-1">
+                          <Link href={`/pricing/${config.id}/edit`}>
+                            <Button variant="ghost" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDeleteDialog({ isOpen: true, config })}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </Button>
-                        </Link>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -203,6 +220,18 @@ export function PricingList({
           </AccordionContent>
         </AccordionItem>
       ))}
+
+      {/* Delete Confirmation Dialog */}
+      {deleteDialog.config && (
+        <DeletePricingDialog
+          configId={deleteDialog.config.id}
+          productSku={deleteDialog.config.product.sku}
+          productName={deleteDialog.config.product.name}
+          branchName={deleteDialog.config.to_location.name}
+          isOpen={deleteDialog.isOpen}
+          onClose={() => setDeleteDialog({ isOpen: false, config: null })}
+        />
+      )}
     </Accordion>
   )
 }
