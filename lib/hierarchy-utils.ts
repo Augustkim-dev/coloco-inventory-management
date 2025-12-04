@@ -229,7 +229,9 @@ export function isDirectParentChild(
 
 /**
  * Validates if stock transfer is allowed between two locations
- * Only allows direct parent-child transfers (forward or reverse)
+ * Allows:
+ * - Direct parent-child transfers (forward or reverse)
+ * - Sibling transfers (locations with the same parent)
  * @param fromId Source location ID
  * @param toId Destination location ID
  * @param locations All locations
@@ -252,20 +254,25 @@ export function canTransferBetween(
     return { valid: false, reason: 'Location not found' }
   }
 
-  // Check if from is parent of to (forward transfer)
+  // 1. Forward transfer: from is parent of to (parent → child)
   if (toLocation.parent_id === fromId) {
     return { valid: true }
   }
 
-  // Check if to is parent of from (reverse transfer)
+  // 2. Reverse transfer: to is parent of from (child → parent)
   if (fromLocation.parent_id === toId) {
     return { valid: true }
   }
 
-  // Not a direct parent-child relationship
+  // 3. Sibling transfer: same parent (sibling ↔ sibling)
+  if (fromLocation.parent_id && fromLocation.parent_id === toLocation.parent_id) {
+    return { valid: true }
+  }
+
+  // Not a valid transfer relationship
   return {
     valid: false,
-    reason: 'Transfer only allowed between direct parent and child locations'
+    reason: 'Transfer only allowed between parent-child or sibling locations'
   }
 }
 
@@ -436,6 +443,7 @@ export function sortByDisplayOrder(locations: Location[]): Location[] {
  * - Groups locations by parent_id
  * - Sorts each group by display_order
  * - Recursively flattens to maintain parent-child order
+ * - Handles filtered location sets (e.g., Branch Manager view without HQ)
  *
  * @param locations Locations to sort
  * @returns Sorted locations with hierarchy preserved and display_order respected
@@ -452,6 +460,8 @@ export function sortByDisplayOrder(locations: Location[]): Location[] {
  * Korea HQ → Vietnam → Ho Chi Minh → ... → China → Wei Hai → ...
  */
 export function sortByHierarchyAndOrder(locations: Location[]): Location[] {
+  if (locations.length === 0) return []
+
   // 1. Group locations by parent_id
   const byParent = new Map<string | null, Location[]>()
 
@@ -470,15 +480,40 @@ export function sortByHierarchyAndOrder(locations: Location[]): Location[] {
 
   // 3. Recursively flatten in tree order
   const result: Location[] = []
+  const visited = new Set<string>()
 
   function addChildren(parentId: string | null) {
     const children = byParent.get(parentId) || []
     for (const child of children) {
-      result.push(child)
-      addChildren(child.id) // Add descendants after each child
+      if (!visited.has(child.id)) {
+        visited.add(child.id)
+        result.push(child)
+        addChildren(child.id) // Add descendants after each child
+      }
     }
   }
 
-  addChildren(null) // Start from root (HQ)
+  // Start from root (HQ with parent_id = null)
+  addChildren(null)
+
+  // If result is empty (filtered view without root, e.g., Branch Manager view),
+  // find "orphan roots" - locations whose parent is not in the filtered set
+  if (result.length === 0) {
+    const locationIds = new Set(locations.map(l => l.id))
+    const orphanRoots = locations.filter(l =>
+      !l.parent_id || !locationIds.has(l.parent_id)
+    )
+
+    // Sort orphan roots by display_order and process each
+    orphanRoots.sort((a, b) => a.display_order - b.display_order)
+    for (const root of orphanRoots) {
+      if (!visited.has(root.id)) {
+        visited.add(root.id)
+        result.push(root)
+        addChildren(root.id)
+      }
+    }
+  }
+
   return result
 }

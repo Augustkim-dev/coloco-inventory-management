@@ -112,24 +112,30 @@ export function InventoryKanban({
       return
     }
 
-    // Branch Manager는 자신의 Location에서만 이동 가능
-    if (userRole === 'Branch_Manager' && sourceLocationId !== userLocationId) {
-      toast.error('You can only transfer from your own location')
-      setActiveBatch(null)
-      return
+    // Branch Manager는 자신의 Location 또는 하위 Sub-Branch에서만 이동 가능
+    if (userRole === 'Branch_Manager' && userLocationId) {
+      const descendants = getDescendants(userLocationId, locations)
+      const accessibleIds = [userLocationId, ...descendants.map(d => d.id)]
+      if (!accessibleIds.includes(sourceLocationId)) {
+        toast.error('You can only transfer from your branch or sub-branches')
+        setActiveBatch(null)
+        return
+      }
     }
 
-    // 계층적 이동 규칙 검증 (직접 부모-자식 관계만 허용)
-    const transferValidation = canTransferBetween(
-      sourceLocationId,
-      targetLocationId,
-      locations
-    )
+    // 계층적 이동 규칙 검증 (HQ Admin은 모든 이동 허용)
+    if (userRole !== 'HQ_Admin') {
+      const transferValidation = canTransferBetween(
+        sourceLocationId,
+        targetLocationId,
+        locations
+      )
 
-    if (!transferValidation.valid) {
-      toast.error(transferValidation.reason || 'Invalid transfer')
-      setActiveBatch(null)
-      return
+      if (!transferValidation.valid) {
+        toast.error(transferValidation.reason || 'Invalid transfer')
+        setActiveBatch(null)
+        return
+      }
     }
 
     // Transfer 다이얼로그 표시
