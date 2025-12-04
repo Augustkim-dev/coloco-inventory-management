@@ -29,6 +29,16 @@ export function ExchangeRateSelector({
       setLoading(true)
       setError(null)
 
+      // Handle same currency (e.g., KRW -> KRW for Korea Branch)
+      if (fromCurrency === toCurrency) {
+        setLatestRate(1)
+        if (!value || value === 0) {
+          onChange(1)
+        }
+        setLoading(false)
+        return
+      }
+
       try {
         const response = await fetch(
           `/api/exchange-rates/latest?from=${fromCurrency}&to=${toCurrency}`
