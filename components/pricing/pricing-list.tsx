@@ -38,6 +38,7 @@ interface PricingConfig {
     level?: number
     location_type?: string
     path?: string
+    parent_id?: string | null
   }
   purchase_price: number
   transfer_cost: number
@@ -58,6 +59,7 @@ interface GroupedPricing {
   level: number
   locationType: string
   path: string
+  parentId: string | null
   configs: PricingConfig[]
 }
 
@@ -87,6 +89,7 @@ export function PricingList({
           level: config.to_location.level || 2,
           locationType: config.to_location.location_type || 'Branch',
           path: config.to_location.path || '',
+          parentId: config.to_location.parent_id ?? null,
           configs: [],
         }
       }
@@ -94,8 +97,8 @@ export function PricingList({
       groups[key].configs.push(config)
     })
 
-    // path 기준으로 정렬 (계층 구조 유지)
-    return Object.values(groups).sort((a, b) => a.path.localeCompare(b.path))
+    // display_order 기준으로 정렬 (Locations 페이지의 Reorder 결과 반영)
+    return Object.values(groups).sort((a, b) => a.displayOrder - b.displayOrder)
   }, [pricingConfigs])
 
   // 데이터가 없는 경우

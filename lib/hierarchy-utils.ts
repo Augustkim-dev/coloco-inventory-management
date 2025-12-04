@@ -430,3 +430,55 @@ export function sortByPath(locations: Location[]): Location[] {
 export function sortByDisplayOrder(locations: Location[]): Location[] {
   return [...locations].sort((a, b) => a.display_order - b.display_order)
 }
+
+/**
+ * Sorts locations maintaining hierarchy while respecting display_order
+ * - Groups locations by parent_id
+ * - Sorts each group by display_order
+ * - Recursively flattens to maintain parent-child order
+ *
+ * @param locations Locations to sort
+ * @returns Sorted locations with hierarchy preserved and display_order respected
+ *
+ * @example
+ * Input (by display_order):
+ * 1. Korea HQ
+ * 2. Vietnam
+ * 3. Ho Chi Minh
+ * 6. China
+ * 7. Wei Hai
+ *
+ * Output:
+ * Korea HQ → Vietnam → Ho Chi Minh → ... → China → Wei Hai → ...
+ */
+export function sortByHierarchyAndOrder(locations: Location[]): Location[] {
+  // 1. Group locations by parent_id
+  const byParent = new Map<string | null, Location[]>()
+
+  locations.forEach(loc => {
+    const parentId = loc.parent_id ?? null
+    if (!byParent.has(parentId)) {
+      byParent.set(parentId, [])
+    }
+    byParent.get(parentId)!.push(loc)
+  })
+
+  // 2. Sort each group by display_order
+  byParent.forEach(group => {
+    group.sort((a, b) => a.display_order - b.display_order)
+  })
+
+  // 3. Recursively flatten in tree order
+  const result: Location[] = []
+
+  function addChildren(parentId: string | null) {
+    const children = byParent.get(parentId) || []
+    for (const child of children) {
+      result.push(child)
+      addChildren(child.id) // Add descendants after each child
+    }
+  }
+
+  addChildren(null) // Start from root (HQ)
+  return result
+}
