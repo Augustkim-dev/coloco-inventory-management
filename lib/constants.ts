@@ -78,7 +78,7 @@ export const navItems: NavItem[] = [
     title: "Settings",
     href: "/settings",
     icon: Settings,
-    roles: ["HQ_Admin"],
+    roles: ["HQ_Admin", "Branch_Manager", "SubBranch_Manager"],
   },
 ]
 
