@@ -184,7 +184,7 @@ export function TemplateForm({ template, mode }: TemplateFormProps) {
                   <SelectValue placeholder="Select currency" />
                 </SelectTrigger>
                 <SelectContent>
-                  {CURRENCIES.filter(c => c.value !== 'KRW').map((currency) => (
+                  {CURRENCIES.map((currency) => (
                     <SelectItem key={currency.value} value={currency.value}>
                       {currency.label}
                     </SelectItem>
