@@ -103,18 +103,21 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   }
 
   // Fetch pricing configs separately (product_id + to_location_id is unique key)
+  // Note: DB uses hq_margin_percent/branch_margin_percent, code expects hq_margin_pct/branch_margin_pct
   const { data: pricingConfigs } = await supabase
     .from('pricing_configs')
-    .select('product_id, to_location_id, local_cost, hq_margin_pct, branch_margin_pct')
+    .select('product_id, to_location_id, purchase_price, transfer_cost, hq_margin_percent, branch_margin_percent')
 
   // Build pricing config lookup map: "product_id:location_id" -> config
   const pricingConfigMap = new Map<string, { local_cost: number; hq_margin_pct: number; branch_margin_pct: number }>()
   pricingConfigs?.forEach(config => {
     const key = `${config.product_id}:${config.to_location_id}`
+    // local_cost = purchase_price + transfer_cost (in KRW, before exchange rate)
+    const localCost = Number(config.purchase_price || 0) + Number(config.transfer_cost || 0)
     pricingConfigMap.set(key, {
-      local_cost: config.local_cost,
-      hq_margin_pct: config.hq_margin_pct,
-      branch_margin_pct: config.branch_margin_pct,
+      local_cost: localCost,
+      hq_margin_pct: Number(config.hq_margin_percent || 0),
+      branch_margin_pct: Number(config.branch_margin_percent || 0),
     })
   })
 

@@ -448,13 +448,16 @@ export function enrichSalesForDashboard(
   return salesData.map((sale) => {
     const location = locationMap.get(sale.location_id)
 
-    // 수익 계산
+    // 수익 계산 (margin percent는 DB에서 10.00 형태로 저장됨, 소수점으로 변환 필요)
+    const hqMarginPct = (sale.pricing_config?.hq_margin_pct || 0) / 100
+    const branchMarginPct = (sale.pricing_config?.branch_margin_pct || 0) / 100
+
     const profits = calculateProfits(
       sale.qty,
-      sale.unit_price,
+      parseFloat(sale.unit_price),
       sale.pricing_config?.local_cost || 0,
-      sale.pricing_config?.hq_margin_pct || 0,
-      sale.pricing_config?.branch_margin_pct || 0
+      hqMarginPct,
+      branchMarginPct
     )
 
     // KRW로 환산
@@ -477,8 +480,8 @@ export function enrichSalesForDashboard(
       unit_price: parseFloat(sale.unit_price),
       total_amount: parseFloat(sale.total_amount),
       branch_cost: sale.pricing_config?.local_cost || 0,
-      hq_margin_pct: sale.pricing_config?.hq_margin_pct || 0,
-      branch_margin_pct: sale.pricing_config?.branch_margin_pct || 0,
+      hq_margin_pct: hqMarginPct,
+      branch_margin_pct: branchMarginPct,
       hq_profit: profits.hqProfit,
       branch_profit: profits.branchProfit,
       total_margin: profits.totalMargin,
