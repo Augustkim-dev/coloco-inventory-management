@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { Edit, Trash2 } from 'lucide-react'
-import { formatCurrency } from '@/lib/utils'
+import { formatCurrency, cn } from '@/lib/utils'
 import type { Currency } from '@/types'
 import { useMemo } from 'react'
 import { DeletePricingDialog } from './delete-pricing-dialog'
@@ -35,6 +35,9 @@ interface PricingConfig {
     country_code: string
     currency: string
     display_order: number
+    level?: number
+    location_type?: string
+    path?: string
   }
   purchase_price: number
   transfer_cost: number
@@ -52,6 +55,9 @@ interface GroupedPricing {
   countryCode: string
   currency: string
   displayOrder: number
+  level: number
+  locationType: string
+  path: string
   configs: PricingConfig[]
 }
 
@@ -78,6 +84,9 @@ export function PricingList({
           countryCode: config.to_location.country_code,
           currency: config.currency,
           displayOrder: config.to_location.display_order,
+          level: config.to_location.level || 2,
+          locationType: config.to_location.location_type || 'Branch',
+          path: config.to_location.path || '',
           configs: [],
         }
       }
@@ -85,8 +94,8 @@ export function PricingList({
       groups[key].configs.push(config)
     })
 
-    // display_order 기준으로 정렬 (Reorder Location 설정 따름)
-    return Object.values(groups).sort((a, b) => a.displayOrder - b.displayOrder)
+    // path 기준으로 정렬 (계층 구조 유지)
+    return Object.values(groups).sort((a, b) => a.path.localeCompare(b.path))
   }, [pricingConfigs])
 
   // 데이터가 없는 경우
@@ -104,122 +113,135 @@ export function PricingList({
   }
 
   return (
-    <Accordion type="multiple" className="space-y-4">
-      {groupedByBranch.map((group) => (
-        <AccordionItem
-          key={`${group.branchName}-${group.countryCode}`}
-          value={`${group.branchName}-${group.countryCode}`}
-          className="border rounded-lg"
-        >
-          <AccordionTrigger className="px-6 py-4 hover:no-underline">
-            <div className="flex items-center justify-between w-full pr-4">
-              <div className="flex items-center gap-3">
-                <h3 className="text-lg font-semibold">
-                  {group.branchName}
-                </h3>
-                <Badge variant="outline" className="text-xs">
-                  {group.countryCode}
-                </Badge>
-                <Badge variant="secondary" className="text-xs">
-                  {group.currency}
-                </Badge>
-              </div>
-              <div className="text-sm text-gray-500">
-                {group.configs.length} {group.configs.length === 1 ? 'product' : 'products'}
-              </div>
-            </div>
-          </AccordionTrigger>
+    <>
+      <Accordion type="multiple" className="space-y-4">
+        {groupedByBranch.map((group) => {
+          // SubBranch인지 확인 (level 3 이상)
+          const isSubBranch = group.level >= 3
 
-          <AccordionContent className="px-6 pb-4">
-            <div className="border rounded-lg">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Product</TableHead>
-                    <TableHead className="text-right">Purchase Price</TableHead>
-                    <TableHead className="text-right">Transfer Cost</TableHead>
-                    <TableHead className="text-center">Margins</TableHead>
-                    <TableHead className="text-right">Exchange Rate</TableHead>
-                    <TableHead className="text-right">Final Price</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {group.configs.map((config) => (
-                    <TableRow key={config.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{config.product.sku}</div>
-                          <div className="text-sm text-gray-500">
-                            {config.product.name}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(config.purchase_price, 'KRW')}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(config.transfer_cost, 'KRW')}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex gap-1 justify-center">
-                          <Badge variant="secondary" className="text-xs">
-                            HQ: {config.hq_margin_percent}%
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            Branch: {config.branch_margin_percent}%
-                          </Badge>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="text-sm">
-                          <div>1 KRW =</div>
-                          <div className="font-medium">
-                            {config.exchange_rate} {config.currency}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="font-bold text-lg">
-                          {formatCurrency(
-                            config.final_price,
-                            config.currency as Currency
-                          )}
-                        </div>
-                        {config.calculated_price !== config.final_price && (
-                          <div className="text-xs text-gray-500 line-through">
-                            {formatCurrency(
-                              config.calculated_price,
-                              config.currency as Currency
+          return (
+            <AccordionItem
+              key={`${group.branchName}-${group.countryCode}`}
+              value={`${group.branchName}-${group.countryCode}`}
+              className={cn(
+                "border rounded-lg",
+                isSubBranch && "ml-6 border-l-2 border-l-muted-foreground/30"
+              )}
+            >
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center justify-between w-full pr-4">
+                  <div className="flex items-center gap-3">
+                    {isSubBranch && (
+                      <span className="text-muted-foreground text-sm">└</span>
+                    )}
+                    <h3 className={cn("font-semibold", isSubBranch ? "text-base" : "text-lg")}>
+                      {group.branchName}
+                    </h3>
+                    <Badge variant="outline" className="text-xs">
+                      {group.locationType}
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {group.currency}
+                    </Badge>
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {group.configs.length} {group.configs.length === 1 ? 'product' : 'products'}
+                  </div>
+                </div>
+              </AccordionTrigger>
+
+              <AccordionContent className="px-6 pb-4">
+                <div className="border rounded-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Product</TableHead>
+                        <TableHead className="text-right">Purchase Price</TableHead>
+                        <TableHead className="text-right">Transfer Cost</TableHead>
+                        <TableHead className="text-center">Margins</TableHead>
+                        <TableHead className="text-right">Exchange Rate</TableHead>
+                        <TableHead className="text-right">Final Price</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {group.configs.map((config) => (
+                        <TableRow key={config.id}>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">{config.product.sku}</div>
+                              <div className="text-sm text-gray-500">
+                                {config.product.name}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {formatCurrency(config.purchase_price, 'KRW')}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {formatCurrency(config.transfer_cost, 'KRW')}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex gap-1 justify-center">
+                              <Badge variant="secondary" className="text-xs">
+                                HQ: {config.hq_margin_percent}%
+                              </Badge>
+                              <Badge variant="outline" className="text-xs">
+                                Branch: {config.branch_margin_percent}%
+                              </Badge>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="text-sm">
+                              <div>1 KRW =</div>
+                              <div className="font-medium">
+                                {config.exchange_rate} {config.currency}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="font-bold text-lg">
+                              {formatCurrency(
+                                config.final_price,
+                                config.currency as Currency
+                              )}
+                            </div>
+                            {config.calculated_price !== config.final_price && (
+                              <div className="text-xs text-gray-500 line-through">
+                                {formatCurrency(
+                                  config.calculated_price,
+                                  config.currency as Currency
+                                )}
+                              </div>
                             )}
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Link href={`/pricing/${config.id}/edit`}>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </Link>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDeleteDialog({ isOpen: true, config })}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      ))}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
+                              <Link href={`/pricing/${config.id}/edit`}>
+                                <Button variant="ghost" size="sm">
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </Link>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setDeleteDialog({ isOpen: true, config })}
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          )
+        })}
+      </Accordion>
 
       {/* Delete Confirmation Dialog */}
       {deleteDialog.config && (
@@ -232,6 +254,6 @@ export function PricingList({
           onClose={() => setDeleteDialog({ isOpen: false, config: null })}
         />
       )}
-    </Accordion>
+    </>
   )
 }

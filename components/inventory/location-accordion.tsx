@@ -40,12 +40,16 @@ export function LocationAccordion({
   // Location 통계
   const stats = calculateLocationStats(batches)
 
+  // SubBranch인지 확인 (level 3 이상)
+  const isSubBranch = (location.level || 1) >= 3
+
   return (
     <AccordionItem
       value={location.id}
       className={cn(
         'border rounded-lg',
-        isOver && 'ring-2 ring-primary bg-accent/50' // 드롭 가능 시 하이라이트
+        isOver && 'ring-2 ring-primary bg-accent/50', // 드롭 가능 시 하이라이트
+        isSubBranch && 'ml-6 border-l-2 border-l-muted-foreground/30' // SubBranch 들여쓰기
       )}
     >
       {/* Header - Droppable 영역 */}
@@ -56,7 +60,10 @@ export function LocationAccordion({
         <div className="flex items-center justify-between w-full pr-4">
           {/* Left: Location 정보 */}
           <div className="flex items-center gap-3">
-            <span className="font-semibold text-lg">{location.name}</span>
+            {isSubBranch && (
+              <span className="text-muted-foreground text-sm">└</span>
+            )}
+            <span className={cn("font-semibold", isSubBranch ? "text-base" : "text-lg")}>{location.name}</span>
             <Badge variant="outline" className="text-xs">
               {location.location_type}
             </Badge>

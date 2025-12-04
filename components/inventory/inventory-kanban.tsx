@@ -46,7 +46,7 @@ export function InventoryKanban({
   const groupedBatches = groupBatchesByLocation(stockBatches)
 
   // Branch Manager인 경우 자신의 Branch + Sub-Branch만 필터링
-  const filteredLocations = userRole === 'Branch_Manager' && userLocationId
+  const filteredLocations = (userRole === 'Branch_Manager' && userLocationId
     ? locations.filter(loc => {
         // 자신의 location이거나 하위 location인 경우만 표시
         if (loc.id === userLocationId) return true
@@ -54,6 +54,12 @@ export function InventoryKanban({
         return descendants.some(d => d.id === loc.id)
       })
     : locations
+  ).sort((a, b) => {
+    // path 기준 정렬로 계층 구조 유지
+    const pathA = a.path || ''
+    const pathB = b.path || ''
+    return pathA.localeCompare(pathB)
+  })
 
   // HQ Location 찾기 (HQ Admin용)
   const hqLocation = locations.find((l) => l.location_type === 'HQ')
