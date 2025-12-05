@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/table"
 import { formatDate, formatCurrency } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
-import { Currency } from "@/types"
+import { Currency, Location } from "@/types"
+import { getDescendants } from "@/lib/hierarchy-utils"
 
 export default async function InventoryReportPage() {
   const supabase = await createClient()
@@ -26,6 +27,14 @@ export default async function InventoryReportPage() {
     .eq("id", user?.id)
     .single()
 
+  // Get all locations for hierarchy operations
+  const { data: allLocations } = await supabase
+    .from('locations')
+    .select('*')
+    .eq('is_active', true)
+
+  const locations = (allLocations || []) as Location[]
+
   // Get inventory data
   let inventoryQuery = supabase
     .from('stock_batches')
@@ -37,8 +46,11 @@ export default async function InventoryReportPage() {
     .gt('qty_on_hand', 0)
     .order('expiry_date', { ascending: true })
 
-  if (profile?.role === 'Branch_Manager') {
-    inventoryQuery = inventoryQuery.eq('location_id', profile.location_id)
+  // Branch Manager can view their location and all sub-branches
+  if (profile?.role === 'Branch_Manager' && profile.location_id) {
+    const descendants = getDescendants(profile.location_id, locations)
+    const allowedLocationIds = [profile.location_id, ...descendants.map(loc => loc.id)]
+    inventoryQuery = inventoryQuery.in('location_id', allowedLocationIds)
   }
 
   const { data: inventory } = await inventoryQuery

@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/table"
 import { formatDate, formatCurrency } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
-import { Currency } from "@/types"
+import { Currency, Location } from "@/types"
+import { getDescendants } from "@/lib/hierarchy-utils"
 
 export default async function SalesReportPage() {
   const supabase = await createClient()
@@ -26,6 +27,14 @@ export default async function SalesReportPage() {
     .eq("id", user?.id)
     .single()
 
+  // Get all locations for hierarchy operations
+  const { data: allLocations } = await supabase
+    .from('locations')
+    .select('*')
+    .eq('is_active', true)
+
+  const locations = (allLocations || []) as Location[]
+
   // Get sales data (last 30 days)
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
@@ -40,8 +49,11 @@ export default async function SalesReportPage() {
     .gte('sale_date', thirtyDaysAgo.toISOString().split('T')[0])
     .order('sale_date', { ascending: false })
 
-  if (profile?.role === 'Branch_Manager') {
-    salesQuery = salesQuery.eq('location_id', profile.location_id)
+  // Branch Manager can view their location and all sub-branches
+  if (profile?.role === 'Branch_Manager' && profile.location_id) {
+    const descendants = getDescendants(profile.location_id, locations)
+    const allowedLocationIds = [profile.location_id, ...descendants.map(loc => loc.id)]
+    salesQuery = salesQuery.in('location_id', allowedLocationIds)
   }
 
   const { data: sales } = await salesQuery
