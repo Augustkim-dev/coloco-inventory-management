@@ -117,7 +117,7 @@ BEGIN
 
   -- 마진 검증
   IF total_margin >= 100 THEN
-    RAISE EXCEPTION 'Invalid margin configuration: total margin cannot be >= 100%% (current: %%)', total_margin;
+    RAISE EXCEPTION 'Invalid margin configuration: total margin cannot be >= 100%% (current: %)', total_margin;
   END IF;
 
   -- 로컬 비용 계산 (환율 적용)
