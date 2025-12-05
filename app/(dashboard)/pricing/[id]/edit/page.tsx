@@ -43,12 +43,13 @@ export default async function EditPricingPage({
     )
   }
 
-  // 지사 목록 (Branch만)
+  // 지사 목록 (Branch와 SubBranch 모두)
   const { data: branches, error: branchesError } = await supabase
     .from('locations')
-    .select('id, name, country_code, currency')
-    .eq('location_type', 'Branch')
-    .order('name')
+    .select('id, name, country_code, currency, location_type, parent_id, level')
+    .in('location_type', ['Branch', 'SubBranch'])
+    .eq('is_active', true)
+    .order('display_order')
 
   if (branchesError) {
     return (
