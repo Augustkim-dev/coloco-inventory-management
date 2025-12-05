@@ -215,6 +215,8 @@ export interface PricingTemplate {
   target_currency: Currency
   hq_margin_percent: number
   branch_margin_percent: number
+  sub_branch_margin_percent: number
+  discount_percent: number
   default_transfer_cost: number
   is_active: boolean
   created_by: string | null
@@ -230,6 +232,8 @@ export interface PricingTemplateInsert {
   target_currency: Currency
   hq_margin_percent: number
   branch_margin_percent: number
+  sub_branch_margin_percent?: number
+  discount_percent?: number
   default_transfer_cost?: number
 }
 
@@ -241,6 +245,8 @@ export interface PricingTemplateUpdate {
   target_currency?: Currency
   hq_margin_percent?: number
   branch_margin_percent?: number
+  sub_branch_margin_percent?: number
+  discount_percent?: number
   default_transfer_cost?: number
   is_active?: boolean
 }
@@ -283,11 +289,14 @@ export interface TemplateApplyPreviewItem {
   product_category: string | null
   location_id: string
   location_name: string
+  location_type?: string
   purchase_price: number
   transfer_cost: number
   exchange_rate: number
   calculated_price: number
   final_price: number
+  discount_percent: number
+  discounted_price: number
   current_price: number | null
   status: 'new' | 'update' | 'skip'
   skip_reason?: string

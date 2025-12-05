@@ -103,19 +103,37 @@ export async function PUT(
       )
     }
 
+    // Validate sub branch margin
+    if (body.sub_branch_margin_percent !== undefined && (body.sub_branch_margin_percent < 0 || body.sub_branch_margin_percent >= 100)) {
+      return NextResponse.json(
+        { error: 'Sub Branch margin must be between 0 and 100' },
+        { status: 400 }
+      )
+    }
+
+    // Validate discount percent
+    if (body.discount_percent !== undefined && (body.discount_percent < 0 || body.discount_percent > 100)) {
+      return NextResponse.json(
+        { error: 'Discount percent must be between 0 and 100' },
+        { status: 400 }
+      )
+    }
+
     // Get current template to check total margin
     const { data: currentTemplate } = await supabase
       .from('pricing_templates')
-      .select('hq_margin_percent, branch_margin_percent')
+      .select('hq_margin_percent, branch_margin_percent, sub_branch_margin_percent')
       .eq('id', id)
       .single()
 
     if (currentTemplate) {
       const newHqMargin = body.hq_margin_percent ?? currentTemplate.hq_margin_percent
       const newBranchMargin = body.branch_margin_percent ?? currentTemplate.branch_margin_percent
-      if (newHqMargin + newBranchMargin >= 100) {
+      const newSubBranchMargin = body.sub_branch_margin_percent ?? (currentTemplate.sub_branch_margin_percent || 0)
+      const totalMargin = newHqMargin + newBranchMargin + newSubBranchMargin
+      if (totalMargin >= 100) {
         return NextResponse.json(
-          { error: 'Total margin (HQ + Branch) must be less than 100%' },
+          { error: 'Total margin (HQ + Branch + SubBranch) must be less than 100%' },
           { status: 400 }
         )
       }

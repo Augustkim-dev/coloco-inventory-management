@@ -44,9 +44,12 @@ interface PricingConfig {
   transfer_cost: number
   hq_margin_percent: number
   branch_margin_percent: number
+  sub_branch_margin_percent?: number
+  discount_percent?: number
   exchange_rate: number
   calculated_price: number
   final_price: number
+  discounted_price?: number
   currency: string
   updated_at: string
 }
@@ -115,6 +118,15 @@ export function PricingList({
     )
   }
 
+  // 마진 표시 helper
+  const formatMargins = (config: PricingConfig, isSubBranch: boolean) => {
+    const margins = [`HQ: ${config.hq_margin_percent}%`, `Branch: ${config.branch_margin_percent}%`]
+    if (isSubBranch && config.sub_branch_margin_percent && config.sub_branch_margin_percent > 0) {
+      margins.push(`SubBranch: ${config.sub_branch_margin_percent}%`)
+    }
+    return margins
+  }
+
   return (
     <>
       <Accordion type="multiple" className="space-y-4">
@@ -154,89 +166,114 @@ export function PricingList({
               </AccordionTrigger>
 
               <AccordionContent className="px-6 pb-4">
-                <div className="border rounded-lg">
+                <div className="border rounded-lg overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Product</TableHead>
-                        <TableHead className="text-right">Purchase Price</TableHead>
-                        <TableHead className="text-right">Transfer Cost</TableHead>
+                        <TableHead className="text-right">Purchase</TableHead>
+                        <TableHead className="text-right">Transfer</TableHead>
                         <TableHead className="text-center">Margins</TableHead>
-                        <TableHead className="text-right">Exchange Rate</TableHead>
-                        <TableHead className="text-right">Final Price</TableHead>
+                        <TableHead className="text-center">Discount</TableHead>
+                        <TableHead className="text-right">Consumer Price</TableHead>
+                        <TableHead className="text-right">Discounted Price</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {group.configs.map((config) => (
-                        <TableRow key={config.id}>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{config.product.sku}</div>
-                              <div className="text-sm text-gray-500">
-                                {config.product.name}
+                      {group.configs.map((config) => {
+                        const discountPercent = config.discount_percent || 0
+                        const discountedPrice = config.discounted_price || config.final_price
+
+                        return (
+                          <TableRow key={config.id}>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{config.product.sku}</div>
+                                <div className="text-sm text-gray-500">
+                                  {config.product.name}
+                                </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {formatCurrency(config.purchase_price, 'KRW')}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {formatCurrency(config.transfer_cost, 'KRW')}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <div className="flex gap-1 justify-center">
-                              <Badge variant="secondary" className="text-xs">
-                                HQ: {config.hq_margin_percent}%
-                              </Badge>
-                              <Badge variant="outline" className="text-xs">
-                                Branch: {config.branch_margin_percent}%
-                              </Badge>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="text-sm">
-                              <div>1 KRW =</div>
-                              <div className="font-medium">
-                                {config.exchange_rate} {config.currency}
+                            </TableCell>
+                            <TableCell className="text-right text-sm">
+                              {formatCurrency(config.purchase_price, 'KRW')}
+                            </TableCell>
+                            <TableCell className="text-right text-sm">
+                              {formatCurrency(config.transfer_cost, 'KRW')}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <div className="flex flex-wrap gap-1 justify-center">
+                                {formatMargins(config, isSubBranch).map((margin, idx) => (
+                                  <Badge
+                                    key={idx}
+                                    variant={idx === 0 ? 'secondary' : 'outline'}
+                                    className="text-xs"
+                                  >
+                                    {margin}
+                                  </Badge>
+                                ))}
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="font-bold text-lg">
-                              {formatCurrency(
-                                config.final_price,
-                                config.currency as Currency
-                              )}
-                            </div>
-                            {config.calculated_price !== config.final_price && (
-                              <div className="text-xs text-gray-500 line-through">
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge
+                                variant={discountPercent > 0 ? 'default' : 'outline'}
+                                className="text-xs"
+                              >
+                                {discountPercent}%
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="font-semibold">
                                 {formatCurrency(
-                                  config.calculated_price,
+                                  config.final_price,
                                   config.currency as Currency
                                 )}
                               </div>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
-                              <Link href={`/pricing/${config.id}/edit`}>
-                                <Button variant="ghost" size="sm">
-                                  <Edit className="h-4 w-4" />
+                              {config.calculated_price !== config.final_price && (
+                                <div className="text-xs text-gray-400 line-through">
+                                  {formatCurrency(
+                                    config.calculated_price,
+                                    config.currency as Currency
+                                  )}
+                                </div>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className={cn(
+                                "font-bold text-lg",
+                                discountPercent > 0 && "text-green-600"
+                              )}>
+                                {formatCurrency(
+                                  discountedPrice,
+                                  config.currency as Currency
+                                )}
+                              </div>
+                              {discountPercent > 0 && (
+                                <div className="text-xs text-gray-500">
+                                  -{discountPercent}% off
+                                </div>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-1">
+                                <Link href={`/pricing/${config.id}/edit`}>
+                                  <Button variant="ghost" size="sm">
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                </Link>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setDeleteDialog({ isOpen: true, config })}
+                                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                >
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
-                              </Link>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setDeleteDialog({ isOpen: true, config })}
-                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
                     </TableBody>
                   </Table>
                 </div>

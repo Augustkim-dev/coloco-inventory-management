@@ -36,10 +36,15 @@ export function TemplateForm({ template, mode }: TemplateFormProps) {
     target_currency: template?.target_currency || 'VND',
     hq_margin_percent: template?.hq_margin_percent ?? 10,
     branch_margin_percent: template?.branch_margin_percent ?? 30,
+    sub_branch_margin_percent: template?.sub_branch_margin_percent ?? 0,
+    discount_percent: template?.discount_percent ?? 0,
     default_transfer_cost: template?.default_transfer_cost ?? 0,
   })
 
-  const totalMargin = formData.hq_margin_percent + formData.branch_margin_percent
+  const totalMargin =
+    formData.hq_margin_percent +
+    formData.branch_margin_percent +
+    formData.sub_branch_margin_percent
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,7 +63,7 @@ export function TemplateForm({ template, mode }: TemplateFormProps) {
       toast({
         variant: 'destructive',
         title: 'Invalid margin',
-        description: 'Total margin (HQ + Branch) must be less than 100%',
+        description: 'Total margin (HQ + Branch + SubBranch) must be less than 100%',
       })
       return
     }
@@ -73,6 +78,8 @@ export function TemplateForm({ template, mode }: TemplateFormProps) {
         target_currency: formData.target_currency as Currency,
         hq_margin_percent: formData.hq_margin_percent,
         branch_margin_percent: formData.branch_margin_percent,
+        sub_branch_margin_percent: formData.sub_branch_margin_percent,
+        discount_percent: formData.discount_percent,
         default_transfer_cost: formData.default_transfer_cost,
       }
 
@@ -109,6 +116,15 @@ export function TemplateForm({ template, mode }: TemplateFormProps) {
       setLoading(false)
     }
   }
+
+  // 예시 계산
+  const examplePurchase = 5000
+  const exampleRate = 18.5
+  const exampleLocalCost = (examplePurchase + formData.default_transfer_cost) * exampleRate
+  const exampleFinalPrice = totalMargin < 100
+    ? exampleLocalCost / (1 - totalMargin / 100)
+    : 0
+  const exampleDiscountedPrice = exampleFinalPrice * (1 - formData.discount_percent / 100)
 
   return (
     <Card className="max-w-2xl">
@@ -201,7 +217,7 @@ export function TemplateForm({ template, mode }: TemplateFormProps) {
           <div className="space-y-4 border-t pt-4">
             <h3 className="font-medium">Margin Settings</h3>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="hq_margin">HQ Margin (%)</Label>
                 <Input
@@ -233,11 +249,54 @@ export function TemplateForm({ template, mode }: TemplateFormProps) {
                   })}
                 />
               </div>
+
+              <div>
+                <Label htmlFor="sub_branch_margin">Sub Branch Margin (%)</Label>
+                <Input
+                  id="sub_branch_margin"
+                  type="number"
+                  min="0"
+                  max="99"
+                  step="0.01"
+                  value={formData.sub_branch_margin_percent}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    sub_branch_margin_percent: parseFloat(e.target.value) || 0,
+                  })}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Applied only to Sub Branches
+                </p>
+              </div>
             </div>
 
             <div className={`text-sm ${totalMargin >= 100 ? 'text-red-600' : 'text-muted-foreground'}`}>
               Total Margin: {totalMargin.toFixed(2)}%
               {totalMargin >= 100 && ' (must be less than 100%)'}
+            </div>
+          </div>
+
+          {/* Discount Settings */}
+          <div className="space-y-4 border-t pt-4">
+            <h3 className="font-medium">Discount Settings</h3>
+
+            <div className="max-w-xs">
+              <Label htmlFor="discount_percent">Discount (%)</Label>
+              <Input
+                id="discount_percent"
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                value={formData.discount_percent}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  discount_percent: parseFloat(e.target.value) || 0,
+                })}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Applied to final consumer price (0-100%)
+              </p>
             </div>
           </div>
 
@@ -269,14 +328,23 @@ export function TemplateForm({ template, mode }: TemplateFormProps) {
             <h4 className="font-medium text-sm">Price Calculation Formula</h4>
             <div className="text-sm text-muted-foreground space-y-1">
               <p>1. Local Cost = (Purchase Price + {formData.default_transfer_cost.toLocaleString()} KRW) × Exchange Rate</p>
-              <p>2. Selling Price = Local Cost ÷ (1 - {totalMargin.toFixed(2)}%)</p>
+              <p>2. Consumer Price = Local Cost ÷ (1 - {totalMargin.toFixed(2)}%)</p>
+              {formData.discount_percent > 0 && (
+                <p>3. Discounted Price = Consumer Price × (1 - {formData.discount_percent}%)</p>
+              )}
             </div>
-            <div className="text-xs text-muted-foreground mt-2">
-              Example: If purchase = 5,000 KRW, rate = 18.5:
+            <div className="text-xs text-muted-foreground mt-2 border-t pt-2">
+              <strong>Example:</strong> Purchase = 5,000 KRW, Exchange Rate = 18.5
               <br />
-              Local Cost = ({5000} + {formData.default_transfer_cost}) × 18.5 = {((5000 + formData.default_transfer_cost) * 18.5).toLocaleString()} VND
+              Local Cost = ({examplePurchase.toLocaleString()} + {formData.default_transfer_cost.toLocaleString()}) × 18.5 = {Math.round(exampleLocalCost).toLocaleString()} VND
               <br />
-              Final = {((5000 + formData.default_transfer_cost) * 18.5 / (1 - totalMargin / 100)).toLocaleString()} VND
+              Consumer Price = {Math.round(exampleFinalPrice).toLocaleString()} VND
+              {formData.discount_percent > 0 && (
+                <>
+                  <br />
+                  Discounted Price = {Math.round(exampleDiscountedPrice).toLocaleString()} VND ({formData.discount_percent}% off)
+                </>
+              )}
             </div>
           </div>
 

@@ -381,49 +381,76 @@ export function ApplyTemplateDialog({
                         <TableHead>Location</TableHead>
                         <TableHead className="text-right">Purchase</TableHead>
                         <TableHead className="text-right">Current</TableHead>
-                        <TableHead className="text-right">New Price</TableHead>
+                        <TableHead className="text-right">Consumer Price</TableHead>
+                        <TableHead className="text-right">Discounted</TableHead>
                         <TableHead>Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {previewData.map((item, index) => (
-                        <TableRow key={index} className={item.status === 'skip' ? 'opacity-50' : ''}>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{item.product_sku}</div>
-                              <div className="text-xs text-muted-foreground">{item.product_name}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>{item.location_name}</TableCell>
-                          <TableCell className="text-right">
-                            {item.purchase_price > 0
-                              ? `${item.purchase_price.toLocaleString()} KRW`
-                              : '-'
-                            }
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {item.current_price
-                              ? formatCurrency(item.current_price, template.target_currency as Currency)
-                              : '-'
-                            }
-                          </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {item.status !== 'skip'
-                              ? formatCurrency(item.final_price, template.target_currency as Currency)
-                              : '-'
-                            }
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              {getStatusIcon(item.status)}
-                              {getStatusBadge(item.status)}
-                            </div>
-                            {item.skip_reason && (
-                              <div className="text-xs text-muted-foreground">{item.skip_reason}</div>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {previewData.map((item, index) => {
+                        const discountPercent = item.discount_percent || 0
+                        const discountedPrice = item.discounted_price || item.final_price
+
+                        return (
+                          <TableRow key={index} className={item.status === 'skip' ? 'opacity-50' : ''}>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{item.product_sku}</div>
+                                <div className="text-xs text-muted-foreground">{item.product_name}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <div>{item.location_name}</div>
+                                {item.location_type && (
+                                  <Badge variant="outline" className="text-xs mt-0.5">
+                                    {item.location_type}
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {item.purchase_price > 0
+                                ? `${item.purchase_price.toLocaleString()} KRW`
+                                : '-'
+                              }
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {item.current_price
+                                ? formatCurrency(item.current_price, template.target_currency as Currency)
+                                : '-'
+                              }
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {item.status !== 'skip'
+                                ? formatCurrency(item.final_price, template.target_currency as Currency)
+                                : '-'
+                              }
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {item.status !== 'skip' ? (
+                                <div>
+                                  <div className={discountPercent > 0 ? 'font-bold text-green-600' : 'font-medium'}>
+                                    {formatCurrency(discountedPrice, template.target_currency as Currency)}
+                                  </div>
+                                  {discountPercent > 0 && (
+                                    <div className="text-xs text-muted-foreground">-{discountPercent}%</div>
+                                  )}
+                                </div>
+                              ) : '-'}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                {getStatusIcon(item.status)}
+                                {getStatusBadge(item.status)}
+                              </div>
+                              {item.skip_reason && (
+                                <div className="text-xs text-muted-foreground">{item.skip_reason}</div>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
                     </TableBody>
                   </Table>
                 </ScrollArea>

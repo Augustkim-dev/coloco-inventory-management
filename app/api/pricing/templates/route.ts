@@ -111,9 +111,26 @@ export async function POST(request: Request) {
       )
     }
 
-    if (body.hq_margin_percent + body.branch_margin_percent >= 100) {
+    const subBranchMargin = body.sub_branch_margin_percent || 0
+    if (subBranchMargin < 0 || subBranchMargin >= 100) {
       return NextResponse.json(
-        { error: 'Total margin (HQ + Branch) must be less than 100%' },
+        { error: 'Sub Branch margin must be between 0 and 100' },
+        { status: 400 }
+      )
+    }
+
+    const totalMargin = body.hq_margin_percent + body.branch_margin_percent + subBranchMargin
+    if (totalMargin >= 100) {
+      return NextResponse.json(
+        { error: 'Total margin (HQ + Branch + SubBranch) must be less than 100%' },
+        { status: 400 }
+      )
+    }
+
+    const discountPercent = body.discount_percent || 0
+    if (discountPercent < 0 || discountPercent > 100) {
+      return NextResponse.json(
+        { error: 'Discount percent must be between 0 and 100' },
         { status: 400 }
       )
     }
@@ -128,6 +145,8 @@ export async function POST(request: Request) {
         target_currency: body.target_currency,
         hq_margin_percent: body.hq_margin_percent,
         branch_margin_percent: body.branch_margin_percent,
+        sub_branch_margin_percent: subBranchMargin,
+        discount_percent: discountPercent,
         default_transfer_cost: body.default_transfer_cost || 0,
         created_by: user.id,
       })

@@ -50,7 +50,9 @@ export function TemplateCard({ template, onApply }: TemplateCardProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
-  const totalMargin = template.hq_margin_percent + template.branch_margin_percent
+  const subBranchMargin = template.sub_branch_margin_percent ?? 0
+  const discountPercent = template.discount_percent ?? 0
+  const totalMargin = template.hq_margin_percent + template.branch_margin_percent + subBranchMargin
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -131,7 +133,7 @@ export function TemplateCard({ template, onApply }: TemplateCardProps) {
           </div>
 
           {/* Margin Info */}
-          <div className="grid grid-cols-3 gap-2 text-sm">
+          <div className="grid grid-cols-2 gap-2 text-sm">
             <div className="bg-muted rounded p-2 text-center">
               <div className="text-xs text-muted-foreground">HQ Margin</div>
               <div className="font-medium">{template.hq_margin_percent}%</div>
@@ -140,11 +142,26 @@ export function TemplateCard({ template, onApply }: TemplateCardProps) {
               <div className="text-xs text-muted-foreground">Branch</div>
               <div className="font-medium">{template.branch_margin_percent}%</div>
             </div>
+            {subBranchMargin > 0 && (
+              <div className="bg-muted rounded p-2 text-center">
+                <div className="text-xs text-muted-foreground">SubBranch</div>
+                <div className="font-medium">{subBranchMargin}%</div>
+              </div>
+            )}
             <div className="bg-muted rounded p-2 text-center">
               <div className="text-xs text-muted-foreground">Total</div>
               <div className="font-medium">{totalMargin}%</div>
             </div>
           </div>
+
+          {/* Discount Info */}
+          {discountPercent > 0 && (
+            <div className="flex items-center gap-2 text-sm">
+              <Badge variant="default" className="bg-green-600">
+                {discountPercent}% Discount
+              </Badge>
+            </div>
+          )}
 
           {/* Transfer Cost */}
           <div className="text-sm">

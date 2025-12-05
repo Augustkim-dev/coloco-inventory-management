@@ -18,18 +18,29 @@ function roundPrice(price: number, currency: string): number {
 }
 
 // Helper function to calculate price from template
+// Updated to support sub_branch_margin and discount
 function calculatePrice(
   purchasePrice: number,
   transferCost: number,
   exchangeRate: number,
   hqMargin: number,
   branchMargin: number,
-  currency: string
-): number {
+  subBranchMargin: number,
+  discountPercent: number,
+  currency: string,
+  isSubBranch: boolean
+): { finalPrice: number; discountedPrice: number } {
   const localCost = (purchasePrice + transferCost) * exchangeRate
-  const marginFactor = 1 - (hqMargin + branchMargin) / 100
+  // SubBranch가 아닌 경우 sub_branch_margin은 0으로 처리
+  const totalMargin = hqMargin + branchMargin + (isSubBranch ? subBranchMargin : 0)
+  const marginFactor = 1 - totalMargin / 100
   const calculatedPrice = localCost / marginFactor
-  return roundPrice(calculatedPrice, currency)
+  const finalPrice = roundPrice(calculatedPrice, currency)
+
+  // Calculate discounted price
+  const discountedPrice = roundPrice(finalPrice * (1 - discountPercent / 100), currency)
+
+  return { finalPrice, discountedPrice }
 }
 
 // POST: Apply template to generate pricing configs
@@ -132,10 +143,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'HQ location not found' }, { status: 400 })
     }
 
-    // Get target locations
+    // Get target locations with location_type
     const { data: locations } = await supabase
       .from('locations')
-      .select('id, name, currency')
+      .select('id, name, currency, location_type')
       .in('id', body.target_location_ids)
       .eq('is_active', true)
 
@@ -221,12 +232,17 @@ export async function POST(request: Request) {
     const previewItems: TemplateApplyPreviewItem[] = []
     let skippedCount = 0
 
+    // Get template margin values (with defaults for backwards compatibility)
+    const templateSubBranchMargin = template.sub_branch_margin_percent ?? 0
+    const templateDiscountPercent = template.discount_percent ?? 0
+
     for (const product of products) {
       const purchasePrice = purchasePriceMap[product.id]
 
       for (const location of locations) {
         const key = `${product.id}-${location.id}`
         const existingConfig = existingConfigMap[key]
+        const isSubBranch = location.location_type === 'SubBranch'
 
         if (!purchasePrice) {
           previewItems.push({
@@ -236,11 +252,14 @@ export async function POST(request: Request) {
             product_category: product.category,
             location_id: location.id,
             location_name: location.name,
+            location_type: location.location_type,
             purchase_price: 0,
             transfer_cost: template.default_transfer_cost,
             exchange_rate: exchangeRate,
             calculated_price: 0,
             final_price: 0,
+            discount_percent: templateDiscountPercent,
+            discounted_price: 0,
             current_price: existingConfig?.final_price || null,
             status: 'skip',
             skip_reason: 'No purchase price found',
@@ -249,13 +268,16 @@ export async function POST(request: Request) {
           continue
         }
 
-        const finalPrice = calculatePrice(
+        const { finalPrice, discountedPrice } = calculatePrice(
           purchasePrice,
           template.default_transfer_cost,
           exchangeRate,
           template.hq_margin_percent,
           template.branch_margin_percent,
-          template.target_currency
+          templateSubBranchMargin,
+          templateDiscountPercent,
+          template.target_currency,
+          isSubBranch
         )
 
         previewItems.push({
@@ -265,11 +287,14 @@ export async function POST(request: Request) {
           product_category: product.category,
           location_id: location.id,
           location_name: location.name,
+          location_type: location.location_type,
           purchase_price: purchasePrice,
           transfer_cost: template.default_transfer_cost,
           exchange_rate: exchangeRate,
           calculated_price: finalPrice,
           final_price: finalPrice,
+          discount_percent: templateDiscountPercent,
+          discounted_price: discountedPrice,
           current_price: existingConfig?.final_price || null,
           status: existingConfig ? 'update' : 'new',
         })
@@ -304,6 +329,8 @@ export async function POST(request: Request) {
       for (const item of batch) {
         const key = `${item.product_id}-${item.location_id}`
         const existingConfig = existingConfigMap[key]
+        const isSubBranch = item.location_type === 'SubBranch'
+        const subBranchMarginToUse = isSubBranch ? templateSubBranchMargin : 0
 
         if (existingConfig) {
           // Update existing
@@ -315,8 +342,11 @@ export async function POST(request: Request) {
               exchange_rate: exchangeRate,
               hq_margin_percent: template.hq_margin_percent,
               branch_margin_percent: template.branch_margin_percent,
+              sub_branch_margin_percent: subBranchMarginToUse,
+              discount_percent: templateDiscountPercent,
               calculated_price: item.final_price,
               final_price: item.final_price,
+              discounted_price: item.discounted_price,
             })
             .eq('id', existingConfig.id)
 
@@ -339,8 +369,11 @@ export async function POST(request: Request) {
               exchange_rate: exchangeRate,
               hq_margin_percent: template.hq_margin_percent,
               branch_margin_percent: template.branch_margin_percent,
+              sub_branch_margin_percent: subBranchMarginToUse,
+              discount_percent: templateDiscountPercent,
               calculated_price: item.final_price,
               final_price: item.final_price,
+              discounted_price: item.discounted_price,
               currency: targetLocation?.currency || template.target_currency,
             })
 
