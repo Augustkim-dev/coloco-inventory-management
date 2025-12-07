@@ -29,7 +29,9 @@ interface QuickSaleRowProps {
 }
 
 interface PriceInfo {
-  price: number
+  consumerPrice: number      // final_price (할인 전 가격)
+  discountPercent: number    // discount_percent (0-100)
+  salePrice: number          // discounted_price 또는 final_price (실제 판매가)
   inherited: boolean
   parentLocationName?: string
 }
@@ -54,7 +56,7 @@ export function QuickSaleRow({
         // 1. Try to get direct price for this location
         const { data: directPrice, error: directError } = await supabase
           .from('pricing_configs')
-          .select('final_price')
+          .select('final_price, discount_percent, discounted_price')
           .eq('product_id', stock.product_id)
           .eq('to_location_id', location.id)
           .maybeSingle()
@@ -64,7 +66,15 @@ export function QuickSaleRow({
         }
 
         if (directPrice) {
-          setPriceInfo({ price: directPrice.final_price, inherited: false })
+          const discountPercent = directPrice.discount_percent ?? 0
+          const salePrice = directPrice.discounted_price ?? directPrice.final_price
+
+          setPriceInfo({
+            consumerPrice: directPrice.final_price,
+            discountPercent: discountPercent,
+            salePrice: salePrice,
+            inherited: false,
+          })
           setLoadingPrice(false)
           return
         }
@@ -92,7 +102,7 @@ export function QuickSaleRow({
 
         const { data: parentPrice, error: parentPriceError } = await supabase
           .from('pricing_configs')
-          .select('final_price')
+          .select('final_price, discount_percent, discounted_price')
           .eq('product_id', stock.product_id)
           .eq('to_location_id', locationData.parent_id)
           .maybeSingle()
@@ -102,10 +112,15 @@ export function QuickSaleRow({
         }
 
         if (parentPrice) {
+          const discountPercent = parentPrice.discount_percent ?? 0
+          const salePrice = parentPrice.discounted_price ?? parentPrice.final_price
+
           setPriceInfo({
-            price: parentPrice.final_price,
+            consumerPrice: parentPrice.final_price,
+            discountPercent: discountPercent,
+            salePrice: salePrice,
             inherited: true,
-            parentLocationName: parentLocation?.name || 'Parent'
+            parentLocationName: parentLocation?.name || 'Parent',
           })
         } else {
           setPriceInfo(null)
@@ -147,7 +162,7 @@ export function QuickSaleRow({
           location_id: location.id,
           product_id: stock.product_id,
           qty: qty,
-          unit_price: priceInfo.price,
+          unit_price: priceInfo.salePrice,
           currency: location.currency,
           sale_date: new Date().toISOString().split('T')[0],
         }),
@@ -162,7 +177,9 @@ export function QuickSaleRow({
       toast.success(
         `Sold ${qty} ${stock.product.unit} of ${stock.product.name}`,
         {
-          description: `Total: ${formatCurrency(qty * priceInfo.price, location.currency as Currency)}`,
+          description: priceInfo.discountPercent > 0
+            ? `Total: ${formatCurrency(qty * priceInfo.salePrice, location.currency as Currency)} (${priceInfo.discountPercent}% 할인 적용)`
+            : `Total: ${formatCurrency(qty * priceInfo.salePrice, location.currency as Currency)}`,
         }
       )
 
@@ -177,7 +194,7 @@ export function QuickSaleRow({
     }
   }
 
-  const totalAmount = priceInfo && qty > 0 ? qty * priceInfo.price : 0
+  const totalAmount = priceInfo && qty > 0 ? qty * priceInfo.salePrice : 0
 
   return (
     <TableRow>
@@ -205,15 +222,34 @@ export function QuickSaleRow({
           <Loader2 className="h-4 w-4 animate-spin ml-auto" />
         ) : priceInfo ? (
           <div>
-            <div className="flex items-center justify-end gap-1">
-              {formatCurrency(priceInfo.price, location.currency as Currency)}
-              {priceInfo.inherited && (
-                <span className="text-xs text-orange-600 font-medium">(상속)</span>
-              )}
-            </div>
-            {priceInfo.inherited && priceInfo.parentLocationName && (
-              <div className="text-xs text-muted-foreground">
-                ↳ {priceInfo.parentLocationName}
+            {/* 할인이 있을 때: 취소선 원가 + 녹색 할인가 + 배지 */}
+            {priceInfo.discountPercent > 0 ? (
+              <>
+                <div className="text-xs text-muted-foreground line-through">
+                  {formatCurrency(priceInfo.consumerPrice, location.currency as Currency)}
+                </div>
+                <div className="flex items-center justify-end gap-1">
+                  <span className="font-semibold text-green-600">
+                    {formatCurrency(priceInfo.salePrice, location.currency as Currency)}
+                  </span>
+                  <span className="text-xs bg-green-100 text-green-700 px-1 rounded">
+                    -{priceInfo.discountPercent}%
+                  </span>
+                </div>
+              </>
+            ) : (
+              /* 할인 없음: 일반 가격 표시 */
+              <div className="flex items-center justify-end gap-1">
+                {formatCurrency(priceInfo.salePrice, location.currency as Currency)}
+              </div>
+            )}
+            {/* 상속 표시 */}
+            {priceInfo.inherited && (
+              <div className="text-xs text-orange-600 font-medium flex items-center justify-end gap-1 mt-0.5">
+                <span>(상속)</span>
+                {priceInfo.parentLocationName && (
+                  <span className="text-muted-foreground">↳ {priceInfo.parentLocationName}</span>
+                )}
               </div>
             )}
           </div>

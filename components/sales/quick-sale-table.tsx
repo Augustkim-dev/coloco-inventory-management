@@ -46,7 +46,7 @@ export function QuickSaleTable({
           <TableRow className="bg-muted/50">
             <TableHead className="w-[40%]">Product</TableHead>
             <TableHead className="text-right w-[15%]">Available</TableHead>
-            <TableHead className="text-right w-[15%]">Unit Price</TableHead>
+            <TableHead className="text-right w-[15%]">Sale Price</TableHead>
             <TableHead className="w-[15%] text-center">Qty</TableHead>
             <TableHead className="w-[15%] text-center">Action</TableHead>
           </TableRow>
