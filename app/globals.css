@@ -74,3 +74,208 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Print styles for price list */
+@media print {
+  /* Hide non-essential elements */
+  .no-print,
+  header,
+  nav,
+  aside,
+  .sidebar,
+  [data-sidebar],
+  [role="navigation"],
+  button:not(.print-visible) {
+    display: none !important;
+  }
+
+  /* Full width for print content */
+  main,
+  .print-container {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  /* Price list table print styles */
+  .price-list-print {
+    width: 100%;
+    font-size: 11pt;
+    border-collapse: collapse;
+  }
+
+  .price-list-print th,
+  .price-list-print td {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    text-align: left;
+  }
+
+  .price-list-print th {
+    background-color: #f5f5f5 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    font-weight: 600;
+  }
+
+  .price-list-print tr:nth-child(even) {
+    background-color: #fafafa !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Print header */
+  .print-header {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #333;
+  }
+
+  .print-header h1 {
+    font-size: 18pt;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  .print-header p {
+    font-size: 10pt;
+    color: #666;
+  }
+
+  /* Prevent page breaks inside table rows */
+  .price-list-print tr {
+    page-break-inside: avoid;
+  }
+
+  /* Page break handling */
+  .page-break {
+    page-break-before: always;
+  }
+}
+
+/* Hide print-only elements on screen */
+@media screen {
+  .print-only {
+    display: none !important;
+  }
+}
+
+/* ===== Print Page Styles (for /pricing/list/print) ===== */
+
+/* Print page container */
+.print-page {
+  padding: 20px;
+  background: white;
+  min-height: 100vh;
+}
+
+/* Print page header */
+.print-page-header {
+  text-align: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #333;
+}
+
+.print-page-header h1 {
+  font-size: 16pt;
+  font-weight: bold;
+  margin: 0 0 4px 0;
+}
+
+.print-page-header p {
+  font-size: 9pt;
+  color: #666;
+  margin: 0;
+}
+
+/* Multi-column layout */
+.print-columns {
+  column-gap: 16px;
+  column-rule: 1px solid #ddd;
+}
+
+.print-columns-2 {
+  column-count: 2;
+}
+
+.print-columns-3 {
+  column-count: 3;
+}
+
+/* Compact table for print */
+.print-table-compact {
+  width: 100%;
+  border-collapse: collapse;
+  break-inside: avoid-column;
+  margin-bottom: 8px;
+}
+
+.print-table-compact th,
+.print-table-compact td {
+  padding: 3px 5px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+.print-table-compact th {
+  background: #f0f0f0;
+  font-weight: 600;
+}
+
+.print-table-compact tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* Font size variations */
+.print-font-9pt { font-size: 9pt; }
+.print-font-8pt { font-size: 8pt; }
+.print-font-7pt { font-size: 7pt; }
+
+.print-font-9pt .print-table-compact th { font-size: 8pt; }
+.print-font-8pt .print-table-compact th { font-size: 7pt; }
+.print-font-7pt .print-table-compact th { font-size: 6pt; }
+
+/* Action buttons area */
+.print-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+/* Print-specific media query for print page */
+@media print {
+  .print-page {
+    padding: 0;
+    margin: 0;
+  }
+
+  .print-actions {
+    display: none !important;
+  }
+
+  .print-page-header {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+  }
+
+  .print-columns {
+    column-gap: 12px;
+  }
+
+  .print-table-compact th,
+  .print-table-compact td {
+    padding: 2px 4px;
+  }
+
+  @page {
+    size: A4;
+    margin: 8mm;
+  }
+}

@@ -11,6 +11,7 @@ import {
   DollarSign,
   Calculator,
   FileText,
+  List,
 } from "lucide-react"
 
 export const navItems: NavItem[] = [
@@ -61,6 +62,12 @@ export const navItems: NavItem[] = [
     href: "/pricing",
     icon: Calculator,
     roles: ["HQ_Admin"],
+  },
+  {
+    title: "Price List",
+    href: "/price-list",
+    icon: List,
+    roles: ["HQ_Admin", "Branch_Manager"],
   },
   {
     title: "Sales",

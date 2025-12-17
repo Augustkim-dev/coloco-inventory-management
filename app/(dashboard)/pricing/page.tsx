@@ -5,7 +5,7 @@ import { PricingChainView } from '@/components/pricing/pricing-chain-view'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Link from 'next/link'
-import { Plus, List, TrendingUp, FileStack } from 'lucide-react'
+import { Plus, List, TrendingUp, FileStack, FileText } from 'lucide-react'
 import { getServerTranslations } from '@/lib/i18n/server-translations'
 
 export default async function PricingPage() {
@@ -67,6 +67,12 @@ export default async function PricingPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Link href="/pricing/list">
+            <Button variant="outline">
+              <FileText className="mr-2 h-4 w-4" />
+              가격표 보기
+            </Button>
+          </Link>
           <Link href="/pricing/templates">
             <Button variant="outline">
               <FileStack className="mr-2 h-4 w-4" />

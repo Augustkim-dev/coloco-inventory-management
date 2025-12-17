@@ -42,6 +42,7 @@ export function Sidebar({ userRole, userName, userEmail }: SidebarProps) {
     '/inventory': 'inventory',
     '/exchange-rates': 'exchangeRates',
     '/pricing': 'pricingConfig',
+    '/price-list': 'priceList',
     '/sales': 'sales',
     '/reports': 'reports',
     '/settings': 'settings',

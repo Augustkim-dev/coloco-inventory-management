@@ -14,10 +14,11 @@ export function formatCurrency(amount: number | null | undefined, currency: Curr
 
   const decimals = currency === 'CNY' ? 2 : 0
 
+  // Use non-breaking space (\u00A0) to prevent line break between amount and currency
   return `${amount.toLocaleString('en-US', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  })} ${currency}`
+  })}\u00A0${currency}`
 }
 
 // Date formatting
